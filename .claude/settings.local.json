@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(lsof:*)",
+      "Bash(pkill:*)",
+      "Bash(npm install:*)",
+      "Bash(mongosh travel_colors:*)",
+      "Bash(mongo travel_colors --eval:*)",
+      "Bash(node -e:*)",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5N2I4OWI5MTkxYWZhOGI2ZTBlYTJhMSIsImlhdCI6MTc2OTcwMzg3MSwiZXhwIjoxNzcwMzA4NjcxfQ.z3zjC00w7gVMfz7IYvkX_F7cpNq3VNnu3JtqCcz7u8M\")",
+      "Bash(npm run build:*)",
+      "Bash(xargs kill:*)",
+      "Bash(kill:*)",
+      "Bash(node src/scripts/clearTestData.js:*)",
+      "Bash(python3:*)",
+      "Bash(node src/scripts/testFinancialSystem.js:*)",
+      "Bash(node src/scripts/fixOldAppointment.js:*)",
+      "Bash(echo:*)",
+      "Bash(__NEW_LINE_1f1512e6cf2c48ca__ curl -s -X POST http://localhost:5002/api/auth/login -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"admin@travelcolors.com\"\",\"\"password\"\":\"\"admin123\"\"}')",
+      "Bash(__NEW_LINE_6e75e8390773f68b__ curl -s -X POST http://localhost:5002/api/auth/login -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"admin@travelcolors.com\"\",\"\"password\"\":\"\"admin123\"\"}')",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5N2I4OWI5MTkxYWZhOGI2ZTBlYTJhMSIsImlhdCI6MTc2OTk2NDA2NiwiZXhwIjoxNzcwNTY4ODY2fQ.HLUGnf6Ji6f1v-g70c-NlanxhiHD_ilqO04a3B0gl-Q\")",
+      "Bash(__NEW_LINE_6a4140de0dc78aa9__ curl -s http://localhost:5002/api/receipts -H \"Authorization: Bearer $TOKEN\")",
+      "Bash(__NEW_LINE_fd44eadbeb8a5f13__ echo \"=== Testing Audit API ===\")",
+      "Bash(node checkTasks.js:*)",
+      "Bash(node createMissingTasks.js:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run:*)",
+      "Bash(npm start)",
+      "Bash(tree:*)",
+      "Bash(node:*)",
+      "Bash(grep:*)",
+      "Bash(npx react-scripts build)",
+      "Bash(ls:*)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git add:*)",
+      "Bash(git -C /Users/mohammedsaleh/TrColors status --short)"
+    ]
+  }
+}

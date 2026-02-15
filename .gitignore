@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Google Service Account credentials
+server/src/config/*.json
+
+# Uploads
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Build outputs
+/client/build
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*

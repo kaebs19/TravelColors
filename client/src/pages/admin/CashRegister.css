@@ -1,0 +1,549 @@
+/* صفحة الصندوق */
+.cash-register-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Breadcrumb */
+.cash-register-page .page-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+}
+
+.cash-register-page .page-breadcrumb .separator {
+  color: var(--border-color);
+}
+
+.cash-register-page .page-breadcrumb .current {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+/* Page Header */
+.cash-register-page .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.cash-register-page .page-header h1 {
+  margin: 0;
+  font-size: var(--font-2xl);
+  color: var(--text-color);
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* صف الأزرار - على اليمين */
+.cash-register-page .header-actions-row {
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+/* بطاقات الرصيد */
+.balance-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.balance-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.balance-icon {
+  font-size: 2rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+}
+
+.balance-card.total .balance-icon { background: #dbeafe; }
+.balance-card.cash .balance-icon { background: #d1fae5; }
+.balance-card.card .balance-icon { background: #fef3c7; }
+.balance-card.transfer .balance-icon { background: #e0e7ff; }
+
+.balance-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.balance-label {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+}
+
+.balance-value {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+/* ملخص اليوم */
+.today-summary {
+  margin-bottom: 1.5rem;
+}
+
+.today-summary h3 {
+  margin: 0 0 1rem;
+  font-size: var(--font-base);
+  color: var(--text-color);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+}
+
+.summary-item {
+  text-align: center;
+  padding: 1rem;
+  background: var(--bg-color);
+  border-radius: var(--radius);
+}
+
+.summary-item .summary-label {
+  display: block;
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.summary-item .summary-value {
+  display: block;
+  font-size: var(--font-lg);
+  font-weight: 700;
+}
+
+.summary-item.income .summary-value { color: #10b981; }
+.summary-item.expense .summary-value { color: #ef4444; }
+.summary-item.net .summary-value { color: var(--primary-color); }
+
+/* التبويبات */
+.cash-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem;
+  background: var(--bg-color);
+  border-radius: var(--radius);
+}
+
+.cash-tabs .tab-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius);
+  font-size: var(--font-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.cash-tabs .tab-btn:hover {
+  background: white;
+}
+
+.cash-tabs .tab-btn.active {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* قسم النظرة العامة */
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.recent-transactions h3,
+.recent-invoices h3 {
+  margin: 0 0 1rem;
+  font-size: var(--font-base);
+}
+
+/* قائمة الحركات */
+.transactions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: var(--bg-color);
+  border-radius: var(--radius);
+  border-right: 3px solid;
+}
+
+.transaction-item.income {
+  border-right-color: #10b981;
+}
+
+.transaction-item.expense {
+  border-right-color: #ef4444;
+}
+
+.transaction-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.transaction-desc {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.transaction-meta {
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+}
+
+.transaction-amount {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.transaction-amount .positive {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.transaction-amount .negative {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.transaction-date {
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+}
+
+/* قائمة الفواتير */
+.invoices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.invoice-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: var(--bg-color);
+  border-radius: var(--radius);
+}
+
+.invoice-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.invoice-number {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+/* روابط الفواتير القابلة للنقر */
+.invoice-item.clickable:hover {
+  background: var(--hover-color, #f3f4f6);
+  transform: translateX(-2px);
+  transition: all 0.2s ease;
+}
+
+.invoice-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.invoice-link:hover {
+  text-decoration: underline;
+}
+
+.clickable-row:hover {
+  background: var(--hover-color, #f3f4f6) !important;
+}
+
+.clickable-row td:first-child .invoice-link:hover {
+  text-decoration: underline;
+}
+
+.invoice-customer {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+}
+
+.invoice-amount {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.invoice-amount .total {
+  font-weight: 600;
+}
+
+.invoice-amount .status {
+  font-size: var(--font-xs);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-full);
+}
+
+.status-paid { background: #d1fae5; color: #065f46; }
+.status-partial { background: #fef3c7; color: #92400e; }
+.status-draft { background: #e5e7eb; color: #374151; }
+
+/* الفلاتر */
+.filters-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.filters-bar select,
+.filters-bar input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: var(--font-sm);
+}
+
+/* جداول */
+.transactions-table,
+.invoices-table,
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.transactions-table th,
+.transactions-table td,
+.invoices-table th,
+.invoices-table td,
+.report-table th,
+.report-table td {
+  padding: 0.75rem 1rem;
+  text-align: right;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.transactions-table th,
+.invoices-table th,
+.report-table th {
+  background: var(--bg-color);
+  font-weight: 600;
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+}
+
+.transactions-table tr:hover,
+.invoices-table tr:hover {
+  background: var(--bg-color);
+}
+
+.positive { color: #10b981; }
+.negative { color: #ef4444; }
+
+/* Badge */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius);
+  font-size: var(--font-xs);
+  font-weight: 500;
+}
+
+.badge-paid { background: #d1fae5; color: #065f46; }
+.badge-partial { background: #fef3c7; color: #92400e; }
+.badge-draft { background: #e5e7eb; color: #374151; }
+.badge-cancelled { background: #fee2e2; color: #991b1b; }
+
+/* نموذج الحركة */
+.transaction-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.transaction-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.transaction-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.transaction-form label {
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.transaction-form input,
+.transaction-form select,
+.transaction-form textarea {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: var(--font-base);
+  font-family: inherit;
+}
+
+.transaction-form input:focus,
+.transaction-form select:focus,
+.transaction-form textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+/* محتوى التقرير */
+.report-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.report-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.report-stat {
+  text-align: center;
+  padding: 1rem;
+  background: var(--bg-color);
+  border-radius: var(--radius);
+}
+
+.report-stat .label {
+  display: block;
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.report-stat .value {
+  display: block;
+  font-size: var(--font-xl);
+  font-weight: 700;
+}
+
+.report-stat .value.positive { color: #10b981; }
+.report-stat .value.negative { color: #ef4444; }
+
+.report-content h4 {
+  margin: 0 0 0.75rem;
+  font-size: var(--font-base);
+  color: var(--text-color);
+}
+
+.payment-method-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.payment-stat {
+  padding: 1rem;
+  background: var(--bg-color);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.payment-stat .method {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.payment-stat .income,
+.payment-stat .expense {
+  font-size: var(--font-sm);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .balance-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .balance-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cash-tabs {
+    overflow-x: auto;
+  }
+
+  .transaction-form .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .report-summary,
+  .payment-method-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .transactions-table,
+  .invoices-table {
+    display: block;
+    overflow-x: auto;
+  }
+}

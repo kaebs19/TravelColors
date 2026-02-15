@@ -1,0 +1,225 @@
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 260px;
+  height: 100vh;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  z-index: var(--z-fixed);
+}
+
+.sidebar-header {
+  padding: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-logo-img {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius);
+  background-color: white;
+  padding: 4px;
+}
+
+.sidebar-brand {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-logo {
+  font-size: var(--font-lg);
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.sidebar-subtitle {
+  font-size: var(--font-sm);
+  opacity: 0.8;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+/* تصميم scrollbar للـ Webkit (Chrome, Safari, Edge) */
+.sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: var(--radius);
+  color: rgba(255, 255, 255, 0.8);
+  transition: all var(--transition);
+  text-decoration: none;
+}
+
+.sidebar-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.sidebar-link.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-weight: 500;
+}
+
+.sidebar-icon {
+  font-size: var(--font-lg);
+}
+
+.sidebar-label {
+  font-size: var(--font-base);
+}
+
+/* Dropdown Menu */
+.sidebar-dropdown {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-dropdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: var(--radius);
+  color: rgba(255, 255, 255, 0.8);
+  transition: all var(--transition);
+  text-decoration: none;
+  background: none;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  text-align: right;
+}
+
+.sidebar-dropdown-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.sidebar-dropdown-toggle.active {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.sidebar-arrow {
+  margin-right: auto;
+  font-size: 10px;
+  transition: transform var(--transition);
+}
+
+.sidebar-dropdown-menu {
+  display: none;
+  flex-direction: column;
+  padding-right: 20px;
+  margin-top: 4px;
+}
+
+.sidebar-dropdown.open .sidebar-dropdown-menu {
+  display: flex;
+}
+
+.sidebar-sublink {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 10px var(--spacing-md);
+  border-radius: var(--radius);
+  color: rgba(255, 255, 255, 0.7);
+  transition: all var(--transition);
+  text-decoration: none;
+  font-size: var(--font-sm);
+}
+
+.sidebar-sublink:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.sidebar-sublink.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-weight: 500;
+}
+
+.sidebar-sublink .sidebar-icon {
+  font-size: var(--font-base);
+}
+
+.admin-badge {
+  margin-right: auto;
+  font-size: 10px;
+}
+
+/* العناصر المقفلة للموظفين */
+.sidebar-sublink.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sidebar-sublink.locked:hover {
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Divider */
+.sidebar-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: var(--spacing-md) 0;
+}
+
+.sidebar-footer {
+  padding: var(--spacing-md);
+  text-align: center;
+  font-size: var(--font-xs);
+  opacity: 0.6;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(100%);
+    transition: transform var(--transition);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+}

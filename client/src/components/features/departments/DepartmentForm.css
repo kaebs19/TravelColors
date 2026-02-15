@@ -1,0 +1,249 @@
+.department-form {
+  background: white;
+  border-radius: var(--radius-lg);
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 1.5rem;
+}
+
+.form-icon {
+  font-size: 1.5rem;
+}
+
+.form-header h3 {
+  margin: 0;
+  font-size: var(--font-lg);
+  color: var(--text-color);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: var(--font-base);
+  font-family: inherit;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Cities */
+.added-cities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.city-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border-radius: var(--radius-full);
+  font-size: var(--font-sm);
+}
+
+.city-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.remove-city-btn {
+  background: none;
+  border: none;
+  color: #0369a1;
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0;
+  margin-right: -0.25rem;
+}
+
+.remove-city-btn:hover {
+  color: #dc2626;
+}
+
+.add-city-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.city-select {
+  flex: 0 0 200px;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: var(--font-sm);
+  background-color: white;
+  cursor: pointer;
+}
+
+.map-link-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: var(--font-sm);
+}
+
+.add-city-btn {
+  padding: 0.75rem 1.5rem;
+  background-color: #4a6fa5;
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: var(--font-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.add-city-btn:hover {
+  background-color: #3d5d8a;
+}
+
+/* Requirements */
+.requirements-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem 0;
+}
+
+.requirement-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background-color: #f9fafb;
+  border-radius: var(--radius);
+  margin-bottom: 0.5rem;
+}
+
+.remove-req-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0.25rem;
+}
+
+.remove-req-btn:hover {
+  color: #dc2626;
+}
+
+.add-requirement-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.requirement-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: var(--font-sm);
+}
+
+.add-req-btn {
+  padding: 0.75rem 1.5rem;
+  background-color: #4a6fa5;
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: var(--font-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.add-req-btn:hover {
+  background-color: #3d5d8a;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  margin-top: 1.5rem;
+}
+
+.cancel-btn {
+  padding: 0.75rem 2rem;
+  background-color: #f3f4f6;
+  color: var(--text-color);
+  border: none;
+  border-radius: var(--radius);
+  font-size: var(--font-base);
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  background-color: #e5e7eb;
+}
+
+.submit-btn {
+  padding: 0.75rem 2rem;
+  background-color: #4a6fa5;
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: var(--font-base);
+  cursor: pointer;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: #3d5d8a;
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .add-city-row {
+    flex-direction: column;
+  }
+
+  .city-select {
+    flex: 1;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+
+  .cancel-btn,
+  .submit-btn {
+    width: 100%;
+  }
+}

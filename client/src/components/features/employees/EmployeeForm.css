@@ -1,0 +1,215 @@
+.employee-form {
+  padding: 0.5rem;
+}
+
+.employee-form .form-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.employee-form .form-icon {
+  font-size: 1.5rem;
+}
+
+.employee-form .form-header h3 {
+  margin: 0;
+  font-size: var(--font-lg);
+  color: var(--text-color);
+}
+
+/* Avatar Section */
+.avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--bg-color);
+  border-radius: var(--radius-md);
+}
+
+.avatar-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid white;
+  box-shadow: var(--shadow-md);
+  flex-shrink: 0;
+}
+
+.avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: var(--font-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.upload-btn:hover {
+  background: var(--bg-color);
+  border-color: var(--primary-color);
+}
+
+.avatar-hint {
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+}
+
+/* Form Groups */
+.employee-form .form-group {
+  margin-bottom: 1.25rem;
+}
+
+.employee-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.employee-form .required {
+  color: var(--danger-color);
+}
+
+.employee-form .optional {
+  font-weight: 400;
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  margin-right: 0.5rem;
+}
+
+.employee-form .form-input,
+.employee-form .form-select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: var(--font-sm);
+  transition: all var(--transition);
+}
+
+.employee-form .form-input:focus,
+.employee-form .form-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.employee-form .form-select {
+  background-color: white;
+  cursor: pointer;
+}
+
+.employee-form .field-hint {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+}
+
+/* Password Input */
+.password-input {
+  position: relative;
+}
+
+.password-input .form-input {
+  padding-left: 3rem;
+}
+
+.toggle-password {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.25rem;
+}
+
+/* Form Actions */
+.employee-form .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.employee-form .cancel-btn {
+  padding: 0.75rem 1.5rem;
+  background: var(--bg-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: var(--font-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.employee-form .cancel-btn:hover {
+  background: var(--border-color);
+}
+
+.employee-form .submit-btn {
+  padding: 0.75rem 1.5rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.employee-form .submit-btn:hover {
+  background: var(--primary-dark);
+}
+
+.employee-form .submit-btn:disabled {
+  background: var(--text-light);
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .avatar-section {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .employee-form .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .employee-form .cancel-btn,
+  .employee-form .submit-btn {
+    width: 100%;
+  }
+}
