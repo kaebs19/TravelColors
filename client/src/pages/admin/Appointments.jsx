@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { appointmentsApi, departmentsApi, settingsApi } from '../../api';
 import { Card, Loader, Modal } from '../../components/common';
 import { generateAppointmentReceipt, shareReceiptToWhatsApp } from '../../utils/receiptGenerator';
+import { generateAppointmentMessage } from '../../utils/messageGenerator';
 import './Appointments.css';
 
 const Appointments = () => {
@@ -337,55 +338,8 @@ const Appointments = () => {
 
   // دالة إرسال رسالة واتساب
   const handleSendWhatsApp = (appointment) => {
-    const dept = departments.find(d => d._id === appointment.department?._id);
-    const deptTitle = dept?.title || appointment.department?.title || '';
-    let message = '';
-
-    if (appointment.type === 'confirmed') {
-      const date = new Date(appointment.appointmentDate);
-      const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-      const dayName = days[date.getDay()];
-      const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-      const timeParts = appointment.appointmentTime?.split(':') || ['00', '00'];
-      const hour = parseInt(timeParts[0]);
-      const period = hour < 12 ? 'صباحاً' : 'مساءً';
-      const displayHour = hour > 12 ? hour - 12 : hour;
-      const timeDisplay = `${displayHour}:${timeParts[1]} ${period}`;
-
-      message = `عزيزي العميل: ${appointment.customerName} 🤝
-
-نؤكد لك حجز موعدك لدى: ${deptTitle}
-
-📅 تفاصيل الموعد:
-- التاريخ: ${dayName} ${formattedDate}
-- الوقت: ${timeDisplay}
-- عدد الأشخاص: ${appointment.personsCount}
-
-⏰ الرجاء الحضور قبل الموعد بـ 15 دقيقة.
-
-مع أطيب التحيات،
-ألوان المسافر للسفر والسياحة 🌍`;
-    } else {
-      const dateFrom = new Date(appointment.dateFrom);
-      const dateTo = new Date(appointment.dateTo);
-      const formattedFrom = `${dateFrom.getDate()}/${dateFrom.getMonth() + 1}/${dateFrom.getFullYear()}`;
-      const formattedTo = `${dateTo.getDate()}/${dateTo.getMonth() + 1}/${dateTo.getFullYear()}`;
-
-      message = `عزيزي العميل: ${appointment.customerName} 🤝
-
-تم تسجيل طلب موعدك لدى: ${deptTitle}
-
-📅 الفترة المتوقعة للموعد:
-- من: ${formattedFrom}
-- إلى: ${formattedTo}
-- عدد الأشخاص: ${appointment.personsCount}
-
-📌 ملاحظة مهمة:
-هذا الموعد قيد التأكيد، وسنوافيك بالتاريخ والوقت المحدد فور تأكيده.
-
-مع أطيب التحيات،
-ألوان المسافر للسفر والسياحة 🌍`;
-    }
+    const dept = departments.find(d => d._id === appointment.department?._id) || appointment.department;
+    const message = generateAppointmentMessage(appointment.type, companySettings, appointment, dept);
 
     const phone = appointment.phone?.replace(/[^0-9]/g, '');
     const phoneNumber = phone?.startsWith('0') ? '966' + phone.slice(1) : phone;

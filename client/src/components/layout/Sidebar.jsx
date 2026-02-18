@@ -91,8 +91,8 @@ const Sidebar = () => {
       <div className="sidebar-header">
         <img src={logoUrl} alt="Travel Colors Logo" className="sidebar-logo-img" onError={(e) => { e.target.src = '/favicon.svg'; }} />
         <div className="sidebar-brand">
-          <h1 className="sidebar-logo">Travel Colors</h1>
-          <span className="sidebar-subtitle">ألوان المسافر</span>
+          <h1 className="sidebar-logo">ألوان المسافر</h1>
+          <span className="sidebar-subtitle">لوحة التحكم</span>
         </div>
       </div>
 

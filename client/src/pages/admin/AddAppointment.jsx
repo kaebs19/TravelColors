@@ -3,54 +3,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { appointmentsApi, departmentsApi, customersApi, settingsApi } from '../../api';
 import { Loader, NumberInput, PhoneInput } from '../../components/common';
 import { generateAppointmentReceipt } from '../../utils/receiptGenerator';
+import { generateAppointmentMessage } from '../../utils/messageGenerator';
 // import { parseArabicNumber, arabicToEnglishNumbers } from '../../utils/formatters';
 import './AddAppointment.css';
-
-// دالة توليد رسالة الموعد المؤكد
-const generateConfirmedMessage = (data, departmentTitle) => {
-  const date = new Date(data.appointmentDate);
-  const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-  const dayName = days[date.getDay()];
-  const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-
-  // تحويل الوقت للعرض
-  const timeParts = data.appointmentTime.split(':');
-  const hour = parseInt(timeParts[0]);
-  const period = hour < 12 ? 'صباحاً' : 'مساءً';
-  const displayHour = hour > 12 ? hour - 12 : hour;
-  const timeDisplay = `${displayHour}:${timeParts[1]} ${period}`;
-
-  return `السلام عليكم ورحمة الله وبركاته
-عميلنا العزيز / ${data.customerName}
-تم تأكيد موعدكم في ${departmentTitle}
-
-📅 يوم ${dayName} الموافق ${formattedDate}
-⏰ الساعة ${timeDisplay}
-
-📍 الموقع:
-https://maps.app.goo.gl/xxxxx
-
-نتمنى لكم تجربة سعيدة
-ألوان المسافر للخدمات`;
-};
-
-// دالة توليد رسالة الموعد غير المؤكد
-const generateUnconfirmedMessage = (data, departmentTitle) => {
-  const dateFrom = new Date(data.dateFrom);
-  const dateTo = new Date(data.dateTo);
-  const formattedFrom = `${dateFrom.getDate()}/${dateFrom.getMonth() + 1}/${dateFrom.getFullYear()}`;
-  const formattedTo = `${dateTo.getDate()}/${dateTo.getMonth() + 1}/${dateTo.getFullYear()}`;
-
-  return `السلام عليكم ورحمة الله وبركاته
-عميلنا العزيز / ${data.customerName}
-تم حجز موعدكم في ${departmentTitle}
-
-📅 الموعد متوقع بين ${formattedFrom} و ${formattedTo}
-سيتم إبلاغكم بالتاريخ المحدد قريباً
-
-نتمنى لكم تجربة سعيدة
-ألوان المسافر للخدمات`;
-};
 
 // دالة تحويل الأرقام العربية للإنجليزية
 const convertArabicToEnglish = (str) => {
@@ -138,6 +93,7 @@ const AddAppointment = () => {
   const [saving, setSaving] = useState(false);
   const [departments, setDepartments] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [settings, setSettings] = useState(null);
   const [editingAppointment, setEditingAppointment] = useState(null);
 
   // حالات نافذة النجاح
@@ -282,9 +238,10 @@ const AddAppointment = () => {
       const custs = customersRes.data?.data?.customers || customersRes.data?.customers || [];
 
       // تحميل إعدادات المواعيد
-      const settings = settingsRes.data?.data || {};
-      if (settings.appointmentSettings) {
-        const apptSettings = settings.appointmentSettings;
+      const settingsData = settingsRes.data?.data || {};
+      setSettings(settingsData);
+      if (settingsData.appointmentSettings) {
+        const apptSettings = settingsData.appointmentSettings;
         setAppointmentSettings(apptSettings);
 
         // توليد قائمة الساعات الديناميكية
@@ -482,10 +439,7 @@ const AddAppointment = () => {
   const handleCopyMessage = async () => {
     if (!savedAppointmentData) return;
     const dept = departments.find(d => d._id === savedAppointmentData.department);
-    const deptTitle = dept?.title || '';
-    const message = savedAppointmentData.type === 'confirmed'
-      ? generateConfirmedMessage(savedAppointmentData, deptTitle)
-      : generateUnconfirmedMessage(savedAppointmentData, deptTitle);
+    const message = generateAppointmentMessage(savedAppointmentData.type, settings, savedAppointmentData, dept);
 
     try {
       await navigator.clipboard.writeText(message);
@@ -500,10 +454,7 @@ const AddAppointment = () => {
   const handleSendWhatsApp = () => {
     if (!savedAppointmentData) return;
     const dept = departments.find(d => d._id === savedAppointmentData.department);
-    const deptTitle = dept?.title || '';
-    const message = savedAppointmentData.type === 'confirmed'
-      ? generateConfirmedMessage(savedAppointmentData, deptTitle)
-      : generateUnconfirmedMessage(savedAppointmentData, deptTitle);
+    const message = generateAppointmentMessage(savedAppointmentData.type, settings, savedAppointmentData, dept);
 
     const phone = savedAppointmentData.phone?.replace(/[^0-9]/g, '');
     const phoneNumber = phone?.startsWith('0') ? '966' + phone.slice(1) : phone;
