@@ -1397,10 +1397,11 @@ const AddAppointment = () => {
             <div className="success-modal-content">
               <div className="message-preview">
                 <pre>
-                  {savedAppointmentData && (
-                    savedAppointmentData.type === 'confirmed'
-                      ? generateConfirmedMessage(savedAppointmentData, departments.find(d => d._id === savedAppointmentData.department)?.title || '')
-                      : generateUnconfirmedMessage(savedAppointmentData, departments.find(d => d._id === savedAppointmentData.department)?.title || '')
+                  {savedAppointmentData && generateAppointmentMessage(
+                    savedAppointmentData.type,
+                    settings,
+                    savedAppointmentData,
+                    departments.find(d => d._id === savedAppointmentData.department)
                   )}
                 </pre>
               </div>
