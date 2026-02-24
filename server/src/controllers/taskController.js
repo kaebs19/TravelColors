@@ -44,7 +44,7 @@ exports.getTasks = async (req, res, next) => {
       .populate({
         path: 'appointment',
         populate: [
-          { path: 'department', select: 'title' },
+          { path: 'department', select: 'title submissionType processingDays' },
           { path: 'customer', select: 'name phone' }
         ]
       })
@@ -97,7 +97,7 @@ exports.getTask = async (req, res, next) => {
       .populate({
         path: 'appointment',
         populate: [
-          { path: 'department', select: 'title cities requirements' },
+          { path: 'department', select: 'title cities requirements submissionType processingDays' },
           { path: 'customer', select: 'name phone email' },
           { path: 'createdBy', select: 'name' }
         ]
@@ -173,7 +173,7 @@ exports.startTask = async (req, res, next) => {
       .populate({
         path: 'appointment',
         populate: [
-          { path: 'department', select: 'title' },
+          { path: 'department', select: 'title submissionType processingDays' },
           { path: 'customer', select: 'name phone' }
         ]
       })
@@ -598,7 +598,7 @@ exports.getMyTasks = async (req, res, next) => {
       .populate({
         path: 'appointment',
         populate: [
-          { path: 'department', select: 'title' },
+          { path: 'department', select: 'title submissionType processingDays' },
           { path: 'customer', select: 'name phone' }
         ]
       })
@@ -973,6 +973,45 @@ exports.getRecentActivities = async (req, res, next) => {
       data: {
         activities: formattedActivities
       }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    جلب سجل النشاط لمهمة معينة (الموعد المرتبط + المهمة)
+// @route   GET /api/tasks/:id/activity-log
+// @access  Private (الموظف المسند إليه أو الإدارة)
+exports.getTaskActivityLog = async (req, res, next) => {
+  try {
+    const task = await Task.findById(req.params.id)
+      .populate('assignedTo', 'name');
+
+    if (!task) {
+      return res.status(404).json({ success: false, message: 'المهمة غير موجودة' });
+    }
+
+    // التحقق من الصلاحية: الإدارة أو الموظف المسند إليه
+    const isAdmin = req.user.role === 'admin';
+    const isAssigned = task.assignedTo?._id?.toString() === req.user._id.toString();
+
+    if (!isAdmin && !isAssigned) {
+      return res.status(403).json({ success: false, message: 'غير مصرح لك بعرض سجل النشاط' });
+    }
+
+    // جلب جميع السجلات المرتبطة بالموعد والمهمة
+    const logs = await AuditLog.find({
+      $or: [
+        { entityType: 'appointment', entityId: task.appointment },
+        { entityType: 'task', entityId: task._id }
+      ]
+    })
+      .sort({ createdAt: 1 })
+      .populate('userId', 'name');
+
+    res.json({
+      success: true,
+      data: { logs }
     });
   } catch (error) {
     next(error);

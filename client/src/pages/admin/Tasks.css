@@ -3144,3 +3144,102 @@
     justify-content: center;
   }
 }
+
+/* ========================================
+   سجل النشاط في تفاصيل المهمة
+   ======================================== */
+
+.sidebar-activity-log h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #1a1a2e;
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+}
+
+.activity-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-right: 3px solid #e9ecef;
+  padding-right: 16px;
+  margin-right: 8px;
+}
+
+.activity-log-item {
+  position: relative;
+  padding: 10px 0;
+  border-bottom: 1px dashed #e9ecef;
+}
+
+.activity-log-item:last-child {
+  border-bottom: none;
+}
+
+.activity-log-item::before {
+  content: '';
+  position: absolute;
+  right: -22px;
+  top: 14px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3B5BDB;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px #3B5BDB;
+}
+
+.activity-log-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: #868e96;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.activity-icon {
+  font-size: 0.85rem;
+}
+
+.activity-date {
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  color: #495057;
+  direction: ltr;
+}
+
+.activity-separator {
+  color: #ced4da;
+  font-weight: 300;
+}
+
+.activity-user {
+  color: #3B5BDB;
+  font-weight: 600;
+  font-size: 0.78rem;
+}
+
+.activity-log-description {
+  font-size: 0.82rem;
+  color: #343a40;
+  line-height: 1.5;
+  padding-right: 4px;
+}
+
+.activity-loading {
+  text-align: center;
+  padding: 16px;
+  color: #868e96;
+  font-size: 0.85rem;
+}
+
+.activity-empty {
+  text-align: center;
+  padding: 16px;
+  color: #adb5bd;
+  font-size: 0.85rem;
+  font-style: italic;
+}

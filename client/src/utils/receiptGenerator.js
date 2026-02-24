@@ -33,7 +33,14 @@ const buildReceiptHTML = (appointmentData, options = {}) => {
   let appointmentTimeStr = '';
   const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
-  if (appointmentData.type === 'confirmed' && appointmentData.appointmentDate) {
+  const isElectronicSubmission = appointmentData.isSubmission && appointmentData.department?.submissionType === 'إلكتروني';
+
+  if (isElectronicSubmission && appointmentData.appointmentDate) {
+    // تقديم إلكتروني: عرض التاريخ فقط بدون وقت
+    const date = new Date(appointmentData.appointmentDate);
+    appointmentDateStr = `${days[date.getDay()]} ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+    appointmentTimeStr = '—';
+  } else if (appointmentData.type === 'confirmed' && appointmentData.appointmentDate) {
     const date = new Date(appointmentData.appointmentDate);
     appointmentDateStr = `${days[date.getDay()]} ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
     if (appointmentData.appointmentTime) {
@@ -56,12 +63,16 @@ const buildReceiptHTML = (appointmentData, options = {}) => {
     cancelled: { text: 'ملغي', color: '#991b1b', bg: '#fee2e2' }
   };
   const typeStatusMap = {
-    confirmed: { text: 'مؤكد', color: '#059669', bg: '#d1fae5' },
-    unconfirmed: { text: 'قيد التأكيد', color: '#d97706', bg: '#fef3c7' }
+    confirmed: { text: '✓ مؤكد', color: '#2F9E44', bg: '#EBFBEE' },
+    unconfirmed: { text: '◌ غير مؤكد', color: '#E67700', bg: '#FFF9DB' },
+    electronic: { text: '📤 تقديم إلكتروني', color: '#3B5BDB', bg: '#EEF2FF' }
   };
 
+  const isElectronic = appointmentData.isSubmission && appointmentData.department?.submissionType === 'إلكتروني';
   const appointmentStatus = statusMap[appointmentData.status] || statusMap.new;
-  const typeStatus = typeStatusMap[appointmentData.type] || typeStatusMap.confirmed;
+  const typeStatus = isElectronic
+    ? typeStatusMap.electronic
+    : (typeStatusMap[appointmentData.type] || typeStatusMap.confirmed);
 
   const paymentLabels = { cash: 'نقدي', card: 'شبكة', transfer: 'تحويل بنكي' };
   const paymentLabel = paymentLabels[appointmentData.paymentType] || '-';

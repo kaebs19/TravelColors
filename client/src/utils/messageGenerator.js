@@ -75,9 +75,36 @@ export const generateUnconfirmedMessageFromTemplate = (template, data, departmen
 };
 
 /**
- * توليد الرسالة المناسبة حسب النوع
+ * توليد رسالة التقديم الإلكتروني من القالب
+ */
+export const generateElectronicSubmissionMessageFromTemplate = (template, data, department) => {
+  if (!template) {
+    return generateElectronicSubmissionFallback(data, department?.title || '', department?.processingDays || '');
+  }
+
+  const submissionDate = data.appointmentDate || data.dateFrom || new Date().toISOString();
+
+  return template
+    .replace(/\{اسم_العميل\}/g, data.customerName || '')
+    .replace(/\{الجهة\}/g, department?.title || '')
+    .replace(/\{التاريخ\}/g, formatDate(submissionDate))
+    .replace(/\{العدد\}/g, data.personsCount || 1)
+    .replace(/\{مدة_المعالجة\}/g, department?.processingDays || 'غير محددة');
+};
+
+/**
+ * توليد الرسالة المناسبة حسب النوع ونوع التقديم
  */
 export const generateAppointmentMessage = (type, settings, data, department) => {
+  // إذا كان تقديم + القسم إلكتروني → رسالة التقديم الإلكتروني
+  if (data.isSubmission && department?.submissionType === 'إلكتروني') {
+    return generateElectronicSubmissionMessageFromTemplate(
+      settings?.electronicSubmissionMessage,
+      data,
+      department
+    );
+  }
+
   if (type === 'confirmed') {
     return generateConfirmedMessageFromTemplate(
       settings?.confirmedMessage,
@@ -90,6 +117,25 @@ export const generateAppointmentMessage = (type, settings, data, department) => 
     data,
     department
   );
+};
+
+/**
+ * توليد رسالة تحديث سريع من القالب
+ * @param {string} template - قالب الرسالة من الإعدادات
+ * @param {object} data - بيانات الموعد
+ * @param {object} department - بيانات القسم
+ * @returns {string} الرسالة المولّدة
+ */
+export const generateQuickUpdateMessage = (template, data, department) => {
+  if (!template) return '';
+
+  const submissionDate = data.appointmentDate || data.dateFrom || new Date().toISOString();
+
+  return template
+    .replace(/\{اسم_العميل\}/g, data.customerName || '')
+    .replace(/\{الجهة\}/g, department?.title || '')
+    .replace(/\{التاريخ\}/g, formatDate(submissionDate))
+    .replace(/\{العدد\}/g, data.personsCount || 1);
 };
 
 // Fallback messages إذا لم يوجد قالب في الإعدادات
@@ -115,4 +161,23 @@ const generateUnconfirmedFallback = (data, deptTitle) => {
 
 نتمنى لكم تجربة سعيدة
 ألوان المسافر للخدمات`;
+};
+
+const generateElectronicSubmissionFallback = (data, deptTitle, processingDays) => {
+  const submissionDate = data.appointmentDate || data.dateFrom || new Date().toISOString();
+  return `عزيزي العميل: ${data.customerName} 🤝
+
+✅ تم استلام طلبك وتقديمه لدى: ${deptTitle}
+
+📋 تفاصيل الطلب:
+- تاريخ التقديم: ${formatDate(submissionDate)}
+- عدد الأشخاص: ${data.personsCount || 1}
+
+⏳ مدة المعالجة المتوقعة: ${processingDays || 'غير محددة'}
+
+📌 سنقوم بمتابعة طلبك باستمرار، وسنتواصل معك
+فور صدور قرار التأشيرة أو استلام الصور المطلوبة.
+
+مع أطيب التحيات،
+ألوان المسافر للسفر والسياحة 🌍`;
 };

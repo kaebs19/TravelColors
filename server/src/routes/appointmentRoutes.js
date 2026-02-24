@@ -18,6 +18,7 @@ router.get('/:id', appointmentController.getAppointment);
 router.post('/', appointmentController.createAppointment);
 router.put('/:id', appointmentController.updateAppointment);
 router.put('/:id/status', appointmentController.changeStatus);
+router.post('/:id/log-quick-update', appointmentController.logQuickUpdate);
 router.delete('/:id', appointmentController.deleteAppointment);
 
 module.exports = router;

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context';
-import { appointmentsApi, tasksApi } from '../../api';
+import { appointmentsApi, tasksApi, departmentsApi } from '../../api';
 import { NotificationBell } from '../common';
 import './Navbar.css';
 
@@ -12,10 +12,12 @@ const Navbar = ({ notificationProps, taskNotifications = [], onClearTaskNotifica
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [recentTaskActivities, setRecentTaskActivities] = useState([]);
+  const [overdueElectronic, setOverdueElectronic] = useState([]);
 
   useEffect(() => {
     fetchTodayAppointments();
     fetchRecentTaskActivities();
+    fetchOverdueElectronic();
   }, []);
 
   // دمج إشعارات المهام المباشرة مع النشاطات الأخيرة
@@ -56,6 +58,60 @@ const Navbar = ({ notificationProps, taskNotifications = [], onClearTaskNotifica
     }
   };
 
+  const fetchOverdueElectronic = async () => {
+    try {
+      const [apptRes, deptRes] = await Promise.all([
+        appointmentsApi.getAppointments(),
+        departmentsApi.getDepartments()
+      ]);
+      const appointments = apptRes.data?.data?.appointments || apptRes.data?.appointments || [];
+      const departments = deptRes.data?.data?.departments || deptRes.data?.departments || [];
+
+      const deptMap = {};
+      departments.forEach(d => { deptMap[d._id] = d; });
+
+      const now = new Date();
+      const overdue = [];
+
+      appointments.forEach(appt => {
+        if (!appt.isSubmission) return;
+        const dept = deptMap[appt.department?._id] || appt.department;
+        if (dept?.submissionType !== 'إلكتروني') return;
+        if (appt.status === 'completed' || appt.status === 'cancelled') return;
+
+        const processingDays = parseInt(dept?.processingDays) || 0;
+        if (processingDays <= 0) return;
+
+        const apptDate = new Date(appt.appointmentDate || appt.dateFrom || appt.createdAt);
+        const diffDays = Math.floor((now - apptDate) / (1000 * 60 * 60 * 24));
+
+        if (diffDays > processingDays) {
+          overdue.push({
+            id: appt._id,
+            customerName: appt.customerName,
+            departmentTitle: dept?.title || 'غير محدد',
+            daysPassed: diffDays,
+            processingDays
+          });
+        }
+      });
+
+      setOverdueElectronic(overdue);
+
+      // إرسال إشعار متصفح إذا وجدت تقديمات متأخرة
+      if (overdue.length > 0 && notificationProps?.permission === 'granted' && notificationProps?.notify) {
+        overdue.forEach(item => {
+          notificationProps.notify(
+            `⚠️ تأخر في معالجة تأشيرة`,
+            `${item.customerName} لدى ${item.departmentTitle} - مضى ${item.daysPassed} يوم`
+          );
+        });
+      }
+    } catch (error) {
+      console.log('Error checking overdue electronic submissions:', error);
+    }
+  };
+
   return (
     <header className="navbar">
       <div className="navbar-start">
@@ -86,8 +142,8 @@ const Navbar = ({ notificationProps, taskNotifications = [], onClearTaskNotifica
             title="التنبيهات"
           >
             <span className="icon">📋</span>
-            {(notifications.length + recentTaskActivities.length) > 0 && (
-              <span className="badge">{notifications.length + recentTaskActivities.length}</span>
+            {(notifications.length + recentTaskActivities.length + overdueElectronic.length) > 0 && (
+              <span className="badge">{notifications.length + recentTaskActivities.length + overdueElectronic.length}</span>
             )}
           </button>
 
@@ -127,6 +183,36 @@ const Navbar = ({ notificationProps, taskNotifications = [], onClearTaskNotifica
                             </strong>
                           </span>
                           <span className="notif-time">{activity.timeAgo || 'الآن'}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* قسم التقديمات المتأخرة */}
+              {overdueElectronic.length > 0 && (
+                <>
+                  <div className="notifications-header overdue-header">
+                    <h4>⚠️ تقديمات متأخرة</h4>
+                    <span className="count overdue-count">{overdueElectronic.length}</span>
+                  </div>
+                  <div className="notifications-list overdue-list">
+                    {overdueElectronic.map(item => (
+                      <div
+                        key={item.id}
+                        className="notification-item overdue-item"
+                        onClick={() => {
+                          navigate(`/control/appointments?type=electronic`);
+                          setShowNotifications(false);
+                        }}
+                      >
+                        <span className="notif-icon">⚠️</span>
+                        <div className="notif-content">
+                          <span className="notif-text">
+                            تأخر معالجة تأشيرة <strong>{item.customerName}</strong> لدى <strong>{item.departmentTitle}</strong>
+                          </span>
+                          <span className="notif-time overdue-time">مضى {item.daysPassed} يوم (المتوقع {item.processingDays} يوم)</span>
                         </div>
                       </div>
                     ))}

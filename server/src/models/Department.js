@@ -26,6 +26,15 @@ const departmentSchema = new mongoose.Schema({
       message: 'لا يمكن إضافة أكثر من 3 مدن'
     }
   },
+  submissionType: {
+    type: String,
+    enum: ['حضوري', 'إلكتروني'],
+    default: 'حضوري'
+  },
+  processingDays: {
+    type: String,
+    default: ''
+  },
   requirements: [{
     type: String,
     trim: true

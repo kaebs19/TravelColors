@@ -483,6 +483,29 @@ exports.convertQuoteToInvoice = async (req, res, next) => {
       });
     }
 
+    // تسجيل العميل إذا لم يكن مسجلاً (عند قبول عرض السعر)
+    let customerId = quote.customer;
+    if (!customerId && quote.customerName && quote.customerPhone) {
+      try {
+        let existingCustomer = await Customer.findOne({ phone: quote.customerPhone });
+        if (existingCustomer) {
+          customerId = existingCustomer._id;
+        } else {
+          const newCustomer = await Customer.create({
+            name: quote.customerName,
+            phone: quote.customerPhone,
+            address: { city: quote.customerCity || 'الرياض' },
+            createdBy: req.user.id
+          });
+          customerId = newCustomer._id;
+        }
+        // تحديث عرض السعر بالعميل المسجل
+        quote.customer = customerId;
+      } catch (customerError) {
+        console.error('Error creating customer from quote:', customerError);
+      }
+    }
+
     // إنشاء فاتورة جديدة من عرض السعر
     const invoiceNumber = await Invoice.generateInvoiceNumber('invoice');
     const settings = await Settings.getSettings();
@@ -491,7 +514,7 @@ exports.convertQuoteToInvoice = async (req, res, next) => {
       invoiceNumber,
       type: 'invoice',
       prefix: 'INV',
-      customer: quote.customer,
+      customer: customerId,
       customerName: quote.customerName,
       customerPhone: quote.customerPhone,
       customerAddress: quote.customerAddress,

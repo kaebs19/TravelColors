@@ -1,5 +1,20 @@
 const { Appointment, Customer, User, Department, Invoice, Transaction, Task } = require('../models');
 
+// دالة مساعدة لبناء فلتر التاريخ مع نهاية اليوم
+const buildDateQuery = (startDate, endDate, field = 'createdAt') => {
+  if (!startDate && !endDate) return {};
+  const query = { [field]: {} };
+  if (startDate) {
+    query[field].$gte = new Date(startDate);
+  }
+  if (endDate) {
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+    query[field].$lte = end;
+  }
+  return query;
+};
+
 // @desc    تقرير إحصائيات عامة
 // @route   GET /api/reports/overview
 // @access  Private/Admin
@@ -7,15 +22,7 @@ exports.getOverviewReport = async (req, res, next) => {
   try {
     const { startDate, endDate } = req.query;
 
-    let dateQuery = {};
-    if (startDate && endDate) {
-      dateQuery = {
-        createdAt: {
-          $gte: new Date(startDate),
-          $lte: new Date(endDate)
-        }
-      };
-    }
+    const dateQuery = buildDateQuery(startDate, endDate);
 
     // إحصائيات عامة
     const [
@@ -62,6 +69,58 @@ exports.getOverviewReport = async (req, res, next) => {
       cancelledCount: 0
     };
 
+    // إحصائيات التقديمات الإلكترونية
+    const electronicDepts = await Department.find({ submissionType: 'إلكتروني' }).select('_id processingDays');
+    const electronicDeptIds = electronicDepts.map(d => d._id);
+
+    let electronic = { processing: 0, overdue: 0, acceptedMonth: 0, total: 0 };
+
+    if (electronicDeptIds.length > 0) {
+      const electronicQuery = {
+        isSubmission: true,
+        department: { $in: electronicDeptIds }
+      };
+
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const [processing, acceptedMonth, totalElectronic] = await Promise.all([
+        Appointment.countDocuments({
+          ...electronicQuery,
+          status: { $in: ['new', 'active', 'confirmed'] },
+          type: 'confirmed'
+        }),
+        Appointment.countDocuments({
+          ...electronicQuery,
+          status: 'completed',
+          updatedAt: { $gte: monthStart }
+        }),
+        Appointment.countDocuments(electronicQuery)
+      ]);
+
+      // حساب المتأخرة
+      const activeElectronic = await Appointment.find({
+        ...electronicQuery,
+        status: { $in: ['new', 'active', 'confirmed'] },
+        type: 'confirmed'
+      }).populate('department', 'processingDays');
+
+      let overdueCount = 0;
+      activeElectronic.forEach(apt => {
+        const days = apt.department?.processingDays || 7;
+        const created = new Date(apt.createdAt);
+        const deadline = new Date(created.getTime() + days * 24 * 60 * 60 * 1000);
+        if (now > deadline) overdueCount++;
+      });
+
+      electronic = {
+        processing,
+        overdue: overdueCount,
+        acceptedMonth,
+        total: totalElectronic
+      };
+    }
+
     res.json({
       success: true,
       data: {
@@ -69,7 +128,8 @@ exports.getOverviewReport = async (req, res, next) => {
         totalCustomers,
         totalEmployees,
         ...stats,
-        remainingAmount: stats.totalAmount - stats.totalPaid
+        remainingAmount: stats.totalAmount - stats.totalPaid,
+        electronic
       }
     });
   } catch (error) {
@@ -84,15 +144,7 @@ exports.getAppointmentsReport = async (req, res, next) => {
   try {
     const { startDate, endDate, groupBy = 'day' } = req.query;
 
-    let dateQuery = {};
-    if (startDate && endDate) {
-      dateQuery = {
-        createdAt: {
-          $gte: new Date(startDate),
-          $lte: new Date(endDate)
-        }
-      };
-    }
+    const dateQuery = buildDateQuery(startDate, endDate);
 
     let groupByFormat;
     switch (groupBy) {
@@ -136,15 +188,7 @@ exports.getEmployeesReport = async (req, res, next) => {
   try {
     const { startDate, endDate } = req.query;
 
-    let dateQuery = {};
-    if (startDate && endDate) {
-      dateQuery = {
-        createdAt: {
-          $gte: new Date(startDate),
-          $lte: new Date(endDate)
-        }
-      };
-    }
+    const dateQuery = buildDateQuery(startDate, endDate);
 
     const report = await Appointment.aggregate([
       { $match: dateQuery },
@@ -209,15 +253,7 @@ exports.getDepartmentsReport = async (req, res, next) => {
   try {
     const { startDate, endDate } = req.query;
 
-    let dateQuery = {};
-    if (startDate && endDate) {
-      dateQuery = {
-        createdAt: {
-          $gte: new Date(startDate),
-          $lte: new Date(endDate)
-        }
-      };
-    }
+    const dateQuery = buildDateQuery(startDate, endDate);
 
     const report = await Appointment.aggregate([
       { $match: dateQuery },
@@ -274,15 +310,7 @@ exports.getFinancialReport = async (req, res, next) => {
   try {
     const { startDate, endDate, groupBy = 'day' } = req.query;
 
-    let dateQuery = {};
-    if (startDate && endDate) {
-      dateQuery = {
-        createdAt: {
-          $gte: new Date(startDate),
-          $lte: new Date(endDate)
-        }
-      };
-    }
+    const dateQuery = buildDateQuery(startDate, endDate);
 
     let groupByFormat;
     switch (groupBy) {
@@ -412,6 +440,13 @@ exports.getEmployeePerformance = async (req, res, next) => {
           paidAmount: { $sum: { $ifNull: ['$paidAmount', 0] } },
           confirmedCount: { $sum: { $cond: [{ $eq: ['$type', 'confirmed'] }, 1, 0] } },
           completedCount: { $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] } },
+          completedPersons: {
+            $sum: { $cond: [
+              { $eq: ['$status', 'completed'] },
+              { $ifNull: ['$personsCount', 1] },
+              0
+            ]}
+          },
           cancelledCount: { $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] } }
         }
       },
@@ -437,6 +472,7 @@ exports.getEmployeePerformance = async (req, res, next) => {
           paidAmount: 1,
           confirmedCount: 1,
           completedCount: 1,
+          completedPersons: 1,
           cancelledCount: 1
         }
       },
@@ -534,6 +570,7 @@ exports.getEmployeePerformance = async (req, res, next) => {
           appointmentAmount: empAppointments.reduce((sum, a) => sum + a.totalAmount, 0),
           invoiceAmount: empInvoices.reduce((sum, i) => sum + i.totalAmount, 0),
           completedAppointments: empAppointments.reduce((sum, a) => sum + a.completedCount, 0),
+          completedPersons: empAppointments.reduce((sum, a) => sum + (a.completedPersons || 0), 0),
           cancelledAppointments: empAppointments.reduce((sum, a) => sum + a.cancelledCount, 0)
         },
         breakdown: {

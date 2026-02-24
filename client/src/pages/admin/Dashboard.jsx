@@ -226,6 +226,34 @@ const Dashboard = () => {
         </Card>
       </div>
 
+      {/* Electronic Submissions Card */}
+      {(stats?.electronic?.processing > 0 || stats?.electronic?.overdue > 0 || stats?.electronic?.acceptedMonth > 0) && (
+        <Card className="stat-card stat-electronic" onClick={() => navigate('/control/appointments')}>
+          <div className="stat-content">
+            <div className="stat-icon-wrapper">
+              <span className="stat-icon">📤</span>
+            </div>
+            <div className="stat-info">
+              <span className="stat-label">التقديمات الإلكترونية</span>
+              <div className="electronic-stats-grid">
+                <div className="electronic-stat-item">
+                  <span className="electronic-stat-value">{stats?.electronic?.processing || 0}</span>
+                  <span className="electronic-stat-label">قيد المعالجة</span>
+                </div>
+                <div className={`electronic-stat-item ${(stats?.electronic?.overdue || 0) > 0 ? 'has-overdue' : ''}`}>
+                  <span className="electronic-stat-value">{stats?.electronic?.overdue || 0}</span>
+                  <span className="electronic-stat-label">⚠️ متأخرة</span>
+                </div>
+                <div className="electronic-stat-item accepted">
+                  <span className="electronic-stat-value">{stats?.electronic?.acceptedMonth || 0}</span>
+                  <span className="electronic-stat-label">مقبولة هذا الشهر</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Charts Section */}
       <div className="dashboard-charts">
         {/* مخطط المواعيد اليومية */}

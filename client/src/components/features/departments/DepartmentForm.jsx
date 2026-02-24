@@ -5,7 +5,9 @@ import './DepartmentForm.css';
 const DepartmentForm = ({ department, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({
     title: '',
-    cities: []
+    cities: [],
+    submissionType: 'حضوري',
+    processingDays: ''
   });
   const [newCity, setNewCity] = useState({ name: '', mapLink: '' });
   const [loading, setLoading] = useState(false);
@@ -19,7 +21,9 @@ const DepartmentForm = ({ department, onSubmit, onCancel }) => {
     if (department) {
       setFormData({
         title: department.title || '',
-        cities: department.cities || []
+        cities: department.cities || [],
+        submissionType: department.submissionType || 'حضوري',
+        processingDays: department.processingDays || ''
       });
     }
   }, [department]);
@@ -99,63 +103,106 @@ const DepartmentForm = ({ department, onSubmit, onCancel }) => {
         />
       </div>
 
-      {/* المدن */}
+      {/* نوع التقديم */}
       <div className="form-group">
-        <label>المدن ({formData.cities.length}/3)</label>
-
-        {/* المدن المضافة */}
-        {formData.cities.length > 0 && (
-          <div className="added-cities">
-            {formData.cities.map((city, index) => (
-              <div key={index} className="city-item">
-                <span className="city-name">{city.name}</span>
-                {city.mapLink && (
-                  <a href={city.mapLink} target="_blank" rel="noopener noreferrer" className="city-link">
-                    📍
-                  </a>
-                )}
-                <button
-                  type="button"
-                  className="remove-city-btn"
-                  onClick={() => handleRemoveCity(city.name)}
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* إضافة مدينة جديدة */}
-        {formData.cities.length < 3 && (
-          <div className="add-city-row">
-            <select
-              value={newCity.name}
-              onChange={(e) => setNewCity(prev => ({ ...prev, name: e.target.value }))}
-              className="city-select"
-            >
-              <option value="">-- اختر المدينة --</option>
-              {availableCities.filter(c => !formData.cities.find(fc => fc.name === c)).map(city => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
+        <label>نوع التقديم</label>
+        <div className="submission-type-toggle">
+          <label className={`radio-option ${formData.submissionType === 'حضوري' ? 'active' : ''}`}>
             <input
-              type="url"
-              value={newCity.mapLink}
-              onChange={(e) => setNewCity(prev => ({ ...prev, mapLink: e.target.value }))}
-              placeholder="رابط الموقع على الخريطة"
-              className="map-link-input"
+              type="radio"
+              name="submissionType"
+              value="حضوري"
+              checked={formData.submissionType === 'حضوري'}
+              onChange={(e) => setFormData(prev => ({ ...prev, submissionType: e.target.value, processingDays: '' }))}
             />
-            <button
-              type="button"
-              className="add-city-btn"
-              onClick={handleAddCity}
-            >
-              + إضافة مدينة
-            </button>
-          </div>
-        )}
+            <span className="radio-label">حضوري</span>
+          </label>
+          <label className={`radio-option ${formData.submissionType === 'إلكتروني' ? 'active' : ''}`}>
+            <input
+              type="radio"
+              name="submissionType"
+              value="إلكتروني"
+              checked={formData.submissionType === 'إلكتروني'}
+              onChange={(e) => setFormData(prev => ({ ...prev, submissionType: e.target.value }))}
+            />
+            <span className="radio-label">إلكتروني</span>
+          </label>
+        </div>
       </div>
+
+      {/* مدة المعالجة المتوقعة - يظهر فقط للتقديم الإلكتروني */}
+      {formData.submissionType === 'إلكتروني' && (
+        <div className="form-group">
+          <label>مدة المعالجة المتوقعة</label>
+          <input
+            type="text"
+            value={formData.processingDays}
+            onChange={(e) => setFormData(prev => ({ ...prev, processingDays: e.target.value }))}
+            placeholder="مثال: 5-7 أيام عمل"
+            className="form-input"
+          />
+        </div>
+      )}
+
+      {/* المدن - تظهر فقط للتقديم الحضوري */}
+      {formData.submissionType !== 'إلكتروني' && (
+        <div className="form-group">
+          <label>المدن ({formData.cities.length}/3)</label>
+
+          {/* المدن المضافة */}
+          {formData.cities.length > 0 && (
+            <div className="added-cities">
+              {formData.cities.map((city, index) => (
+                <div key={index} className="city-item">
+                  <span className="city-name">{city.name}</span>
+                  {city.mapLink && (
+                    <a href={city.mapLink} target="_blank" rel="noopener noreferrer" className="city-link">
+                      📍
+                    </a>
+                  )}
+                  <button
+                    type="button"
+                    className="remove-city-btn"
+                    onClick={() => handleRemoveCity(city.name)}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* إضافة مدينة جديدة */}
+          {formData.cities.length < 3 && (
+            <div className="add-city-row">
+              <select
+                value={newCity.name}
+                onChange={(e) => setNewCity(prev => ({ ...prev, name: e.target.value }))}
+                className="city-select"
+              >
+                <option value="">-- اختر المدينة --</option>
+                {availableCities.filter(c => !formData.cities.find(fc => fc.name === c)).map(city => (
+                  <option key={city} value={city}>{city}</option>
+                ))}
+              </select>
+              <input
+                type="url"
+                value={newCity.mapLink}
+                onChange={(e) => setNewCity(prev => ({ ...prev, mapLink: e.target.value }))}
+                placeholder="رابط الموقع على الخريطة"
+                className="map-link-input"
+              />
+              <button
+                type="button"
+                className="add-city-btn"
+                onClick={handleAddCity}
+              >
+                + إضافة مدينة
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Actions */}
       <div className="form-actions">

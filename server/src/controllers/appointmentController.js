@@ -50,7 +50,7 @@ exports.getAppointments = async (req, res, next) => {
 
     const [appointments, total] = await Promise.all([
       Appointment.find(query)
-        .populate('department', 'title cities')
+        .populate('department', 'title cities submissionType processingDays')
         .populate('customer', 'name phone email')
         .populate('createdBy', 'name')
         .sort({ createdAt: -1 })
@@ -71,7 +71,7 @@ exports.getAppointments = async (req, res, next) => {
 exports.getAppointment = async (req, res, next) => {
   try {
     const appointment = await Appointment.findById(req.params.id)
-      .populate('department', 'title cities')
+      .populate('department', 'title cities submissionType processingDays')
       .populate('customer', 'name phone email')
       .populate('createdBy', 'name');
 
@@ -112,7 +112,9 @@ exports.createAppointment = async (req, res, next) => {
       // بيانات الدفع
       paymentType,
       totalAmount,
-      paidAmount
+      paidAmount,
+      // مضاف بواسطة (اختياري)
+      createdBy
     } = req.body;
 
     // التحقق من القسم للأنواع غير المسودة
@@ -165,7 +167,7 @@ exports.createAppointment = async (req, res, next) => {
       paymentType: paymentType || '',
       totalAmount: parseFloat(totalAmount) || 0,
       paidAmount: parseFloat(paidAmount) || 0,
-      createdBy: req.user.id
+      createdBy: createdBy || req.user.id
     };
 
     // إضافة الحقول حسب نوع الموعد
@@ -305,18 +307,54 @@ exports.createAppointment = async (req, res, next) => {
     }
 
     const populatedAppointment = await Appointment.findById(appointment._id)
-      .populate('department', 'title cities')
+      .populate('department', 'title cities submissionType processingDays')
       .populate('customer', 'name phone email')
       .populate('createdBy', 'name');
 
     // إنشاء مهمة تلقائياً للمواعيد المؤكدة
     if (appointmentData.type === 'confirmed') {
       try {
-        await Task.create({
+        // التحقق إذا كان تقديم إلكتروني
+        const dept = await Department.findById(appointmentData.department);
+        const isElectronicSubmission = appointmentData.isSubmission && dept?.submissionType === 'إلكتروني';
+
+        const taskData = {
           appointment: appointment._id,
-          status: 'new',
           createdBy: req.user.id
-        });
+        };
+
+        if (isElectronicSubmission) {
+          // التقديم الإلكتروني: بدء العمل تلقائياً
+          taskData.status = 'in_progress';
+          taskData.assignedTo = req.user.id;
+          taskData.startedAt = new Date();
+        } else {
+          taskData.status = 'new';
+        }
+
+        const newTask = await Task.create(taskData);
+
+        // تسجيل في سجل التدقيق إذا كان تقديم إلكتروني
+        if (isElectronicSubmission) {
+          try {
+            await AuditLog.create({
+              action: 'start_task',
+              entityType: 'task',
+              entityId: newTask._id,
+              entityNumber: newTask.taskNumber,
+              userId: req.user.id,
+              userName: req.user.name,
+              userRole: req.user.role,
+              description: `بدأ العمل تلقائياً - أضافه: ${req.user.name}`,
+              changes: {
+                before: { status: 'new' },
+                after: { status: 'in_progress', assignedTo: req.user.id }
+              }
+            });
+          } catch (auditErr) {
+            console.error('Error creating audit log for auto-start:', auditErr);
+          }
+        }
       } catch (taskError) {
         console.error('Error creating task for appointment:', taskError);
         // لا نوقف العملية إذا فشل إنشاء المهمة
@@ -396,7 +434,9 @@ exports.updateAppointment = async (req, res, next) => {
       // بيانات الدفع
       paymentType,
       totalAmount,
-      paidAmount
+      paidAmount,
+      // مضاف بواسطة
+      createdBy
     } = req.body;
 
     // تحديث الحقول الأساسية
@@ -411,6 +451,8 @@ exports.updateAppointment = async (req, res, next) => {
     if (city) appointment.city = city;
     if (notes !== undefined) appointment.notes = notes;
     if (status) appointment.status = status;
+    // تحديث مضاف بواسطة (الموظف المسؤول)
+    if (createdBy) appointment.createdBy = createdBy;
 
     // تحديث بيانات الدفع
     if (paymentType !== undefined) appointment.paymentType = paymentType;
@@ -440,7 +482,7 @@ exports.updateAppointment = async (req, res, next) => {
     await appointment.save();
 
     const updatedAppointment = await Appointment.findById(appointment._id)
-      .populate('department', 'title cities')
+      .populate('department', 'title cities submissionType processingDays')
       .populate('customer', 'name phone email')
       .populate('createdBy', 'name');
 
@@ -554,6 +596,45 @@ exports.changeStatus = async (req, res, next) => {
       success: true,
       message: 'تم تغيير حالة الموعد',
       data: { appointment }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    تسجيل إرسال رسالة تحديث سريع في سجل التدقيق
+// @route   POST /api/appointments/:id/log-quick-update
+// @access  Private
+exports.logQuickUpdate = async (req, res, next) => {
+  try {
+    const { messageType, customerName } = req.body;
+    const appointment = await Appointment.findById(req.params.id);
+
+    if (!checkExists(res, appointment, 'الموعد')) return;
+
+    const typeLabels = {
+      accepted: 'تم القبول',
+      rejected: 'تم الرفض',
+      additionalDocs: 'مستندات إضافية',
+      processingDelay: 'تأخر في المعالجة'
+    };
+
+    const label = typeLabels[messageType] || messageType;
+
+    await AuditLog.log({
+      action: 'send_message',
+      entityType: 'appointment',
+      entityId: appointment._id,
+      entityNumber: appointment._id.toString().slice(-6).toUpperCase(),
+      user: req.user,
+      req,
+      description: `إرسال تحديث واتساب: "${label}" - العميل: ${customerName || appointment.customerName}`,
+      metadata: { messageType, customerName: customerName || appointment.customerName }
+    });
+
+    res.json({
+      success: true,
+      message: 'تم تسجيل الإرسال في سجل التدقيق'
     });
   } catch (error) {
     next(error);
@@ -691,7 +772,7 @@ exports.getDashboardStats = async (req, res, next) => {
       { $limit: 5 },
       {
         $lookup: {
-          from: 'employees',
+          from: 'users',
           localField: '_id',
           foreignField: '_id',
           as: 'employee'
@@ -773,6 +854,36 @@ exports.getDashboardStats = async (req, res, next) => {
       }
     ]);
 
+    // إحصائيات التقديمات الإلكترونية
+    const electronicDepts = await Department.find({ submissionType: 'إلكتروني' }).select('_id processingDays');
+    const electronicDeptIds = electronicDepts.map(d => d._id);
+    const electronicDeptMap = {};
+    electronicDepts.forEach(d => { electronicDeptMap[d._id.toString()] = parseInt(d.processingDays) || 0; });
+
+    const electronicBase = { isSubmission: true, department: { $in: electronicDeptIds } };
+
+    const [electronicProcessing, electronicAcceptedMonth, electronicActiveAll] = await Promise.all([
+      // قيد المعالجة: جديد أو قيد العمل
+      Appointment.countDocuments({ ...electronicBase, status: { $in: ['new', 'in_progress'] } }),
+      // مقبولة هذا الشهر
+      Appointment.countDocuments({ ...electronicBase, status: 'completed', updatedAt: { $gte: monthStart, $lte: monthEnd } }),
+      // جميع النشطة لحساب المتأخرة
+      Appointment.find({ ...electronicBase, status: { $in: ['new', 'in_progress'] } })
+        .select('appointmentDate dateFrom createdAt department')
+        .lean()
+    ]);
+
+    // حساب المتأخرة
+    const nowDate = new Date();
+    let electronicOverdue = 0;
+    electronicActiveAll.forEach(appt => {
+      const processingDays = electronicDeptMap[appt.department?.toString()] || 0;
+      if (processingDays <= 0) return;
+      const apptDate = new Date(appt.appointmentDate || appt.dateFrom || appt.createdAt);
+      const diffDays = Math.floor((nowDate - apptDate) / (1000 * 60 * 60 * 24));
+      if (diffDays > processingDays) electronicOverdue++;
+    });
+
     // حساب نسبة التغيير
     const calculateChange = (current, previous) => {
       if (previous === 0) return current > 0 ? 100 : 0;
@@ -816,7 +927,12 @@ exports.getDashboardStats = async (req, res, next) => {
         byStatus: byStatus.reduce((acc, item) => {
           acc[item._id] = item.count;
           return acc;
-        }, {})
+        }, {}),
+        electronic: {
+          processing: electronicProcessing,
+          overdue: electronicOverdue,
+          acceptedMonth: electronicAcceptedMonth
+        }
       }
     });
   } catch (error) {

@@ -1303,6 +1303,32 @@ const Settings = () => {
 
                 <div className="message-section">
                   <div className="message-header">
+                    <h3>📨 رسالة التقديم الإلكتروني</h3>
+                    <p>تُرسل للعميل عند التقديم الإلكتروني نيابةً عنه (للسفارات ذات التقديم الإلكتروني)</p>
+                  </div>
+                  <div className="form-group">
+                    <textarea
+                      value={settings.electronicSubmissionMessage || ''}
+                      onChange={(e) => handleChange('electronicSubmissionMessage', e.target.value)}
+                      className="form-textarea message-textarea"
+                      rows="15"
+                      disabled={!isAdmin}
+                    />
+                  </div>
+                  <div className="message-variables">
+                    <span className="var-label">المتغيرات المتاحة:</span>
+                    <code>{'{اسم_العميل}'}</code>
+                    <code>{'{الجهة}'}</code>
+                    <code>{'{التاريخ}'}</code>
+                    <code>{'{العدد}'}</code>
+                    <code>{'{مدة_المعالجة}'}</code>
+                  </div>
+                </div>
+
+                <div className="form-divider"></div>
+
+                <div className="message-section">
+                  <div className="message-header">
                     <h3>○ رسالة الموعد غير المؤكد</h3>
                     <p>تُرسل للعميل عند حجز موعد قيد التأكيد</p>
                   </div>
@@ -1321,6 +1347,110 @@ const Settings = () => {
                     <code>{'{الجهة}'}</code>
                     <code>{'{تاريخ_البداية}'}</code>
                     <code>{'{تاريخ_النهاية}'}</code>
+                    <code>{'{العدد}'}</code>
+                  </div>
+                </div>
+
+                <div className="form-divider"></div>
+                <div className="quick-update-messages-header">
+                  <h3>⚡ رسائل التحديث السريع</h3>
+                  <p>تُستخدم هذه الرسائل مع أزرار التحديث السريع في التقديمات الإلكترونية</p>
+                </div>
+
+                <div className="message-section">
+                  <div className="message-header">
+                    <h3>🎉 رسالة تم القبول</h3>
+                    <p>تُرسل للعميل عند قبول طلب التأشيرة</p>
+                  </div>
+                  <div className="form-group">
+                    <textarea
+                      value={settings.acceptedMessage || ''}
+                      onChange={(e) => handleChange('acceptedMessage', e.target.value)}
+                      className="form-textarea message-textarea"
+                      rows="10"
+                      disabled={!isAdmin}
+                    />
+                  </div>
+                  <div className="message-variables">
+                    <span className="var-label">المتغيرات المتاحة:</span>
+                    <code>{'{اسم_العميل}'}</code>
+                    <code>{'{الجهة}'}</code>
+                    <code>{'{التاريخ}'}</code>
+                    <code>{'{العدد}'}</code>
+                  </div>
+                </div>
+
+                <div className="form-divider"></div>
+
+                <div className="message-section">
+                  <div className="message-header">
+                    <h3>❌ رسالة تم الرفض</h3>
+                    <p>تُرسل للعميل عند رفض طلب التأشيرة</p>
+                  </div>
+                  <div className="form-group">
+                    <textarea
+                      value={settings.rejectedMessage || ''}
+                      onChange={(e) => handleChange('rejectedMessage', e.target.value)}
+                      className="form-textarea message-textarea"
+                      rows="10"
+                      disabled={!isAdmin}
+                    />
+                  </div>
+                  <div className="message-variables">
+                    <span className="var-label">المتغيرات المتاحة:</span>
+                    <code>{'{اسم_العميل}'}</code>
+                    <code>{'{الجهة}'}</code>
+                    <code>{'{التاريخ}'}</code>
+                    <code>{'{العدد}'}</code>
+                  </div>
+                </div>
+
+                <div className="form-divider"></div>
+
+                <div className="message-section">
+                  <div className="message-header">
+                    <h3>📎 رسالة مستندات إضافية</h3>
+                    <p>تُرسل للعميل عند طلب مستندات إضافية من السفارة</p>
+                  </div>
+                  <div className="form-group">
+                    <textarea
+                      value={settings.additionalDocsMessage || ''}
+                      onChange={(e) => handleChange('additionalDocsMessage', e.target.value)}
+                      className="form-textarea message-textarea"
+                      rows="10"
+                      disabled={!isAdmin}
+                    />
+                  </div>
+                  <div className="message-variables">
+                    <span className="var-label">المتغيرات المتاحة:</span>
+                    <code>{'{اسم_العميل}'}</code>
+                    <code>{'{الجهة}'}</code>
+                    <code>{'{التاريخ}'}</code>
+                    <code>{'{العدد}'}</code>
+                  </div>
+                </div>
+
+                <div className="form-divider"></div>
+
+                <div className="message-section">
+                  <div className="message-header">
+                    <h3>⏳ رسالة تأخر في المعالجة</h3>
+                    <p>تُرسل للعميل عند تأخر معالجة طلبه</p>
+                  </div>
+                  <div className="form-group">
+                    <textarea
+                      value={settings.processingDelayMessage || ''}
+                      onChange={(e) => handleChange('processingDelayMessage', e.target.value)}
+                      className="form-textarea message-textarea"
+                      rows="10"
+                      disabled={!isAdmin}
+                    />
+                  </div>
+                  <div className="message-variables">
+                    <span className="var-label">المتغيرات المتاحة:</span>
+                    <code>{'{اسم_العميل}'}</code>
+                    <code>{'{الجهة}'}</code>
+                    <code>{'{التاريخ}'}</code>
                     <code>{'{العدد}'}</code>
                   </div>
                 </div>

@@ -40,7 +40,10 @@ const tasksApi = {
   }),
 
   // جلب النشاطات الأخيرة للمهام
-  getRecentActivities: (limit = 10) => api.get('/tasks/recent-activities', { params: { limit } })
+  getRecentActivities: (limit = 10) => api.get('/tasks/recent-activities', { params: { limit } }),
+
+  // جلب سجل النشاط لمهمة معينة
+  getActivityLog: (id) => api.get(`/tasks/${id}/activity-log`)
 };
 
 export default tasksApi;

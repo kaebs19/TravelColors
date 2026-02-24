@@ -147,6 +147,7 @@
 .stat-persons { border-right-color: #10b981; }
 .stat-appointments { border-right-color: #8b5cf6; }
 .stat-vip { border-right-color: #f59e0b; }
+.stat-electronic { border-right-color: #3B5BDB; }
 
 .stat-content {
   display: flex;
@@ -168,6 +169,7 @@
 .stat-persons .stat-icon-wrapper { background: #d1fae5; }
 .stat-appointments .stat-icon-wrapper { background: #ede9fe; }
 .stat-vip .stat-icon-wrapper { background: #fef3c7; }
+.stat-electronic .stat-icon-wrapper { background: #EEF2FF; }
 
 .stat-icon {
   font-size: 1.75rem;
@@ -947,4 +949,44 @@
     flex: 1;
     margin-bottom: 0;
   }
+}
+
+/* Electronic Submissions Stats */
+.electronic-stats-grid {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.electronic-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.electronic-stat-value {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.electronic-stat-label {
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.electronic-stat-item.has-overdue .electronic-stat-value {
+  color: #E03131;
+  font-size: var(--font-2xl);
+}
+
+.electronic-stat-item.has-overdue .electronic-stat-label {
+  color: #E03131;
+  font-weight: 600;
+}
+
+.electronic-stat-item.accepted .electronic-stat-value {
+  color: #2F9E44;
 }

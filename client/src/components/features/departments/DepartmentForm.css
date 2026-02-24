@@ -48,6 +48,42 @@
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
+/* Submission Type Toggle */
+.submission-type-toggle {
+  display: flex;
+  gap: 1rem;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: var(--font-sm);
+}
+
+.radio-option:hover {
+  border-color: #4a6fa5;
+}
+
+.radio-option.active {
+  border-color: #4a6fa5;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.radio-option input[type="radio"] {
+  accent-color: #4a6fa5;
+}
+
+.radio-label {
+  font-weight: 500;
+}
+
 /* Cities */
 .added-cities {
   display: flex;

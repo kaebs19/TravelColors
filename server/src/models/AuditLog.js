@@ -22,7 +22,8 @@ const auditLogSchema = new mongoose.Schema({
       'start_task',   // بدء المهمة
       'complete_task', // إكمال المهمة
       'cancel_task',  // إلغاء المهمة
-      'transfer_task' // تحويل المهمة
+      'transfer_task', // تحويل المهمة
+      'send_message'   // إرسال رسالة واتساب
     ],
     required: true
   },

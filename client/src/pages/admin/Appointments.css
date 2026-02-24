@@ -504,13 +504,18 @@
 }
 
 .type-badge.type-confirmed {
-  background: #d1fae5;
-  color: #065f46;
+  background: #EBFBEE;
+  color: #2F9E44;
 }
 
 .type-badge.type-unconfirmed {
-  background: #fef3c7;
-  color: #92400e;
+  background: #FFF9DB;
+  color: #E67700;
+}
+
+.type-badge.type-electronic {
+  background: #EEF2FF;
+  color: #3B5BDB;
 }
 
 .type-badge.type-draft {
@@ -803,6 +808,34 @@
 .created-by-cell {
   font-size: var(--font-sm);
   color: var(--text-secondary);
+}
+
+.created-by-cell.clickable {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 6px;
+  transition: background 0.15s;
+}
+
+.created-by-cell.clickable:hover {
+  background: var(--bg-hover, #f0f4ff);
+  color: var(--primary-color, #4f46e5);
+}
+
+.edit-icon-small {
+  font-size: 10px;
+  opacity: 0.5;
+  margin-right: 2px;
+}
+
+.created-by-select {
+  font-size: var(--font-sm, 13px);
+  padding: 4px 8px;
+  border: 1px solid var(--primary-color, #4f46e5);
+  border-radius: 6px;
+  background: #fff;
+  outline: none;
+  min-width: 120px;
 }
 
 /* Customer Link */
@@ -1193,11 +1226,15 @@
 }
 
 .legend-dot.type-confirmed {
-  background: #10b981;
+  background: #2F9E44;
 }
 
 .legend-dot.type-unconfirmed {
-  background: #f59e0b;
+  background: #E67700;
+}
+
+.legend-dot.type-electronic {
+  background: #3B5BDB;
 }
 
 .legend-dot.type-draft {
@@ -1676,5 +1713,243 @@
 
 .card-action-btn.receipt:hover {
   background: #bfdbfe;
+}
+
+/* Menu Section Label */
+.menu-section-label {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Quick Update Menu Items */
+.action-menu-item.quick-accepted:hover {
+  background: #EBFBEE;
+  color: #2F9E44;
+}
+
+.action-menu-item.quick-rejected:hover {
+  background: #FFF5F5;
+  color: #E03131;
+}
+
+.action-menu-item.quick-docs:hover {
+  background: #EEF2FF;
+  color: #3B5BDB;
+}
+
+.action-menu-item.quick-delay:hover {
+  background: #FFF9DB;
+  color: #E67700;
+}
+
+/* Quick Update Section in View Modal */
+.quick-update-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.quick-update-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.quick-update-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.quick-update-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: white;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.quick-update-btn.accepted {
+  color: #2F9E44;
+  border-color: #d3f9d8;
+  background: #EBFBEE;
+}
+
+.quick-update-btn.accepted:hover {
+  background: #d3f9d8;
+  border-color: #2F9E44;
+}
+
+.quick-update-btn.rejected {
+  color: #E03131;
+  border-color: #ffc9c9;
+  background: #FFF5F5;
+}
+
+.quick-update-btn.rejected:hover {
+  background: #ffc9c9;
+  border-color: #E03131;
+}
+
+.quick-update-btn.docs {
+  color: #3B5BDB;
+  border-color: #dbe4ff;
+  background: #EEF2FF;
+}
+
+.quick-update-btn.docs:hover {
+  background: #dbe4ff;
+  border-color: #3B5BDB;
+}
+
+.quick-update-btn.delay {
+  color: #E67700;
+  border-color: #ffec99;
+  background: #FFF9DB;
+}
+
+.quick-update-btn.delay:hover {
+  background: #ffec99;
+  border-color: #E67700;
+}
+
+/* Quick Message Modal */
+.quick-message-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.quick-message-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+
+.quick-message-customer {
+  font-weight: 600;
+  color: var(--text-color);
+  font-size: var(--font-sm);
+}
+
+.quick-message-dept {
+  color: var(--text-secondary);
+  font-size: var(--font-xs);
+}
+
+.quick-message-preview {
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.quick-message-textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: var(--font-sm);
+  line-height: 1.7;
+  color: var(--text-color);
+  background: #f8fafc;
+  resize: vertical;
+  transition: all var(--transition);
+}
+
+.quick-message-textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  background: white;
+}
+
+.quick-message-status-note {
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-xs);
+  font-weight: 500;
+}
+
+.quick-message-status-note.accepted {
+  background: #EBFBEE;
+  color: #2F9E44;
+  border: 1px solid #d3f9d8;
+}
+
+.quick-message-status-note.rejected {
+  background: #FFF5F5;
+  color: #E03131;
+  border: 1px solid #ffc9c9;
+}
+
+.quick-message-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.quick-msg-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1.25rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.quick-msg-btn span {
+  font-size: 1.1rem;
+}
+
+.quick-msg-btn.copy-btn {
+  background: #f1f3f5;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.quick-msg-btn.copy-btn:hover {
+  background: #e9ecef;
+}
+
+.quick-msg-btn.copy-btn.success {
+  background: #EBFBEE;
+  color: #2F9E44;
+  border-color: #d3f9d8;
+}
+
+.quick-msg-btn.send-btn {
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  color: white;
+}
+
+.quick-msg-btn.send-btn:hover {
+  background: linear-gradient(135deg, #128c7e, #075e54);
+  transform: translateY(-1px);
+}
+
+.quick-msg-btn.send-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 

@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { appointmentsApi, departmentsApi, customersApi, settingsApi } from '../../api';
+import { appointmentsApi, departmentsApi, customersApi, settingsApi, employeesApi } from '../../api';
 import { Loader, NumberInput, PhoneInput } from '../../components/common';
+import { useAuth } from '../../context';
 import { generateAppointmentReceipt } from '../../utils/receiptGenerator';
 import { generateAppointmentMessage } from '../../utils/messageGenerator';
 // import { parseArabicNumber, arabicToEnglishNumbers } from '../../utils/formatters';
@@ -84,15 +85,24 @@ const STORAGE_KEY = 'appointmentFormDraft';
 
 const AddAppointment = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const appointmentType = searchParams.get('type') || 'confirmed';
   const editId = searchParams.get('edit');
+
+  // نوع الموعد الجديد: حضوري / إلكتروني / غير مؤكد
+  const getInitialMode = () => {
+    if (appointmentType === 'unconfirmed') return 'unconfirmed';
+    return 'in_person'; // الافتراضي: حضوري
+  };
+  const [appointmentMode, setAppointmentMode] = useState(getInitialMode());
 
   const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [departments, setDepartments] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [allEmployees, setAllEmployees] = useState([]);
   const [settings, setSettings] = useState(null);
   const [editingAppointment, setEditingAppointment] = useState(null);
 
@@ -117,12 +127,12 @@ const AddAppointment = () => {
   const savedData = getSavedData();
 
   const [formData, setFormData] = useState({
-    type: appointmentType || savedData?.type || 'confirmed',
+    type: appointmentType === 'unconfirmed' ? 'unconfirmed' : (savedData?.type || 'confirmed'),
     customerName: savedData?.customerName || '',
     customer: savedData?.customer || '',
     phone: savedData?.phone || '',
     personsCount: savedData?.personsCount || 1,
-    isSubmission: savedData?.isSubmission || false,
+    isSubmission: false,
     isVIP: savedData?.isVIP || false,
     visibility: savedData?.visibility || 'private',
     appointmentDate: savedData?.appointmentDate || '',
@@ -140,7 +150,9 @@ const AddAppointment = () => {
     // بيانات الدفع
     paymentType: savedData?.paymentType || '',
     totalAmount: savedData?.totalAmount || '',
-    paidAmount: savedData?.paidAmount || ''
+    paidAmount: savedData?.paidAmount || '',
+    // مضاف بواسطة
+    createdBy: savedData?.createdBy || ''
   });
 
   const [availableCities, setAvailableCities] = useState(['الرياض']);
@@ -196,8 +208,42 @@ const AddAppointment = () => {
   }, []);
 
   useEffect(() => {
-    setFormData(prev => ({ ...prev, type: appointmentType }));
+    if (appointmentType === 'unconfirmed') {
+      setAppointmentMode('unconfirmed');
+      setFormData(prev => ({ ...prev, type: 'unconfirmed' }));
+    }
   }, [appointmentType]);
+
+  // تغيير وضع الموعد
+  const handleModeChange = (mode) => {
+    setAppointmentMode(mode);
+    if (mode === 'in_person') {
+      setFormData(prev => ({ ...prev, type: 'confirmed', isSubmission: false, department: '', city: 'الرياض' }));
+    } else if (mode === 'electronic') {
+      setFormData(prev => ({ ...prev, type: 'confirmed', isSubmission: true, department: '', city: 'الرياض' }));
+    } else if (mode === 'unconfirmed') {
+      setFormData(prev => ({ ...prev, type: 'unconfirmed', isSubmission: false, department: '', city: 'الرياض' }));
+    }
+  };
+
+  // فلترة الأقسام حسب نوع التقديم
+  const getFilteredDepartments = () => {
+    if (appointmentMode === 'electronic') {
+      return departments.filter(d => d.submissionType === 'إلكتروني');
+    } else if (appointmentMode === 'in_person') {
+      return departments.filter(d => d.submissionType !== 'إلكتروني');
+    }
+    return departments; // غير مؤكد: يعرض الكل
+  };
+
+  const filteredDepartments = getFilteredDepartments();
+
+  // الحصول على مدة المعالجة للقسم المختار
+  const getSelectedDeptProcessingDays = () => {
+    if (!formData.department) return '';
+    const dept = departments.find(d => d._id === formData.department);
+    return dept?.processingDays || '';
+  };
 
   // حفظ البيانات تلقائياً
   useEffect(() => {
@@ -228,14 +274,17 @@ const AddAppointment = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [departmentsRes, customersRes, settingsRes] = await Promise.all([
+      const [departmentsRes, customersRes, settingsRes, employeesRes] = await Promise.all([
         departmentsApi.getDepartments(),
         customersApi.getCustomers(),
-        settingsApi.getSettings()
+        settingsApi.getSettings(),
+        employeesApi.getEmployees()
       ]);
 
       const depts = departmentsRes.data?.data?.departments || departmentsRes.data?.departments || [];
       const custs = customersRes.data?.data?.customers || customersRes.data?.customers || [];
+      const emps = employeesRes.data?.data?.employees || employeesRes.data?.employees || [];
+      setAllEmployees(emps);
 
       // تحميل إعدادات المواعيد
       const settingsData = settingsRes.data?.data || {};
@@ -305,7 +354,8 @@ const AddAppointment = () => {
             notes: appointment.notes || '',
             paymentType: appointment.paymentType || '',
             totalAmount: appointment.totalAmount || '',
-            paidAmount: appointment.paidAmount || ''
+            paidAmount: appointment.paidAmount || '',
+            createdBy: appointment.createdBy?._id || appointment.createdBy || ''
           });
 
           if (appointment.customer) {
@@ -580,11 +630,11 @@ const AddAppointment = () => {
   const getTitle = () => {
     if (editingAppointment) return 'تعديل الموعد';
     const titles = {
-      confirmed: 'إضافة موعد مؤكد',
-      unconfirmed: 'إضافة موعد غير مؤكد',
-      draft: 'إضافة مسودة'
+      in_person: 'إضافة موعد حضوري',
+      electronic: 'إضافة تقديم إلكتروني',
+      unconfirmed: 'إضافة موعد غير مؤكد'
     };
-    return titles[appointmentType] || 'إضافة موعد جديد';
+    return titles[appointmentMode] || 'إضافة موعد جديد';
   };
 
   const progress = calculateProgress();
@@ -607,8 +657,48 @@ const AddAppointment = () => {
 
       <form className="appointment-form-page" onSubmit={handleSubmit}>
         <div className="form-content-wrapper">
-          {/* ========== موعد مؤكد ========== */}
-          {formData.type === 'confirmed' && (
+
+          {/* ========== اختيار نوع الموعد ========== */}
+          {!editingAppointment && (
+            <div className="form-section appointment-mode-section">
+              <div className="section-title">
+                <span className="section-icon">📋</span>
+                <h4>نوع الموعد</h4>
+              </div>
+              <div className="appointment-mode-selector">
+                <button
+                  type="button"
+                  className={`mode-card ${appointmentMode === 'in_person' ? 'active' : ''}`}
+                  onClick={() => handleModeChange('in_person')}
+                >
+                  <span className="mode-icon">🏢</span>
+                  <span className="mode-title">موعد حضوري</span>
+                  <span className="mode-desc">حجز موعد بالسفارة</span>
+                </button>
+                <button
+                  type="button"
+                  className={`mode-card ${appointmentMode === 'electronic' ? 'active electronic' : ''}`}
+                  onClick={() => handleModeChange('electronic')}
+                >
+                  <span className="mode-icon">💻</span>
+                  <span className="mode-title">تقديم إلكتروني</span>
+                  <span className="mode-desc">تقديم نيابةً عن العميل</span>
+                </button>
+                <button
+                  type="button"
+                  className={`mode-card ${appointmentMode === 'unconfirmed' ? 'active unconfirmed' : ''}`}
+                  onClick={() => handleModeChange('unconfirmed')}
+                >
+                  <span className="mode-icon">📅</span>
+                  <span className="mode-title">موعد غير مؤكد</span>
+                  <span className="mode-desc">نطاق تاريخ متوقع</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ========== موعد حضوري أو تقديم إلكتروني ========== */}
+          {(appointmentMode === 'in_person' || appointmentMode === 'electronic') && formData.type === 'confirmed' && (
             <>
               {/* بيانات العميل */}
               <div className="form-section">
@@ -694,17 +784,26 @@ const AddAppointment = () => {
                       placeholder="05XX XXX XXXX"
                     />
                   </div>
-                  <div className="form-group checkbox-inline">
-                    <label className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        name="isSubmission"
-                        checked={formData.isSubmission}
-                        onChange={handleChange}
-                      />
-                      <span className="checkbox-text">تقديم</span>
-                    </label>
-                  </div>
+                  {appointmentMode === 'in_person' && (
+                    <div className="form-group checkbox-inline">
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          name="isSubmission"
+                          checked={formData.isSubmission}
+                          onChange={handleChange}
+                        />
+                        <span className="checkbox-text">تقديم</span>
+                      </label>
+                    </div>
+                  )}
+                  {appointmentMode === 'electronic' && (
+                    <div className="form-group">
+                      <div className="electronic-badge">
+                        <span>📨</span> تقديم إلكتروني نيابةً عن العميل
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -712,11 +811,11 @@ const AddAppointment = () => {
               <div className="form-section">
                 <div className="section-title">
                   <span className="section-icon">📅</span>
-                  <h4>تاريخ ووقت الموعد</h4>
+                  <h4>{appointmentMode === 'electronic' ? 'تاريخ التقديم' : 'تاريخ ووقت الموعد'}</h4>
                 </div>
 
                 <div className="form-group">
-                  <label>تاريخ الموعد <span className="required">*</span></label>
+                  <label>{appointmentMode === 'electronic' ? 'تاريخ التقديم' : 'تاريخ الموعد'} <span className="required">*</span></label>
                   <input
                     type="date"
                     name="appointmentDate"
@@ -731,72 +830,88 @@ const AddAppointment = () => {
                   {dateError && <span className="error-text">{dateError}</span>}
                 </div>
 
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label>الساعة <span className="required">*</span></label>
-                    <select
-                      name="appointmentHour"
-                      value={formData.appointmentHour}
-                      onChange={handleChange}
-                      className="form-select"
-                    >
-                      {hourOptions.map(option => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
+                {/* الوقت - يظهر فقط للحضوري */}
+                {appointmentMode === 'in_person' && (
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label>الساعة <span className="required">*</span></label>
+                      <select
+                        name="appointmentHour"
+                        value={formData.appointmentHour}
+                        onChange={handleChange}
+                        className="form-select"
+                      >
+                        {hourOptions.map(option => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>الدقائق <span className="required">*</span></label>
+                      <select
+                        name="appointmentMinute"
+                        value={formData.appointmentMinute}
+                        onChange={handleChange}
+                        className="form-select"
+                      >
+                        {minuteOptions.map(option => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
-                  <div className="form-group">
-                    <label>الدقائق <span className="required">*</span></label>
-                    <select
-                      name="appointmentMinute"
-                      value={formData.appointmentMinute}
-                      onChange={handleChange}
-                      className="form-select"
-                    >
-                      {minuteOptions.map(option => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* الأقسام / السفارات والمدينة */}
               <div className="form-section">
                 <div className="section-title">
                   <span className="section-icon">🏬</span>
-                  <h4>الأقسام / السفارات والمدينة</h4>
+                  <h4>{appointmentMode === 'electronic' ? 'الجهة / السفارة' : 'الأقسام / السفارات والمدينة'}</h4>
                 </div>
-                <div className="form-grid">
+                <div className={appointmentMode === 'electronic' ? '' : 'form-grid'}>
                   <div className="form-group">
-                    <label>الأقسام / السفارات <span className="required">*</span></label>
+                    <label>{appointmentMode === 'electronic' ? 'الجهة / السفارة' : 'الأقسام / السفارات'} <span className="required">*</span></label>
                     <select
                       name="department"
                       value={formData.department}
                       onChange={handleChange}
                       className="form-select"
                     >
-                      <option value="">-- اختر القسم / السفارة --</option>
-                      {departments.map(dept => (
+                      <option value="">-- اختر {appointmentMode === 'electronic' ? 'الجهة' : 'القسم / السفارة'} --</option>
+                      {filteredDepartments.map(dept => (
                         <option key={dept._id} value={dept._id}>{dept.title}</option>
                       ))}
                     </select>
+                    {appointmentMode === 'electronic' && filteredDepartments.length === 0 && (
+                      <span className="error-text">لا توجد سفارات بتقديم إلكتروني. أضف قسم بنوع "إلكتروني" أولاً.</span>
+                    )}
                   </div>
-                  <div className="form-group">
-                    <label>اختر المدينة</label>
-                    <select
-                      name="city"
-                      value={formData.city}
-                      onChange={handleChange}
-                      className="form-select"
-                      disabled={!formData.department}
-                    >
-                      {availableCities.map(city => (
-                        <option key={city} value={city}>{city}</option>
-                      ))}
-                    </select>
-                  </div>
+                  {appointmentMode !== 'electronic' && (
+                    <div className="form-group">
+                      <label>اختر المدينة</label>
+                      <select
+                        name="city"
+                        value={formData.city}
+                        onChange={handleChange}
+                        className="form-select"
+                        disabled={!formData.department}
+                      >
+                        {availableCities.map(city => (
+                          <option key={city} value={city}>{city}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
+
+                {/* مدة المعالجة المتوقعة - للتقديم الإلكتروني */}
+                {appointmentMode === 'electronic' && getSelectedDeptProcessingDays() && (
+                  <div className="processing-days-info">
+                    <span className="processing-icon">⏳</span>
+                    <span>مدة المعالجة المتوقعة: <strong>{getSelectedDeptProcessingDays()}</strong></span>
+                  </div>
+                )}
               </div>
 
               {/* المرفقات */}
@@ -1077,7 +1192,7 @@ const AddAppointment = () => {
                       className="form-select"
                     >
                       <option value="">-- اختر القسم / السفارة --</option>
-                      {departments.map(dept => (
+                      {filteredDepartments.map(dept => (
                         <option key={dept._id} value={dept._id}>{dept.title}</option>
                       ))}
                     </select>
@@ -1356,6 +1471,32 @@ const AddAppointment = () => {
               </div>
             </>
           )}
+          {/* ========== مضاف بواسطة ========== */}
+          <div className="form-section">
+            <div className="section-title">
+              <span className="section-icon">👤</span>
+              <h4>مضاف بواسطة</h4>
+            </div>
+            <div className="form-grid">
+              <div className="form-group">
+                <label>الموظف المسؤول</label>
+                <select
+                  name="createdBy"
+                  value={formData.createdBy || user?._id || user?.id || ''}
+                  onChange={handleChange}
+                  className="form-select"
+                >
+                  <option value="">-- الموظف الحالي --</option>
+                  {allEmployees.map(emp => (
+                    <option key={emp._id} value={emp._id}>
+                      {emp.name} {emp.role === 'admin' ? '(مدير)' : ''}
+                    </option>
+                  ))}
+                </select>
+                <small className="form-hint">اختر الموظف الذي أضاف هذا الموعد. الافتراضي: الموظف الحالي</small>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* شريط التقدم وأزرار الإجراءات */}

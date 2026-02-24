@@ -47,6 +47,18 @@
   margin-bottom: 1.5rem;
 }
 
+.invoices-page .header-actions-row .btn-success {
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.invoices-page .header-actions-row .btn-outline {
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+}
+
 /* الإحصائيات */
 .invoices-page .stats-grid {
   display: grid;
@@ -398,6 +410,52 @@
   padding-top: 0.75rem;
   font-weight: 700;
   font-size: var(--font-lg);
+}
+
+/* خصم بنسبة أو ثابت */
+.discount-row {
+  align-items: center;
+}
+
+.discount-input-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.discount-type-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.discount-type-btn {
+  padding: 4px 10px;
+  border: none;
+  background: #f8fafc;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  transition: all 0.15s;
+}
+
+.discount-type-btn.active {
+  background: var(--primary-color, #2563eb);
+  color: #fff;
+}
+
+.discount-type-btn:first-child {
+  border-left: 1px solid var(--border-color, #e2e8f0);
+}
+
+.discount-amount-preview {
+  font-size: 11px;
+  color: #ef4444;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .form-actions {

@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
-import { reportsApi } from '../../api';
+import { reportsApi, settingsApi } from '../../api';
 import { Card, Loader } from '../../components/common';
 import { formatCurrency, formatDate } from '../../utils';
+import {
+  generateOverviewReport, generateAppointmentsReport, generateTasksReport,
+  generateEmployeePerformanceReport, generateTopCustomersReport, generateProfitLossReport,
+  generateDepartmentsReport, generateFinancialReport, generateEmployeesReport, openReportWindow
+} from '../../utils/reportPrintGenerator';
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -29,23 +34,27 @@ const Reports = () => {
   const [tasksData, setTasksData] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [period, setPeriod] = useState('daily');
+  const [companySettings, setCompanySettings] = useState(null);
 
   useEffect(() => {
     fetchData();
   }, [activeTab, dateRange, groupBy, period, selectedEmployee]);
 
-  // جلب بيانات أداء الموظفين للبطاقات العلوية عند تحميل الصفحة
+  // جلب إعدادات الشركة + أداء الموظفين عند تحميل الصفحة
   useEffect(() => {
-    const fetchPerformanceSummary = async () => {
+    const fetchInitialData = async () => {
       try {
-        const params = { ...dateRange, period: 'daily' };
-        const empRes = await reportsApi.getEmployeePerformance(params);
+        const [settingsRes, empRes] = await Promise.all([
+          settingsApi.getSettings(),
+          reportsApi.getEmployeePerformance({ ...dateRange, period: 'daily' })
+        ]);
+        setCompanySettings(settingsRes.data?.data?.settings || settingsRes.data?.settings || {});
         setEmployeePerformance(empRes.data?.data || {});
       } catch (error) {
-        console.error('Error fetching performance summary:', error);
+        console.error('Error fetching initial data:', error);
       }
     };
-    fetchPerformanceSummary();
+    fetchInitialData();
   }, [dateRange]);
 
   const fetchData = async () => {
@@ -59,8 +68,12 @@ const Reports = () => {
           setOverviewData(overviewRes.data?.data || {});
           break;
         case 'appointments':
-          const appointmentsRes = await reportsApi.getAppointmentsReport(params);
+          const [appointmentsRes, empForApptRes] = await Promise.all([
+            reportsApi.getAppointmentsReport(params),
+            reportsApi.getEmployeesReport(params)
+          ]);
           setAppointmentsData(appointmentsRes.data?.data || []);
+          setEmployeesData(empForApptRes.data?.data || []);
           break;
         case 'employees':
           const employeesRes = await reportsApi.getEmployeesReport(params);
@@ -134,6 +147,58 @@ const Reports = () => {
     setDateRange({ startDate, endDate });
   };
 
+  // عرض / طباعة التقرير
+  const handleReportAction = (autoPrint = false) => {
+    const titleMap = {
+      'overview': 'تقرير نظرة عامة',
+      'appointments': 'تقرير المواعيد',
+      'tasks': 'تقرير المهام',
+      'employee-performance': 'تقرير أداء الموظفين',
+      'top-customers': 'تقرير أفضل العملاء',
+      'profit-loss': 'تقرير الأرباح والخسائر',
+      'departments': 'تقرير الأقسام',
+      'financial': 'التقرير المالي',
+      'employees': 'تقرير الموظفين'
+    };
+
+    let content = '';
+    switch (activeTab) {
+      case 'overview':
+        content = generateOverviewReport(overviewData || {}, companySettings, dateRange);
+        break;
+      case 'appointments':
+        content = generateAppointmentsReport(appointmentsData, companySettings, dateRange, employeesData);
+        break;
+      case 'tasks':
+        content = generateTasksReport(tasksData, companySettings, dateRange);
+        break;
+      case 'employee-performance':
+        content = generateEmployeePerformanceReport(employeePerformance, companySettings, dateRange);
+        break;
+      case 'top-customers':
+        content = generateTopCustomersReport(topCustomers, companySettings, dateRange);
+        break;
+      case 'profit-loss':
+        content = generateProfitLossReport(profitLoss, companySettings, dateRange);
+        break;
+      case 'departments':
+        content = generateDepartmentsReport(departmentsData, companySettings, dateRange);
+        break;
+      case 'financial':
+        content = generateFinancialReport(financialData, companySettings, dateRange);
+        break;
+      case 'employees':
+        content = generateEmployeesReport(employeesData, companySettings, dateRange);
+        break;
+      default:
+        return;
+    }
+
+    if (content) {
+      openReportWindow(content, titleMap[activeTab] || 'تقرير', autoPrint);
+    }
+  };
+
   const tabs = [
     { id: 'overview', label: 'نظرة عامة', icon: '📊' },
     { id: 'charts', label: 'الرسوم البيانية', icon: '📈' },
@@ -163,62 +228,64 @@ const Reports = () => {
 
     return (
       <div className="overview-content">
-        {/* الإحصائيات الرئيسية */}
-        <div className="stats-grid stats-grid-4">
-          <Card className="stat-card stat-primary">
-            <div className="stat-icon">📅</div>
-            <div className="stat-info">
-              <span className="stat-value">{overviewData.totalAppointments || 0}</span>
-              <span className="stat-label">إجمالي المواعيد</span>
+        {/* التقديمات الإلكترونية */}
+        {overviewData.electronic && (overviewData.electronic.processing > 0 || overviewData.electronic.overdue > 0 || overviewData.electronic.acceptedMonth > 0) && (
+          <Card className="electronic-overview-card">
+            <h3>📤 التقديمات الإلكترونية</h3>
+            <div className="electronic-overview-grid">
+              <div className="electronic-overview-item">
+                <span className="electronic-overview-value">{overviewData.electronic.processing || 0}</span>
+                <span className="electronic-overview-label">قيد المعالجة</span>
+              </div>
+              <div className={`electronic-overview-item ${overviewData.electronic.overdue > 0 ? 'overdue-warning' : ''}`}>
+                <span className="electronic-overview-value">{overviewData.electronic.overdue || 0}</span>
+                <span className="electronic-overview-label">متأخرة ⚠️</span>
+              </div>
+              <div className="electronic-overview-item accepted">
+                <span className="electronic-overview-value">{overviewData.electronic.acceptedMonth || 0}</span>
+                <span className="electronic-overview-label">مقبولة هذا الشهر</span>
+              </div>
             </div>
           </Card>
-          <Card className="stat-card stat-success">
-            <div className="stat-icon">👥</div>
-            <div className="stat-info">
-              <span className="stat-value">{overviewData.totalPersons || 0}</span>
-              <span className="stat-label">إجمالي الأشخاص</span>
-            </div>
-          </Card>
-          <Card className="stat-card stat-info">
-            <div className="stat-icon">👤</div>
-            <div className="stat-info">
-              <span className="stat-value">{overviewData.totalCustomers || 0}</span>
-              <span className="stat-label">العملاء</span>
-            </div>
-          </Card>
-          <Card className="stat-card stat-warning">
-            <div className="stat-icon">🧑‍💼</div>
-            <div className="stat-info">
-              <span className="stat-value">{overviewData.totalEmployees || 0}</span>
-              <span className="stat-label">الموظفين</span>
-            </div>
-          </Card>
-        </div>
+        )}
 
-        {/* الإحصائيات المالية */}
-        <div className="stats-grid stats-grid-3">
-          <Card className="stat-card stat-money">
-            <div className="stat-icon">💵</div>
-            <div className="stat-info">
-              <span className="stat-value">{formatCurrency(overviewData.totalAmount || 0)}</span>
-              <span className="stat-label">إجمالي المبالغ</span>
-            </div>
-          </Card>
-          <Card className="stat-card stat-paid">
-            <div className="stat-icon">✅</div>
-            <div className="stat-info">
-              <span className="stat-value">{formatCurrency(overviewData.totalPaid || 0)}</span>
-              <span className="stat-label">المدفوع</span>
-            </div>
-          </Card>
-          <Card className="stat-card stat-remaining">
-            <div className="stat-icon">⏳</div>
-            <div className="stat-info">
-              <span className="stat-value">{formatCurrency(overviewData.remainingAmount || 0)}</span>
-              <span className="stat-label">المتبقي</span>
-            </div>
-          </Card>
-        </div>
+        {/* ملخص المواعيد - التوزيع */}
+        <Card className="appointment-summary-card">
+          <h3>ملخص المواعيد</h3>
+          <div className="appointment-type-bars">
+            {(() => {
+              const total = overviewData.totalAppointments || 1;
+              const inPerson = (overviewData.confirmedCount || 0) - (overviewData.electronic?.total || 0);
+              const electronic = overviewData.electronic?.total || 0;
+              const unconfirmed = overviewData.unconfirmedCount || 0;
+              return (
+                <>
+                  <div className="type-bar-row">
+                    <span className="type-bar-label">🏢 حضوري</span>
+                    <div className="type-bar-track">
+                      <div className="type-bar-fill in-person" style={{ width: `${Math.max((inPerson / total) * 100, 0)}%` }}></div>
+                    </div>
+                    <span className="type-bar-count">{Math.max(inPerson, 0)}</span>
+                  </div>
+                  <div className="type-bar-row">
+                    <span className="type-bar-label">📤 إلكتروني</span>
+                    <div className="type-bar-track">
+                      <div className="type-bar-fill electronic" style={{ width: `${(electronic / total) * 100}%` }}></div>
+                    </div>
+                    <span className="type-bar-count">{electronic}</span>
+                  </div>
+                  <div className="type-bar-row">
+                    <span className="type-bar-label">◌ غير مؤكد</span>
+                    <div className="type-bar-track">
+                      <div className="type-bar-fill unconfirmed" style={{ width: `${(unconfirmed / total) * 100}%` }}></div>
+                    </div>
+                    <span className="type-bar-count">{unconfirmed}</span>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        </Card>
 
         {/* توزيع الحالات */}
         <div className="overview-charts">
@@ -333,6 +400,49 @@ const Reports = () => {
             </tbody>
           </table>
         </Card>
+
+        {/* جدول الموظفين - عدد الأشخاص المضافين */}
+        {employeesData && employeesData.length > 0 && (
+          <Card className="table-card">
+            <h3>👥 الموظفين - عدد الأشخاص المضافين</h3>
+            <table className="report-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>الموظف</th>
+                  <th>المواعيد</th>
+                  <th>الأشخاص</th>
+                  <th>المبلغ</th>
+                  <th>نسبة الإنجاز</th>
+                </tr>
+              </thead>
+              <tbody>
+                {employeesData.map((emp, index) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td><strong>{emp.employeeName}</strong></td>
+                    <td>{emp.totalAppointments}</td>
+                    <td>{emp.totalPersons}</td>
+                    <td>{formatCurrency(emp.totalAmount)}</td>
+                    <td>
+                      <span className={`badge ${emp.completionRate >= 70 ? 'badge-success' : emp.completionRate >= 40 ? 'badge-warning' : 'badge-danger'}`}>
+                        {emp.completionRate?.toFixed(1)}%
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+                <tr className="total-row-table">
+                  <td></td>
+                  <td><strong>الإجمالي</strong></td>
+                  <td><strong>{employeesData.reduce((s, e) => s + (e.totalAppointments || 0), 0)}</strong></td>
+                  <td><strong>{employeesData.reduce((s, e) => s + (e.totalPersons || 0), 0)}</strong></td>
+                  <td><strong>{formatCurrency(employeesData.reduce((s, e) => s + (e.totalAmount || 0), 0))}</strong></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </Card>
+        )}
       </div>
     );
   };
@@ -660,57 +770,12 @@ const Reports = () => {
 
     const totalAppointments = summary.reduce((sum, emp) => sum + (emp.totals?.appointments || 0), 0);
     const totalPersons = summary.reduce((sum, emp) => sum + (emp.totals?.persons || 0), 0);
-    const totalCustomers = summary.reduce((sum, emp) => sum + (emp.totals?.customers || 0), 0);
     const totalCompleted = summary.reduce((sum, emp) => sum + (emp.totals?.completedAppointments || 0), 0);
-    const avgCompletionRate = totalAppointments > 0 ? Math.round((totalCompleted / totalAppointments) * 100) : 0;
+    const totalCompletedPersons = summary.reduce((sum, emp) => sum + (emp.totals?.completedPersons || 0), 0);
+    const avgCompletionRate = totalPersons > 0 ? Math.round((totalCompletedPersons / totalPersons) * 100) : 0;
 
     return (
       <div className="employee-performance-report">
-        {/* بطاقات ملخص أداء الموظفين */}
-        <div className="performance-summary-cards">
-          {/* بطاقة أفضل موظف */}
-          <Card className="summary-card top-employee">
-            <div className="summary-icon">🏆</div>
-            <div className="summary-info">
-              <span className="summary-label">أفضل موظف</span>
-              <span className="summary-value">{topEmployee?.employeeName || '-'}</span>
-              <span className="summary-sub">
-                {topEmployee ? `${topEmployee.totals?.completedAppointments || 0} مهمة مكتملة • ${topEmployee.totals?.customers || 0} عميل • ${topEmployee.totals?.persons || 0} شخص` : '-'}
-              </span>
-            </div>
-          </Card>
-
-          {/* بطاقة متوسط الإنجاز */}
-          <Card className="summary-card avg-completion">
-            <div className="summary-icon">📊</div>
-            <div className="summary-info">
-              <span className="summary-label">متوسط الإنجاز</span>
-              <span className="summary-value">{avgCompletionRate}%</span>
-              <span className="summary-sub">{summary.length} موظف نشط</span>
-            </div>
-          </Card>
-
-          {/* بطاقة إجمالي العملاء */}
-          <Card className="summary-card total-customers">
-            <div className="summary-icon">👥</div>
-            <div className="summary-info">
-              <span className="summary-label">إجمالي العملاء</span>
-              <span className="summary-value">{totalCustomers}</span>
-              <span className="summary-sub">{totalPersons} شخص تمت خدمتهم</span>
-            </div>
-          </Card>
-
-          {/* بطاقة إجمالي المواعيد */}
-          <Card className="summary-card total-appointments">
-            <div className="summary-icon">📅</div>
-            <div className="summary-info">
-              <span className="summary-label">إجمالي المواعيد</span>
-              <span className="summary-value">{totalAppointments}</span>
-              <span className="summary-sub">{totalCompleted} مكتملة</span>
-            </div>
-          </Card>
-        </div>
-
         {/* فلاتر */}
         <Card className="filters-card">
           <div className="filters-row">
@@ -733,6 +798,144 @@ const Reports = () => {
             </div>
           </div>
         </Card>
+
+        {/* جدول ملخص أداء الموظفين */}
+        <Card className="table-card">
+          <h3>👥 ملخص أداء الموظفين</h3>
+          <table className="report-table">
+            <thead>
+              <tr>
+                <th>الموظف</th>
+                <th>المواعيد</th>
+                <th>الأشخاص</th>
+                <th>المكتملة</th>
+                <th>أشخاص مكتملة</th>
+                <th>نسبة الإنجاز</th>
+              </tr>
+            </thead>
+            <tbody>
+              {summary.map((emp, index) => {
+                const persons = emp.totals?.persons || 0;
+                const completedPersons = emp.totals?.completedPersons || 0;
+                const rate = persons > 0 ? Math.round((completedPersons / persons) * 100) : 0;
+                return (
+                  <tr key={index}>
+                    <td><strong>{emp.employeeName}</strong></td>
+                    <td>{emp.totals?.appointments || 0}</td>
+                    <td>{persons}</td>
+                    <td>{emp.totals?.completedAppointments || 0}</td>
+                    <td>{completedPersons}</td>
+                    <td>
+                      <span className={`badge ${rate >= 70 ? 'badge-success' : rate >= 40 ? 'badge-warning' : 'badge-danger'}`}>
+                        {rate}%
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+              {summary.length > 0 && (
+                <tr className="total-row-table">
+                  <td><strong>الإجمالي</strong></td>
+                  <td><strong>{totalAppointments}</strong></td>
+                  <td><strong>{totalPersons}</strong></td>
+                  <td><strong>{totalCompleted}</strong></td>
+                  <td><strong>{totalCompletedPersons}</strong></td>
+                  <td>
+                    <strong>
+                      <span className={`badge ${avgCompletionRate >= 70 ? 'badge-success' : avgCompletionRate >= 40 ? 'badge-warning' : 'badge-danger'}`}>
+                        {avgCompletionRate}%
+                      </span>
+                    </strong>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </Card>
+
+        {/* التقرير الشهري - الأشخاص المضافين حسب الموظف */}
+        {period === 'monthly' && summary.length > 0 && (() => {
+          // تجميع الأشهر الفريدة من جميع الموظفين
+          const allMonths = new Set();
+          summary.forEach(emp => {
+            (emp.breakdown?.appointments || []).forEach(item => {
+              if (item.period) allMonths.add(item.period);
+            });
+          });
+          const months = Array.from(allMonths).sort();
+          const monthNames = {
+            '01': 'يناير', '02': 'فبراير', '03': 'مارس', '04': 'أبريل',
+            '05': 'مايو', '06': 'يونيو', '07': 'يوليو', '08': 'أغسطس',
+            '09': 'سبتمبر', '10': 'أكتوبر', '11': 'نوفمبر', '12': 'ديسمبر'
+          };
+          const getMonthLabel = (m) => {
+            const parts = m.split('-');
+            return monthNames[parts[1]] || m;
+          };
+
+          if (months.length === 0) return null;
+
+          return (
+            <Card className="table-card">
+              <h3>📅 التقرير الشهري - الأشخاص المضافين</h3>
+              <div className="table-scroll">
+                <table className="report-table">
+                  <thead>
+                    <tr>
+                      <th>الموظف</th>
+                      {months.map(m => (
+                        <th key={m}>{getMonthLabel(m)}</th>
+                      ))}
+                      <th>الإجمالي</th>
+                      <th>نسبة الإنجاز</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {summary.map((emp, index) => {
+                      const empPersons = emp.totals?.persons || 0;
+                      const empCompletedPersons = emp.totals?.completedPersons || 0;
+                      const empRate = empPersons > 0 ? Math.round((empCompletedPersons / empPersons) * 100) : 0;
+
+                      return (
+                        <tr key={index}>
+                          <td><strong>{emp.employeeName}</strong></td>
+                          {months.map(m => {
+                            const monthData = (emp.breakdown?.appointments || []).find(a => a.period === m);
+                            return <td key={m}>{monthData?.totalPersons || 0}</td>;
+                          })}
+                          <td><strong>{empPersons}</strong></td>
+                          <td>
+                            <span className={`badge ${empRate >= 70 ? 'badge-success' : empRate >= 40 ? 'badge-warning' : 'badge-danger'}`}>
+                              {empRate}%
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    <tr className="total-row-table">
+                      <td><strong>الإجمالي</strong></td>
+                      {months.map(m => {
+                        const monthTotal = summary.reduce((sum, emp) => {
+                          const monthData = (emp.breakdown?.appointments || []).find(a => a.period === m);
+                          return sum + (monthData?.totalPersons || 0);
+                        }, 0);
+                        return <td key={m}><strong>{monthTotal}</strong></td>;
+                      })}
+                      <td><strong>{totalPersons}</strong></td>
+                      <td>
+                        <strong>
+                          <span className={`badge ${avgCompletionRate >= 70 ? 'badge-success' : avgCompletionRate >= 40 ? 'badge-warning' : 'badge-danger'}`}>
+                            {avgCompletionRate}%
+                          </span>
+                        </strong>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          );
+        })()}
 
         {/* ملخص الموظفين */}
         {employeePerformance.summary?.map((emp, index) => (
@@ -1343,90 +1546,6 @@ const Reports = () => {
         </div>
       </div>
 
-      {/* بطاقات ملخص أداء الموظفين */}
-      {employeePerformance && (
-        <div className="performance-summary-cards">
-          {/* بطاقة أفضل موظف */}
-          <Card className="summary-card top-employee">
-            <div className="summary-icon">🏆</div>
-            <div className="summary-info">
-              <span className="summary-label">أفضل موظف</span>
-              <span className="summary-value">
-                {(() => {
-                  const summary = employeePerformance.summary || [];
-                  const topEmp = summary.length > 0
-                    ? summary.reduce((best, emp) =>
-                        (emp.totals?.completedAppointments > (best?.totals?.completedAppointments || 0)) ? emp : best,
-                        summary[0]
-                      )
-                    : null;
-                  return topEmp?.employee?.name || '-';
-                })()}
-              </span>
-              <span className="summary-sub">
-                {(() => {
-                  const summary = employeePerformance.summary || [];
-                  const topEmp = summary.length > 0
-                    ? summary.reduce((best, emp) =>
-                        (emp.totals?.completedAppointments > (best?.totals?.completedAppointments || 0)) ? emp : best,
-                        summary[0]
-                      )
-                    : null;
-                  return topEmp ? `${topEmp.totals?.completedAppointments || 0} مهمة مكتملة` : '';
-                })()}
-              </span>
-            </div>
-          </Card>
-
-          {/* بطاقة متوسط الإنجاز */}
-          <Card className="summary-card avg-completion">
-            <div className="summary-icon">📊</div>
-            <div className="summary-info">
-              <span className="summary-label">متوسط الإنجاز</span>
-              <span className="summary-value">
-                {(() => {
-                  const summary = employeePerformance.summary || [];
-                  const totalAppointments = summary.reduce((sum, emp) => sum + (emp.totals?.appointments || 0), 0);
-                  const totalCompleted = summary.reduce((sum, emp) => sum + (emp.totals?.completedAppointments || 0), 0);
-                  return totalAppointments > 0 ? `${Math.round((totalCompleted / totalAppointments) * 100)}%` : '0%';
-                })()}
-              </span>
-              <span className="summary-sub">
-                {(employeePerformance.summary || []).filter(emp => emp.totals?.appointments > 0).length} موظف نشط
-              </span>
-            </div>
-          </Card>
-
-          {/* بطاقة إجمالي العملاء */}
-          <Card className="summary-card total-customers">
-            <div className="summary-icon">👥</div>
-            <div className="summary-info">
-              <span className="summary-label">إجمالي العملاء</span>
-              <span className="summary-value">
-                {(employeePerformance.summary || []).reduce((sum, emp) => sum + (emp.totals?.customers || 0), 0)}
-              </span>
-              <span className="summary-sub">
-                {(employeePerformance.summary || []).reduce((sum, emp) => sum + (emp.totals?.persons || 0), 0)} شخص تمت خدمتهم
-              </span>
-            </div>
-          </Card>
-
-          {/* بطاقة إجمالي المواعيد */}
-          <Card className="summary-card total-appointments">
-            <div className="summary-icon">📋</div>
-            <div className="summary-info">
-              <span className="summary-label">إجمالي المواعيد</span>
-              <span className="summary-value">
-                {(employeePerformance.summary || []).reduce((sum, emp) => sum + (emp.totals?.appointments || 0), 0)}
-              </span>
-              <span className="summary-sub">
-                {(employeePerformance.summary || []).reduce((sum, emp) => sum + (emp.totals?.completedAppointments || 0), 0)} مكتملة
-              </span>
-            </div>
-          </Card>
-        </div>
-      )}
-
       {/* Tabs */}
       <div className="report-tabs">
         {tabs.map(tab => (
@@ -1443,6 +1562,17 @@ const Reports = () => {
 
       {/* Content */}
       <div className="report-content">
+        {/* أزرار عرض/طباعة التقرير */}
+        {activeTab !== 'charts' && (
+          <div className="report-actions-bar">
+            <button className="report-action-btn view-btn" onClick={() => handleReportAction(false)}>
+              <span>👁</span> عرض التقرير
+            </button>
+            <button className="report-action-btn print-btn" onClick={() => handleReportAction(true)}>
+              <span>🖨</span> طباعة
+            </button>
+          </div>
+        )}
         {renderContent()}
       </div>
     </div>

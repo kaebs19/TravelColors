@@ -59,7 +59,7 @@ const invoiceSchema = new mongoose.Schema({
   },
   customerName: {
     type: String,
-    required: true
+    default: ''
   },
   customerPhone: {
     type: String,

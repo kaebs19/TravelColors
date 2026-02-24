@@ -26,6 +26,9 @@ router.get('/recent-activities', taskController.getRecentActivities);
 router.get('/', taskController.getTasks);
 router.get('/:id', taskController.getTask);
 
+// سجل النشاط للمهمة
+router.get('/:id/activity-log', taskController.getTaskActivityLog);
+
 // عمليات المهمة
 router.put('/:id/start', taskController.startTask);
 router.put('/:id/complete', taskController.completeTask);

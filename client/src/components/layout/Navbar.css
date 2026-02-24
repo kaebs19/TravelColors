@@ -287,6 +287,34 @@
   flex: 1;
 }
 
+/* Overdue Electronic Notifications */
+.overdue-header {
+  background: #FFF5F5;
+}
+
+.overdue-header h4 {
+  color: #E03131;
+}
+
+.overdue-count {
+  background: #E03131 !important;
+  color: white !important;
+}
+
+.overdue-item {
+  border-right: 3px solid #E03131;
+  background: #FFF5F5;
+}
+
+.overdue-item:hover {
+  background: #ffe3e3 !important;
+}
+
+.overdue-time {
+  color: #E03131 !important;
+  font-weight: 600;
+}
+
 @media (max-width: 768px) {
   .notifications-dropdown {
     right: 0;

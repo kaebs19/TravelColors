@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { appointmentsApi, departmentsApi, settingsApi } from '../../api';
+import { appointmentsApi, departmentsApi, settingsApi, tasksApi, employeesApi } from '../../api';
 import { Card, Loader, Modal } from '../../components/common';
+import { useAuth } from '../../context';
 import { generateAppointmentReceipt, shareReceiptToWhatsApp } from '../../utils/receiptGenerator';
-import { generateAppointmentMessage } from '../../utils/messageGenerator';
+import { generateAppointmentMessage, generateQuickUpdateMessage } from '../../utils/messageGenerator';
 import './Appointments.css';
 
 const Appointments = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const urlDepartment = searchParams.get('department') || '';
 
@@ -43,6 +45,12 @@ const Appointments = () => {
   });
   const [converting, setConverting] = useState(false);
 
+  // حالة مودال رسالة التحديث السريع
+  const [quickMessageModal, setQuickMessageModal] = useState(null); // { appointment, messageType, message }
+  const [quickMessageText, setQuickMessageText] = useState('');
+  const [quickCopySuccess, setQuickCopySuccess] = useState(false);
+  const [quickSending, setQuickSending] = useState(false);
+
   // استخراج قائمة المدن الفريدة
   const uniqueCities = [...new Set(appointments.map(a => a.city).filter(Boolean))];
 
@@ -62,6 +70,8 @@ const Appointments = () => {
     isSubmission: true
   });
   const [companySettings, setCompanySettings] = useState({});
+  const [allEmployees, setAllEmployees] = useState([]);
+  const [changingCreatedBy, setChangingCreatedBy] = useState(null); // appointment._id being changed
 
   useEffect(() => {
     fetchData();
@@ -87,22 +97,25 @@ const Appointments = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [appointmentsRes, departmentsRes, statsRes, settingsRes] = await Promise.all([
+      const [appointmentsRes, departmentsRes, statsRes, settingsRes, employeesRes] = await Promise.all([
         appointmentsApi.getAppointments(),
         departmentsApi.getDepartments(),
         appointmentsApi.getStats(),
-        settingsApi.getSettings()
+        settingsApi.getSettings(),
+        employeesApi.getEmployees()
       ]);
 
       const appts = appointmentsRes.data?.data?.appointments || appointmentsRes.data?.appointments || [];
       const depts = departmentsRes.data?.data?.departments || departmentsRes.data?.departments || [];
       const statsData = statsRes.data?.data || statsRes.data || {};
       const settingsData = settingsRes.data?.data || {};
+      const emps = employeesRes.data?.data?.employees || employeesRes.data?.employees || [];
 
       setAppointments(appts);
       setDepartments(depts);
       setStats(statsData);
       setCompanySettings(settingsData);
+      setAllEmployees(emps);
 
       // تحميل إعدادات الأعمدة
       if (settingsData.appointmentsTableColumns) {
@@ -124,12 +137,44 @@ const Appointments = () => {
     navigate(`/control/appointments/add?type=${type}`);
   };
 
+  // التحقق من صلاحية التعديل
+  const canEdit = (appointment) => {
+    if (!user) return false;
+    // الإدارة: تعدل الكل
+    if (user.role === 'admin') return true;
+    // الموظف الذي أضافه: يعدل
+    const creatorId = appointment.createdBy?._id || appointment.createdBy;
+    return creatorId === user._id || creatorId === user.id;
+  };
+
   const handleEdit = (appointment) => {
     navigate(`/control/appointments/add?type=${appointment.type}&edit=${appointment._id}`);
   };
 
   const handleView = (appointment) => {
     setViewAppointment(appointment);
+  };
+
+  // تغيير "مضاف بواسطة" فوري
+  const handleChangeCreatedBy = async (appointmentId, newCreatedBy) => {
+    try {
+      await appointmentsApi.updateAppointment(appointmentId, { createdBy: newCreatedBy });
+      // تحديث فوري بدون إعادة تحميل
+      setAppointments(prev => prev.map(appt => {
+        if (appt._id === appointmentId) {
+          const emp = allEmployees.find(e => e._id === newCreatedBy);
+          return {
+            ...appt,
+            createdBy: emp ? { _id: emp._id, name: emp.name } : appt.createdBy
+          };
+        }
+        return appt;
+      }));
+      setChangingCreatedBy(null);
+    } catch (error) {
+      console.error('Error changing createdBy:', error);
+      alert('حدث خطأ أثناء تغيير الموظف');
+    }
   };
 
   const handleDelete = async (id) => {
@@ -266,7 +311,10 @@ const Appointments = () => {
 
     const matchesDepartment = !filterDepartment || appt.department?._id === filterDepartment;
     const matchesStatus = !filterStatus || appt.status === filterStatus;
-    const matchesType = !filterType || appt.type === filterType;
+    const matchesType = !filterType ||
+      (filterType === 'electronic'
+        ? (appt.isSubmission === true && appt.department?.submissionType === 'إلكتروني')
+        : appt.type === filterType);
     const matchesCity = !filterCity || appt.city === filterCity;
     const matchesSubmission = !filterSubmission ||
       (filterSubmission === 'true' ? appt.isSubmission === true : appt.isSubmission !== true);
@@ -314,13 +362,17 @@ const Appointments = () => {
     return statusMap[status] || { label: 'جديد', class: 'status-new', icon: '🆕' };
   };
 
-  const getTypeBadge = (type) => {
+  const getTypeBadge = (appointment) => {
+    // إذا كان تقديم إلكتروني
+    if (appointment.isSubmission && appointment.department?.submissionType === 'إلكتروني') {
+      return { label: '📤 إلكتروني', class: 'type-electronic' };
+    }
     const typeMap = {
-      confirmed: { label: 'مؤكد', class: 'type-confirmed' },
-      unconfirmed: { label: 'غير مؤكد', class: 'type-unconfirmed' },
+      confirmed: { label: '✓ مؤكد', class: 'type-confirmed' },
+      unconfirmed: { label: '◌ غير مؤكد', class: 'type-unconfirmed' },
       draft: { label: 'مسودة', class: 'type-draft' }
     };
-    return typeMap[type] || { label: type, class: '' };
+    return typeMap[appointment.type] || { label: appointment.type, class: '' };
   };
 
   const formatDateDisplay = (dateStr, includeYear = false) => {
@@ -349,6 +401,114 @@ const Appointments = () => {
       : `https://wa.me/?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
     setOpenActionsMenu(null);
+  };
+
+  // دالة فتح مودال التحديث السريع (عرض الرسالة قبل الإرسال)
+  const handleQuickUpdateWhatsApp = (appointment, messageType) => {
+    const dept = departments.find(d => d._id === appointment.department?._id) || appointment.department;
+    const templateMap = {
+      accepted: companySettings?.acceptedMessage,
+      rejected: companySettings?.rejectedMessage,
+      additionalDocs: companySettings?.additionalDocsMessage,
+      processingDelay: companySettings?.processingDelayMessage
+    };
+    const template = templateMap[messageType];
+    const message = generateQuickUpdateMessage(template, appointment, dept);
+
+    if (!message) {
+      alert('لم يتم تعيين قالب الرسالة في الإعدادات');
+      return;
+    }
+
+    setQuickMessageText(message);
+    setQuickMessageModal({ appointment, messageType, message });
+    setQuickCopySuccess(false);
+    setOpenActionsMenu(null);
+  };
+
+  // دالة نسخ رسالة التحديث السريع
+  const handleQuickMessageCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(quickMessageText);
+      setQuickCopySuccess(true);
+      setTimeout(() => setQuickCopySuccess(false), 2000);
+    } catch (err) {
+      console.error('فشل النسخ:', err);
+    }
+  };
+
+  // دالة إرسال رسالة التحديث السريع عبر واتساب + تحديث الحالات
+  const handleQuickMessageSend = async () => {
+    if (!quickMessageModal) return;
+    const { appointment, messageType } = quickMessageModal;
+
+    setQuickSending(true);
+
+    // إرسال رسالة الواتساب
+    const phone = appointment.phone?.replace(/[^0-9]/g, '');
+    const phoneNumber = phone?.startsWith('0') ? '966' + phone.slice(1) : phone;
+    const encodedMessage = encodeURIComponent(quickMessageText);
+    const whatsappUrl = phoneNumber
+      ? `https://wa.me/${phoneNumber}?text=${encodedMessage}`
+      : `https://wa.me/?text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
+
+    // تحديث حالة الموعد والمهمة حسب نوع التحديث
+    try {
+      if (messageType === 'accepted') {
+        await appointmentsApi.changeStatus(appointment._id, 'completed');
+        try {
+          const taskRes = await tasksApi.getTaskByAppointment(appointment._id);
+          const task = taskRes.data?.data?.task || taskRes.data?.task;
+          if (task?._id) {
+            await tasksApi.completeTask(task._id);
+          }
+        } catch (taskErr) {
+          console.log('لا توجد مهمة مرتبطة أو تم إكمالها مسبقاً');
+        }
+        setAppointments(prev => prev.map(a =>
+          a._id === appointment._id ? { ...a, status: 'completed' } : a
+        ));
+      } else if (messageType === 'rejected') {
+        await appointmentsApi.changeStatus(appointment._id, 'cancelled');
+        try {
+          const taskRes = await tasksApi.getTaskByAppointment(appointment._id);
+          const task = taskRes.data?.data?.task || taskRes.data?.task;
+          if (task?._id) {
+            await tasksApi.completeTask(task._id);
+          }
+        } catch (taskErr) {
+          console.log('لا توجد مهمة مرتبطة أو تم إكمالها مسبقاً');
+        }
+        setAppointments(prev => prev.map(a =>
+          a._id === appointment._id ? { ...a, status: 'cancelled' } : a
+        ));
+      }
+    } catch (error) {
+      console.error('خطأ في تحديث الحالة:', error);
+    }
+
+    // تسجيل الإرسال في سجل التدقيق
+    try {
+      await appointmentsApi.logQuickUpdate(appointment._id, {
+        messageType,
+        customerName: appointment.customerName
+      });
+    } catch (auditErr) {
+      console.error('خطأ في تسجيل التدقيق:', auditErr);
+    }
+
+    // تحديث المودال إذا كان مفتوحاً
+    if (viewAppointment?._id === appointment._id) {
+      if (messageType === 'accepted') {
+        setViewAppointment(prev => prev ? { ...prev, status: 'completed' } : null);
+      } else if (messageType === 'rejected') {
+        setViewAppointment(prev => prev ? { ...prev, status: 'cancelled' } : null);
+      }
+    }
+
+    setQuickSending(false);
+    setQuickMessageModal(null);
   };
 
   // دالة إضافة كعميل
@@ -646,9 +806,10 @@ const Appointments = () => {
             onChange={(e) => setFilterType(e.target.value)}
           >
             <option value="">جميع الأنواع</option>
-            <option value="confirmed">مؤكد</option>
-            <option value="unconfirmed">غير مؤكد</option>
-            <option value="draft">مسودة</option>
+            <option value="confirmed">✓ مؤكد</option>
+            <option value="unconfirmed">◌ غير مؤكد</option>
+            <option value="electronic">📤 إلكتروني</option>
+            <option value="draft">📝 مسودة</option>
           </select>
           <select
             className="filter-select"
@@ -791,6 +952,7 @@ const Appointments = () => {
           <div className="calendar-legend">
             <div className="legend-item"><span className="legend-dot type-confirmed"></span> مؤكد</div>
             <div className="legend-item"><span className="legend-dot type-unconfirmed"></span> غير مؤكد</div>
+            <div className="legend-item"><span className="legend-dot type-electronic"></span> إلكتروني</div>
             <div className="legend-item"><span className="legend-dot type-draft"></span> مسودة</div>
           </div>
         </Card>
@@ -801,7 +963,7 @@ const Appointments = () => {
           ) : (
             filteredAppointments.map(appointment => {
               const statusInfo = getStatusBadge(appointment.status);
-              const typeInfo = getTypeBadge(appointment.type);
+              const typeInfo = getTypeBadge(appointment);
 
               let dateDisplay = '-';
               if (appointment.type === 'confirmed') {
@@ -850,7 +1012,9 @@ const Appointments = () => {
                   </div>
                   <div className="card-actions">
                     <button className="card-action-btn view" onClick={() => handleView(appointment)} title="تفاصيل">👁️</button>
-                    <button className="card-action-btn edit" onClick={() => handleEdit(appointment)} title="تعديل">✏️</button>
+                    {canEdit(appointment) && (
+                      <button className="card-action-btn edit" onClick={() => handleEdit(appointment)} title="تعديل">✏️</button>
+                    )}
                     <button className="card-action-btn whatsapp" onClick={() => handleSendWhatsApp(appointment)} title="واتساب">📱</button>
                     <button className="card-action-btn receipt" onClick={() => handlePrintReceipt(appointment)} title="إيصال">🧾</button>
                     {appointment.type === 'unconfirmed' && (
@@ -892,7 +1056,7 @@ const Appointments = () => {
             ) : (
               filteredAppointments.map(appointment => {
                 const statusInfo = getStatusBadge(appointment.status);
-                const typeInfo = getTypeBadge(appointment.type);
+                const typeInfo = getTypeBadge(appointment);
 
                 // عرض التاريخ حسب نوع الموعد
                 let dateDisplay = '-';
@@ -1040,9 +1204,28 @@ const Appointments = () => {
                     )}
                     {tableColumns.createdBy !== false && (
                       <td>
-                        <span className="created-by-cell">
-                          {appointment.createdBy?.name || '-'}
-                        </span>
+                        {changingCreatedBy === appointment._id ? (
+                          <select
+                            className="created-by-select"
+                            value={appointment.createdBy?._id || ''}
+                            onChange={(e) => handleChangeCreatedBy(appointment._id, e.target.value)}
+                            onBlur={() => setChangingCreatedBy(null)}
+                            autoFocus
+                          >
+                            {allEmployees.map(emp => (
+                              <option key={emp._id} value={emp._id}>{emp.name}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span
+                            className={`created-by-cell ${user?.role === 'admin' ? 'clickable' : ''}`}
+                            onClick={() => { if (user?.role === 'admin') setChangingCreatedBy(appointment._id); }}
+                            title={user?.role === 'admin' ? 'انقر لتغيير الموظف' : ''}
+                          >
+                            {appointment.createdBy?.name || '-'}
+                            {user?.role === 'admin' && <span className="edit-icon-small"> ✎</span>}
+                          </span>
+                        )}
                       </td>
                     )}
                     <td className="actions-cell">
@@ -1059,10 +1242,12 @@ const Appointments = () => {
                               <span>👁️</span>
                               تفاصيل الموعد
                             </button>
+                            {canEdit(appointment) && (
                             <button className="action-menu-item" onClick={() => { handleEdit(appointment); setOpenActionsMenu(null); }}>
                               <span>✏️</span>
                               تعديل الموعد
                             </button>
+                            )}
                             {!appointment.customer && (
                               <button className="action-menu-item" onClick={() => handleAddAsCustomer(appointment)}>
                                 <span>👤</span>
@@ -1086,6 +1271,28 @@ const Appointments = () => {
                                 <span>🔄</span>
                                 تحويل لموعد مؤكد
                               </button>
+                            )}
+                            {appointment.isSubmission && appointment.department?.submissionType === 'إلكتروني' && (
+                              <>
+                                <div className="menu-divider"></div>
+                                <div className="menu-section-label">⚡ تحديث سريع</div>
+                                <button className="action-menu-item quick-accepted" onClick={() => handleQuickUpdateWhatsApp(appointment, 'accepted')}>
+                                  <span>🎉</span>
+                                  تم القبول
+                                </button>
+                                <button className="action-menu-item quick-rejected" onClick={() => handleQuickUpdateWhatsApp(appointment, 'rejected')}>
+                                  <span>❌</span>
+                                  تم الرفض
+                                </button>
+                                <button className="action-menu-item quick-docs" onClick={() => handleQuickUpdateWhatsApp(appointment, 'additionalDocs')}>
+                                  <span>📎</span>
+                                  مستندات إضافية
+                                </button>
+                                <button className="action-menu-item quick-delay" onClick={() => handleQuickUpdateWhatsApp(appointment, 'processingDelay')}>
+                                  <span>⏳</span>
+                                  تأخر في المعالجة
+                                </button>
+                              </>
                             )}
                             <div className="menu-divider"></div>
                             <button className="action-menu-item danger" onClick={() => { handleDelete(appointment._id); setOpenActionsMenu(null); }}>
@@ -1116,8 +1323,8 @@ const Appointments = () => {
           <div className="appointment-details">
             <div className="detail-row">
               <span className="detail-label">نوع الموعد:</span>
-              <span className={`type-badge ${getTypeBadge(viewAppointment.type).class}`}>
-                {getTypeBadge(viewAppointment.type).label}
+              <span className={`type-badge ${getTypeBadge(viewAppointment).class}`}>
+                {getTypeBadge(viewAppointment).label}
               </span>
             </div>
             <div className="detail-row">
@@ -1285,14 +1492,48 @@ const Appointments = () => {
                 <span>📱</span>
                 رسالة واتساب
               </button>
-              <button
-                className="modal-action-btn edit-btn"
-                onClick={() => { handleEdit(viewAppointment); setViewAppointment(null); }}
-              >
-                <span>✏️</span>
-                تعديل
-              </button>
+              {canEdit(viewAppointment) && (
+                <button
+                  className="modal-action-btn edit-btn"
+                  onClick={() => { handleEdit(viewAppointment); setViewAppointment(null); }}
+                >
+                  <span>✏️</span>
+                  تعديل
+                </button>
+              )}
             </div>
+
+            {viewAppointment.isSubmission && viewAppointment.department?.submissionType === 'إلكتروني' && (
+              <div className="quick-update-section">
+                <div className="quick-update-label">⚡ تحديث سريع</div>
+                <div className="quick-update-buttons">
+                  <button
+                    className="quick-update-btn accepted"
+                    onClick={() => handleQuickUpdateWhatsApp(viewAppointment, 'accepted')}
+                  >
+                    🎉 تم القبول
+                  </button>
+                  <button
+                    className="quick-update-btn rejected"
+                    onClick={() => handleQuickUpdateWhatsApp(viewAppointment, 'rejected')}
+                  >
+                    ❌ تم الرفض
+                  </button>
+                  <button
+                    className="quick-update-btn docs"
+                    onClick={() => handleQuickUpdateWhatsApp(viewAppointment, 'additionalDocs')}
+                  >
+                    📎 مستندات إضافية
+                  </button>
+                  <button
+                    className="quick-update-btn delay"
+                    onClick={() => handleQuickUpdateWhatsApp(viewAppointment, 'processingDelay')}
+                  >
+                    ⏳ تأخر في المعالجة
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </Modal>
@@ -1368,6 +1609,65 @@ const Appointments = () => {
                   {converting ? 'جاري التحويل...' : 'تأكيد التحويل'}
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Quick Update Message Modal */}
+      <Modal
+        isOpen={!!quickMessageModal}
+        onClose={() => setQuickMessageModal(null)}
+        title={
+          quickMessageModal?.messageType === 'accepted' ? '🎉 رسالة تم القبول' :
+          quickMessageModal?.messageType === 'rejected' ? '❌ رسالة تم الرفض' :
+          quickMessageModal?.messageType === 'additionalDocs' ? '📎 رسالة مستندات إضافية' :
+          '⏳ رسالة تأخر في المعالجة'
+        }
+        size="medium"
+      >
+        {quickMessageModal && (
+          <div className="quick-message-modal-content">
+            <div className="quick-message-info">
+              <span className="quick-message-customer">👤 {quickMessageModal.appointment.customerName}</span>
+              <span className="quick-message-dept">🏛️ {quickMessageModal.appointment.department?.title || 'غير محدد'}</span>
+            </div>
+
+            <div className="quick-message-preview">
+              <textarea
+                value={quickMessageText}
+                onChange={(e) => setQuickMessageText(e.target.value)}
+                className="quick-message-textarea"
+                rows="10"
+                dir="rtl"
+              />
+            </div>
+
+            {(quickMessageModal.messageType === 'accepted' || quickMessageModal.messageType === 'rejected') && (
+              <div className={`quick-message-status-note ${quickMessageModal.messageType}`}>
+                {quickMessageModal.messageType === 'accepted'
+                  ? '📌 عند الإرسال: سيتم تغيير حالة الموعد إلى "مكتمل" والمهمة إلى "مكتملة"'
+                  : '📌 عند الإرسال: سيتم تغيير حالة الموعد إلى "ملغي" والمهمة إلى "مكتملة"'
+                }
+              </div>
+            )}
+
+            <div className="quick-message-actions">
+              <button
+                className={`quick-msg-btn copy-btn ${quickCopySuccess ? 'success' : ''}`}
+                onClick={handleQuickMessageCopy}
+              >
+                <span>{quickCopySuccess ? '✓' : '📋'}</span>
+                {quickCopySuccess ? 'تم النسخ!' : 'نسخ الرسالة'}
+              </button>
+              <button
+                className="quick-msg-btn send-btn"
+                onClick={handleQuickMessageSend}
+                disabled={quickSending}
+              >
+                <span>📱</span>
+                {quickSending ? 'جاري الإرسال...' : 'إرسال عبر واتساب'}
+              </button>
             </div>
           </div>
         )}

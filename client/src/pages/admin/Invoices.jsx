@@ -69,6 +69,7 @@ const Invoices = () => {
     customerCity: '',
     items: [{ product: '', description: '', quantity: 1, persons: 1, unitPrice: 0 }],
     discount: 0,
+    discountType: 'fixed', // 'fixed' أو 'percent'
     paymentMethod: 'cash',
     paidAmount: 0,
     notes: '',
@@ -195,17 +196,22 @@ const Invoices = () => {
       sum + (item.quantity * item.unitPrice), 0);
     const taxRate = settings?.tax?.enabled ? settings.tax.rate : 0;
     const taxAmount = (subtotal * taxRate) / 100;
-    const total = subtotal + taxAmount - (invoiceForm.discount || 0);
-    return { subtotal, taxRate, taxAmount, total };
+    // حساب الخصم حسب النوع (ثابت أو نسبة مئوية)
+    const discountValue = invoiceForm.discountType === 'percent'
+      ? ((subtotal + taxAmount) * (invoiceForm.discount || 0)) / 100
+      : (invoiceForm.discount || 0);
+    const total = subtotal + taxAmount - discountValue;
+    return { subtotal, taxRate, taxAmount, discountValue, total };
   };
 
   const handleCreateInvoice = async (e) => {
     e.preventDefault();
     try {
-      const { subtotal, taxRate, taxAmount, total } = calculateTotals();
+      const { subtotal, taxRate, taxAmount, discountValue, total } = calculateTotals();
 
       await invoicesApi.createInvoice({
         ...invoiceForm,
+        discount: discountValue,
         subtotal,
         taxRate,
         taxAmount,
@@ -257,6 +263,7 @@ const Invoices = () => {
       customerCity: '',
       items: [{ product: '', description: '', quantity: 1, persons: 1, unitPrice: 0 }],
       discount: 0,
+      discountType: 'fixed',
       paymentMethod: 'cash',
       paidAmount: 0,
       notes: '',
@@ -319,7 +326,7 @@ const Invoices = () => {
     return <Loader />;
   }
 
-  const { subtotal, taxRate, taxAmount, total } = calculateTotals();
+  const { subtotal, taxRate, taxAmount, discountValue, total } = calculateTotals();
 
   return (
     <div className="invoices-page">
@@ -335,10 +342,10 @@ const Invoices = () => {
         <h1>الفواتير وعروض الأسعار</h1>
       </div>
       <div className="header-actions-row">
-        <Button variant="outline" onClick={() => { setInvoiceForm({...invoiceForm, type: 'quote'}); setShowCreateModal(true); }}>
+        <Button variant="outline" onClick={() => { resetForm(); setInvoiceForm(prev => ({...prev, type: 'quote'})); setShowCreateModal(true); }}>
           📝 عرض سعر جديد
         </Button>
-        <Button onClick={() => { setInvoiceForm({...invoiceForm, type: 'invoice'}); setShowCreateModal(true); }}>
+        <Button variant="success" onClick={() => { resetForm(); setInvoiceForm(prev => ({...prev, type: 'invoice'})); setShowCreateModal(true); }}>
           ➕ فاتورة جديدة
         </Button>
       </div>
@@ -579,12 +586,13 @@ const Invoices = () => {
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label>اسم العميل *</label>
+                <label>اسم العميل {invoiceForm.type === 'invoice' ? '*' : ''}</label>
                 <input
                   type="text"
                   value={invoiceForm.customerName}
                   onChange={(e) => setInvoiceForm({...invoiceForm, customerName: e.target.value})}
-                  required
+                  required={invoiceForm.type === 'invoice'}
+                  placeholder={invoiceForm.type === 'quote' ? 'اختياري - يمكن إضافته لاحقاً' : 'اسم العميل'}
                 />
               </div>
               <div className="form-group">
@@ -713,15 +721,37 @@ const Invoices = () => {
                   <span>{formatCurrency(taxAmount)}</span>
                 </div>
               )}
-              <div className="total-row">
+              <div className="total-row discount-row">
                 <span>الخصم:</span>
-                <NumberInput
-                  value={invoiceForm.discount}
-                  onChange={(e) => setInvoiceForm({...invoiceForm, discount: parseArabicNumber(e.target.value) || 0})}
-                  min={0}
-                  allowDecimal={true}
-                  style={{width: '100px'}}
-                />
+                <div className="discount-input-group">
+                  <NumberInput
+                    value={invoiceForm.discount}
+                    onChange={(e) => setInvoiceForm({...invoiceForm, discount: parseArabicNumber(e.target.value) || 0})}
+                    min={0}
+                    max={invoiceForm.discountType === 'percent' ? 100 : undefined}
+                    allowDecimal={true}
+                    style={{width: '80px'}}
+                  />
+                  <div className="discount-type-toggle">
+                    <button
+                      type="button"
+                      className={`discount-type-btn ${invoiceForm.discountType === 'fixed' ? 'active' : ''}`}
+                      onClick={() => setInvoiceForm({...invoiceForm, discountType: 'fixed', discount: 0})}
+                    >
+                      ر.س
+                    </button>
+                    <button
+                      type="button"
+                      className={`discount-type-btn ${invoiceForm.discountType === 'percent' ? 'active' : ''}`}
+                      onClick={() => setInvoiceForm({...invoiceForm, discountType: 'percent', discount: 0})}
+                    >
+                      %
+                    </button>
+                  </div>
+                  {invoiceForm.discountType === 'percent' && invoiceForm.discount > 0 && (
+                    <span className="discount-amount-preview">= {formatCurrency(discountValue)}</span>
+                  )}
+                </div>
               </div>
               <div className="total-row grand-total">
                 <span>الإجمالي:</span>

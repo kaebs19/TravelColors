@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { tasksApi, departmentsApi, employeesApi } from '../../api';
 import { Card, Loader, Modal } from '../../components/common';
+import { useAuth } from '../../context';
 import './Tasks.css';
 
 const Tasks = () => {
+  const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -29,6 +31,10 @@ const Tasks = () => {
   const [newNote, setNewNote] = useState('');
   const [addingNote, setAddingNote] = useState(false);
 
+  // سجل النشاط
+  const [activityLogs, setActivityLogs] = useState([]);
+  const [loadingActivityLogs, setLoadingActivityLogs] = useState(false);
+
   // وضع العرض (شبكة أو قائمة أو كانبان أو تقويم أو تقارير)
   const [viewMode, setViewMode] = useState('list'); // 'list', 'grid', 'kanban', 'calendar', 'reports'
 
@@ -45,18 +51,25 @@ const Tasks = () => {
     endDate: ''
   });
 
-  // حالة طي/فتح صفوف البطاقات
-  const [collapsedSections, setCollapsedSections] = useState({
-    status: false,      // بطاقات الحالة
-    time: false,        // بطاقات الفترة الزمنية
-    reports: false      // بطاقات التقارير
+  // حالة طي/فتح صفوف البطاقات - محفوظة في localStorage
+  const COLLAPSED_KEY = 'tasks_cards_state';
+  const [collapsedSections, setCollapsedSections] = useState(() => {
+    try {
+      const saved = localStorage.getItem(COLLAPSED_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error('Error reading collapsed state:', e);
+    }
+    // الافتراضي: مطوية
+    return { status: true, time: true, reports: false };
   });
 
   const toggleSection = (section) => {
-    setCollapsedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
+    setCollapsedSections(prev => {
+      const updated = { ...prev, [section]: !prev[section] };
+      try { localStorage.setItem(COLLAPSED_KEY, JSON.stringify(updated)); } catch (e) {}
+      return updated;
+    });
   };
 
   useEffect(() => {
@@ -91,9 +104,65 @@ const Tasks = () => {
       const taskData = res.data?.data || res.data;
       setSelectedTask(taskData);
       setShowTaskModal(true);
+
+      // جلب سجل النشاط
+      fetchActivityLogs(task._id);
     } catch (error) {
       console.error('Error fetching task details:', error);
     }
+  };
+
+  const fetchActivityLogs = async (taskId) => {
+    try {
+      setLoadingActivityLogs(true);
+      setActivityLogs([]);
+      const res = await tasksApi.getActivityLog(taskId);
+      setActivityLogs(res.data?.data?.logs || []);
+    } catch (error) {
+      // 403 = غير مصرح - لا نعرض شيء
+      if (error.response?.status !== 403) {
+        console.error('Error fetching activity logs:', error);
+      }
+      setActivityLogs([]);
+    } finally {
+      setLoadingActivityLogs(false);
+    }
+  };
+
+  // أيقونة سجل النشاط حسب نوع الإجراء
+  const getActivityIcon = (log) => {
+    const action = log.action;
+    const desc = log.description || '';
+    if (action === 'create' && log.entityType === 'appointment') return '📅';
+    if (action === 'send_message') {
+      if (desc.includes('تم القبول')) return '✅';
+      if (desc.includes('تم الرفض')) return '❌';
+      if (desc.includes('مستندات')) return '📎';
+      if (desc.includes('تأخر')) return '⏳';
+      if (desc.includes('تقديم') || desc.includes('تأكيد')) return '📤';
+      return '💬';
+    }
+    if (action === 'start_task') return '▶️';
+    if (action === 'complete_task') return '✅';
+    if (action === 'cancel_task') return '🗑️';
+    if (action === 'transfer_task') return '🔄';
+    if (action === 'update') return '✏️';
+    return '📋';
+  };
+
+  const formatActivityDate = (dateStr) => {
+    const date = new Date(dateStr);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${day}/${month}/${year} - ${hours}:${minutes}`;
+  };
+
+  // التحقق إذا كانت المهمة مرتبطة بتقديم إلكتروني
+  const isElectronicTask = (task) => {
+    return task?.appointment?.isSubmission && task?.appointment?.department?.submissionType === 'إلكتروني';
   };
 
   const handleStartTask = async (taskId) => {
@@ -1018,7 +1087,7 @@ const Tasks = () => {
                         <button className="btn-action btn-view" onClick={() => handleViewTask(task)} title="عرض">
                           👁️
                         </button>
-                        {task.status === 'new' && (
+                        {task.status === 'new' && !isElectronicTask(task) && (
                           <button className="btn-action btn-start" onClick={() => handleStartTask(task._id)} title="بدأ العمل">
                             ▶️
                           </button>
@@ -1068,7 +1137,7 @@ const Tasks = () => {
                   </div>
                 </div>
                 <div className="task-card-actions">
-                  {task.status === 'new' && (
+                  {task.status === 'new' && !isElectronicTask(task) && (
                     <button className="btn-card-action btn-start" onClick={() => handleStartTask(task._id)}>
                       ▶️ بدء العمل
                     </button>
@@ -1125,12 +1194,14 @@ const Tasks = () => {
                         </span>
                       )}
                     </div>
-                    <button
-                      className="kanban-action"
-                      onClick={(e) => { e.stopPropagation(); handleStartTask(task._id); }}
-                    >
-                      ▶️ بدء العمل
-                    </button>
+                    {!isElectronicTask(task) && (
+                      <button
+                        className="kanban-action"
+                        onClick={(e) => { e.stopPropagation(); handleStartTask(task._id); }}
+                      >
+                        ▶️ بدء العمل
+                      </button>
+                    )}
                   </div>
                 );
               })}
@@ -1923,7 +1994,7 @@ const Tasks = () => {
               <div className="sidebar-section sidebar-actions">
                 <h4>الإجراءات</h4>
                 <div className="action-buttons-list">
-                  {selectedTask.status === 'new' && (
+                  {selectedTask.status === 'new' && !isElectronicTask(selectedTask) && (
                     <button className="action-btn action-start" onClick={() => handleStartTask(selectedTask._id)}>
                       <span className="action-icon">▶️</span>
                       <span>بدء العمل</span>
@@ -1943,6 +2014,34 @@ const Tasks = () => {
                   )}
                 </div>
               </div>
+
+              {/* سجل النشاط */}
+              {(user?.role === 'admin' || selectedTask.assignedTo?._id === user?._id) && (
+                <div className="sidebar-section sidebar-activity-log">
+                  <h4>📋 سجل النشاط</h4>
+                  {loadingActivityLogs ? (
+                    <div className="activity-loading">جاري التحميل...</div>
+                  ) : activityLogs.length > 0 ? (
+                    <div className="activity-log-list">
+                      {activityLogs.map((log, index) => (
+                        <div key={log._id || index} className="activity-log-item">
+                          <div className="activity-log-header">
+                            <span className="activity-icon">{getActivityIcon(log)}</span>
+                            <span className="activity-date">{formatActivityDate(log.createdAt)}</span>
+                            <span className="activity-separator">|</span>
+                            <span className="activity-user">{log.userName || log.userId?.name || 'النظام'}</span>
+                          </div>
+                          <div className="activity-log-description">
+                            {log.description || log.action}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="activity-empty">لا يوجد نشاط مسجل</div>
+                  )}
+                </div>
+              )}
 
               {/* معلومات إضافية */}
               <div className="sidebar-section sidebar-info-table">

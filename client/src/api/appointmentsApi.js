@@ -18,6 +18,8 @@ export const getStats = () => axios.get('/appointments/stats');
 
 export const getDashboardStats = () => axios.get('/appointments/dashboard-stats');
 
+export const logQuickUpdate = (id, data) => axios.post(`/appointments/${id}/log-quick-update`, data);
+
 export default {
   getAppointments,
   getAppointment,
@@ -27,5 +29,6 @@ export default {
   changeStatus,
   getTodayAppointments,
   getStats,
-  getDashboardStats
+  getDashboardStats,
+  logQuickUpdate
 };

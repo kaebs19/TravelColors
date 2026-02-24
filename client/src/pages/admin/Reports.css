@@ -982,15 +982,234 @@
   padding: 2rem !important;
 }
 
+/* النص الأخضر تحت البطاقة */
+.summary-sub.summary-green {
+  color: #10b981 !important;
+  font-weight: 600;
+}
+
+/* ========================================
+   التقديمات الإلكترونية - نظرة عامة
+   ======================================== */
+
+.electronic-overview-card {
+  margin-bottom: 20px;
+}
+
+.electronic-overview-card h3 {
+  font-size: 1rem;
+  color: #1a1a2e;
+  margin-bottom: 14px;
+}
+
+.electronic-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.electronic-overview-item {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s;
+}
+
+.electronic-overview-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.electronic-overview-value {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #3B5BDB;
+}
+
+.electronic-overview-label {
+  display: block;
+  font-size: 0.82rem;
+  color: #868e96;
+  margin-top: 4px;
+}
+
+.electronic-overview-item.overdue-warning {
+  background: #fff5f5;
+  border-color: #ffc9c9;
+}
+
+.electronic-overview-item.overdue-warning .electronic-overview-value {
+  color: #e03131;
+}
+
+.electronic-overview-item.accepted {
+  background: #ebfbee;
+  border-color: #b2f2bb;
+}
+
+.electronic-overview-item.accepted .electronic-overview-value {
+  color: #2f9e44;
+}
+
+/* ========================================
+   ملخص المواعيد - توزيع الأنواع
+   ======================================== */
+
+.appointment-summary-card {
+  margin-bottom: 20px;
+}
+
+.appointment-summary-card h3 {
+  font-size: 1rem;
+  color: #1a1a2e;
+  margin-bottom: 14px;
+}
+
+.appointment-type-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.type-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.type-bar-label {
+  min-width: 110px;
+  font-size: 0.85rem;
+  color: #495057;
+  font-weight: 500;
+}
+
+.type-bar-track {
+  flex: 1;
+  height: 24px;
+  background: #f1f3f5;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.type-bar-fill {
+  height: 100%;
+  border-radius: 12px;
+  min-width: 4px;
+  transition: width 0.6s ease;
+}
+
+.type-bar-fill.in-person {
+  background: linear-gradient(135deg, #2f9e44, #40c057);
+}
+
+.type-bar-fill.electronic {
+  background: linear-gradient(135deg, #3B5BDB, #5c7cfa);
+}
+
+.type-bar-fill.unconfirmed {
+  background: linear-gradient(135deg, #e67700, #fab005);
+}
+
+.type-bar-count {
+  min-width: 40px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #343a40;
+}
+
+/* ========================================
+   أزرار عرض/طباعة التقرير
+   ======================================== */
+
+.report-actions-bar {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 0;
+}
+
+/* صف الإجمالي في الجدول */
+.total-row-table {
+  background: #f0f4ff !important;
+  border-top: 2px solid #3B5BDB;
+}
+
+.total-row-table td {
+  color: #1a1a2e;
+}
+
+/* badges نسبة الإنجاز */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.badge-success { background: #ebfbee; color: #2f9e44; }
+.badge-warning { background: #fff9db; color: #e67700; }
+.badge-danger { background: #fff5f5; color: #e03131; }
+
+.report-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.report-action-btn.view-btn {
+  background: #e7f5ff;
+  color: #1971c2;
+  border: 1px solid #a5d8ff;
+}
+
+.report-action-btn.view-btn:hover {
+  background: #d0ebff;
+  transform: translateY(-1px);
+}
+
+.report-action-btn.print-btn {
+  background: #f3f0ff;
+  color: #6741d9;
+  border: 1px solid #d0bfff;
+}
+
+.report-action-btn.print-btn:hover {
+  background: #e5dbff;
+  transform: translateY(-1px);
+}
+
 /* Responsive للبطاقات */
 @media (max-width: 1024px) {
   .performance-summary-cards {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .electronic-overview-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
 @media (max-width: 640px) {
   .performance-summary-cards {
     grid-template-columns: 1fr;
+  }
+  .electronic-overview-grid {
+    grid-template-columns: 1fr;
+  }
+  .report-actions-bar {
+    justify-content: center;
   }
 }
