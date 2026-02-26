@@ -64,12 +64,21 @@ exports.requirePermission = (...permissions) => {
 
     const { getDefaultPermissions } = require('../utils/permissions');
 
-    // الحصول على صلاحيات المستخدم (المحفوظة أو الافتراضية)
-    let userPerms;
-    if (req.user.permissions && Object.keys(req.user.permissions).length > 0) {
-      userPerms = req.user.permissions;
-    } else {
-      userPerms = getDefaultPermissions(req.user.role);
+    // البدء بالصلاحيات الافتراضية دائماً
+    let userPerms = getDefaultPermissions(req.user.role);
+
+    // محاولة استخدام الصلاحيات المحفوظة
+    try {
+      const stored = req.user.permissions;
+      if (stored && typeof stored === 'object') {
+        // التعامل مع Map أو plain object
+        const obj = (stored instanceof Map) ? Object.fromEntries(stored) : stored;
+        if (obj && Object.keys(obj).length > 0) {
+          userPerms = obj;
+        }
+      }
+    } catch (e) {
+      // استخدام الافتراضي في حالة أي خطأ
     }
 
     const hasAll = permissions.every(perm => userPerms[perm] === true);
