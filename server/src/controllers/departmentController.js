@@ -5,7 +5,7 @@ const { Department } = require('../models');
 // @access  Private (Employee/Admin)
 exports.getDepartments = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, search } = req.query;
+    const { page = 1, limit = 100, search } = req.query;
 
     let query = {};
 
