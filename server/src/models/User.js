@@ -37,8 +37,7 @@ const userSchema = new mongoose.Schema({
     default: 'user'
   },
   permissions: {
-    type: Map,
-    of: Boolean,
+    type: mongoose.Schema.Types.Mixed,
     default: undefined
   },
   avatar: {
@@ -69,7 +68,7 @@ userSchema.pre('save', async function() {
 userSchema.pre('save', function() {
   if (this.isNew && !this.permissions && this.role !== 'admin' && this.role !== 'user') {
     const { getDefaultPermissions } = require('../utils/permissions');
-    this.permissions = new Map(Object.entries(getDefaultPermissions(this.role)));
+    this.permissions = getDefaultPermissions(this.role);
   }
 });
 

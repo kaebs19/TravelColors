@@ -66,8 +66,8 @@ exports.requirePermission = (...permissions) => {
 
     // الحصول على صلاحيات المستخدم (المحفوظة أو الافتراضية)
     let userPerms;
-    if (req.user.permissions && req.user.permissions.size > 0) {
-      userPerms = Object.fromEntries(req.user.permissions);
+    if (req.user.permissions && Object.keys(req.user.permissions).length > 0) {
+      userPerms = req.user.permissions;
     } else {
       userPerms = getDefaultPermissions(req.user.role);
     }
