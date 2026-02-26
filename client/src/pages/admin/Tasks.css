@@ -687,23 +687,38 @@
 }
 
 .tasks-page .status-new {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: #dbeafe;
+  color: #1e40af;
 }
 
 .tasks-page .status-progress {
-  background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
+  background: #fef3c7;
+  color: #92400e;
+  font-weight: 700;
 }
 
 .tasks-page .status-completed {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background: #d1fae5;
+  color: #065f46;
 }
 
 .tasks-page .status-cancelled {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Submission Tag */
+.tasks-page .submission-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: #ede9fe;
+  color: #6d28d9;
+  padding: 1px 8px;
+  border-radius: 12px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  margin-right: 4px;
 }
 
 /* Action Buttons */

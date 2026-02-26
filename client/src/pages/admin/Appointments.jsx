@@ -1158,13 +1158,13 @@ const Appointments = () => {
                             >
                               {appointment.isVIP && <span className="vip-star">⭐</span>}
                               {appointment.customerName}
-                              {appointment.isSubmission && <span className="submission-badge">📤</span>}
+                              {appointment.isSubmission && <span className="submission-badge">📤 تقديم</span>}
                             </button>
                           ) : (
                             <span className="customer-text">
                               {appointment.isVIP && <span className="vip-star">⭐</span>}
                               {appointment.customerName}
-                              {appointment.isSubmission && <span className="submission-badge">📤</span>}
+                              {appointment.isSubmission && <span className="submission-badge">📤 تقديم</span>}
                             </span>
                           )}
                           <div className="customer-hover-card">

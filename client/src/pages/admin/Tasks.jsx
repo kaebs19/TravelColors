@@ -765,6 +765,15 @@ const Tasks = () => {
     return true;
   });
 
+  // ترتيب المهام: قيد العمل أولاً → جديدة → مكتملة → ملغاة
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    const statusOrder = { in_progress: 0, new: 1, completed: 2, cancelled: 3 };
+    const orderA = statusOrder[a.status] ?? 4;
+    const orderB = statusOrder[b.status] ?? 4;
+    if (orderA !== orderB) return orderA - orderB;
+    return new Date(b.createdAt) - new Date(a.createdAt);
+  });
+
   if (loading) return <Loader />;
 
   return (
@@ -1046,12 +1055,12 @@ const Tasks = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredTasks.length === 0 ? (
+              {sortedTasks.length === 0 ? (
                 <tr>
                   <td colSpan="9" className="no-data">لا توجد مهام</td>
                 </tr>
               ) : (
-                filteredTasks.map(task => {
+                sortedTasks.map(task => {
                   const timeInfo = getTimeRemaining(task.appointment?.appointmentDate);
                   const overdue = isTaskOverdue(task);
                   return (
@@ -1062,6 +1071,7 @@ const Tasks = () => {
                         <span className="customer-name">
                           {task.appointment?.customerName}
                           {task.appointment?.isVIP && <span className="vip-badge">VIP</span>}
+                          {task.appointment?.isSubmission && <span className="submission-tag">📤 تقديم</span>}
                         </span>
                         <span className="persons-count">{task.appointment?.personsCount || 1} شخص</span>
                       </div>
@@ -1111,10 +1121,10 @@ const Tasks = () => {
       {/* عرض الشبكة */}
       {viewMode === 'grid' && (
         <div className="tasks-grid">
-          {filteredTasks.length === 0 ? (
+          {sortedTasks.length === 0 ? (
             <div className="no-data-grid">لا توجد مهام</div>
           ) : (
-            filteredTasks.map(task => (
+            sortedTasks.map(task => (
               <Card key={task._id} className={`task-card task-card-${task.status}`}>
                 <div className="task-card-header">
                   <span className="task-card-number" onClick={() => handleViewTask(task)}>{task.taskNumber}</span>
@@ -1124,6 +1134,7 @@ const Tasks = () => {
                   <h3 className="task-card-customer">
                     {task.appointment?.customerName}
                     {task.appointment?.isVIP && <span className="vip-badge">VIP</span>}
+                    {task.appointment?.isSubmission && <span className="submission-tag">📤 تقديم</span>}
                   </h3>
                   <div className="task-card-info">
                     <span>📞 {task.appointment?.phone || '-'}</span>
@@ -1180,6 +1191,7 @@ const Tasks = () => {
                     <div className="kanban-task-header">
                       <span className="task-number">{task.taskNumber}</span>
                       {task.appointment?.isVIP && <span className="vip-badge">VIP</span>}
+                      {task.appointment?.isSubmission && <span className="submission-tag">📤 تقديم</span>}
                     </div>
                     <h4>{task.appointment?.customerName}</h4>
                     <div className="kanban-task-info">
@@ -1228,6 +1240,7 @@ const Tasks = () => {
                     <div className="kanban-task-header">
                       <span className="task-number">{task.taskNumber}</span>
                       {task.appointment?.isVIP && <span className="vip-badge">VIP</span>}
+                      {task.appointment?.isSubmission && <span className="submission-tag">📤 تقديم</span>}
                     </div>
                     <h4>{task.appointment?.customerName}</h4>
                     <div className="kanban-task-info">
@@ -2032,7 +2045,15 @@ const Tasks = () => {
                             <span className="activity-user">{log.userName || log.userId?.name || 'النظام'}</span>
                           </div>
                           <div className="activity-log-description">
-                            {log.description || log.action}
+                            {log.description || {
+                              start_task: 'بدأ العمل على المهمة',
+                              complete_task: 'تم إكمال المهمة',
+                              cancel_task: 'تم إلغاء المهمة',
+                              create: 'تم إنشاء المهمة',
+                              update: 'تم تحديث المهمة',
+                              transfer: 'تم تحويل المهمة',
+                              add_note: 'تم إضافة ملاحظة'
+                            }[log.action] || log.action}
                           </div>
                         </div>
                       ))}

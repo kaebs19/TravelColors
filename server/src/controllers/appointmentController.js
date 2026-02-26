@@ -702,6 +702,30 @@ exports.changeStatus = async (req, res, next) => {
     appointment.status = status;
     await appointment.save();
 
+    // مزامنة حالة المهمة المرتبطة تلقائياً
+    try {
+      const task = await Task.findOne({ appointment: appointment._id });
+      if (task) {
+        if (status === 'in_progress' && task.status === 'new') {
+          task.status = 'in_progress';
+          task.startedAt = new Date();
+          task.assignedTo = task.assignedTo || req.user.id;
+          await task.save();
+        } else if (status === 'completed' && task.status !== 'completed') {
+          task.status = 'completed';
+          task.completedAt = new Date();
+          await task.save();
+        } else if (status === 'cancelled' && task.status !== 'cancelled') {
+          task.status = 'cancelled';
+          task.cancelledAt = new Date();
+          task.cancelReason = 'تم إلغاء الموعد';
+          await task.save();
+        }
+      }
+    } catch (taskErr) {
+      console.error('Error syncing task status:', taskErr);
+    }
+
     // مزامنة مع Google Sheets
     if (isGoogleSheetsEnabled()) {
       try {
