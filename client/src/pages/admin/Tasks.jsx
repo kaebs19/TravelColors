@@ -83,7 +83,7 @@ const Tasks = () => {
         tasksApi.getTasks(),
         tasksApi.getStats(),
         departmentsApi.getDepartments(),
-        employeesApi.getEmployees()
+        employeesApi.getEmployees().catch(() => ({ data: { data: { employees: [] } } }))
       ]);
 
       setTasks(tasksRes.data?.data?.tasks || tasksRes.data?.tasks || []);

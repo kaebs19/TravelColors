@@ -280,7 +280,7 @@ const AddAppointment = () => {
         departmentsApi.getDepartments(),
         customersApi.getCustomers(),
         settingsApi.getSettings(),
-        employeesApi.getEmployees()
+        employeesApi.getEmployees().catch(() => ({ data: { data: { employees: [] } } }))
       ]);
 
       const depts = departmentsRes.data?.data?.departments || departmentsRes.data?.departments || [];

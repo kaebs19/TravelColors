@@ -115,6 +115,23 @@ exports.login = async (req, res, next) => {
       console.error('Error creating login audit log:', auditError);
     }
 
+    // تجهيز الصلاحيات: استخدام المخزنة أو الافتراضية
+    let userPermissions = {};
+    if (user.role !== 'admin') {
+      const { getDefaultPermissions } = require('../utils/permissions');
+      const stored = user.permissions;
+      if (stored && typeof stored === 'object') {
+        const obj = (stored instanceof Map) ? Object.fromEntries(stored) : stored;
+        if (obj && Object.keys(obj).length > 0) {
+          userPermissions = obj;
+        } else {
+          userPermissions = getDefaultPermissions(user.role);
+        }
+      } else {
+        userPermissions = getDefaultPermissions(user.role);
+      }
+    }
+
     res.json({
       success: true,
       message: 'تم تسجيل الدخول بنجاح',
@@ -126,7 +143,7 @@ exports.login = async (req, res, next) => {
           email: user.email,
           role: user.role,
           avatar: user.avatar,
-          permissions: user.permissions || {}
+          permissions: userPermissions
         }
       }
     });
@@ -142,9 +159,19 @@ exports.getMe = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
 
+    // تجهيز الصلاحيات: استخدام المخزنة أو الافتراضية
+    const userObj = user.toObject();
+    if (userObj.role !== 'admin') {
+      const { getDefaultPermissions } = require('../utils/permissions');
+      const stored = userObj.permissions;
+      if (!stored || typeof stored !== 'object' || Object.keys(stored).length === 0) {
+        userObj.permissions = getDefaultPermissions(userObj.role);
+      }
+    }
+
     res.json({
       success: true,
-      data: { user }
+      data: { user: userObj }
     });
   } catch (error) {
     next(error);

@@ -108,7 +108,7 @@ const Appointments = () => {
         departmentsApi.getDepartments(),
         appointmentsApi.getStats(),
         settingsApi.getSettings(),
-        employeesApi.getEmployees()
+        employeesApi.getEmployees().catch(() => ({ data: { data: { employees: [] } } }))
       ]);
 
       const appts = appointmentsRes.data?.data?.appointments || appointmentsRes.data?.appointments || [];
