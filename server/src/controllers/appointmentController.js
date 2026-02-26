@@ -424,6 +424,9 @@ exports.updateAppointment = async (req, res, next) => {
 
     if (!checkExists(res, appointment, 'الموعد')) return;
 
+    // حفظ النوع القديم قبل التعديل (لإنشاء مهمة عند التحويل لمؤكد)
+    const oldType = appointment.type;
+
     const {
       type,
       customerName,
@@ -522,6 +525,34 @@ exports.updateAppointment = async (req, res, next) => {
       });
     } catch (auditError) {
       console.error('Error creating audit log:', auditError);
+    }
+
+    // إنشاء مهمة تلقائياً عند تحويل الموعد إلى مؤكد
+    if (type === 'confirmed' && oldType !== 'confirmed') {
+      try {
+        const existingTask = await Task.findOne({ appointment: appointment._id });
+        if (!existingTask) {
+          const dept = await Department.findById(appointment.department);
+          const isElectronicSubmission = appointment.isSubmission && dept?.submissionType === 'إلكتروني';
+
+          const taskData = {
+            appointment: appointment._id,
+            createdBy: req.user.id
+          };
+
+          if (isElectronicSubmission) {
+            taskData.status = 'in_progress';
+            taskData.assignedTo = req.user.id;
+            taskData.startedAt = new Date();
+          } else {
+            taskData.status = 'new';
+          }
+
+          await Task.create(taskData);
+        }
+      } catch (taskError) {
+        console.error('Error creating task on convert:', taskError);
+      }
     }
 
     // مزامنة مع Google Sheets
