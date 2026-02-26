@@ -1,15 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { protect, authorize } = require('../middlewares/auth');
+const { protect, requirePermission } = require('../middlewares/auth');
 const transactionController = require('../controllers/transactionController');
 
 // حماية جميع المسارات
 router.use(protect);
+router.use(requirePermission('finance.transactions'));
 
 // مسارات الإحصائيات (يجب أن تكون قبل /:id)
 router.get('/stats/summary', transactionController.getTransactionStats);
 router.get('/balance/summary', transactionController.getBalanceSummary);
-router.get('/reports/daily', authorize('admin'), transactionController.getDailyReport);
+router.get('/reports/daily', requirePermission('finance.reports'), transactionController.getDailyReport);
 
 // المسارات الرئيسية
 router.route('/')
@@ -19,7 +20,7 @@ router.route('/')
 router.route('/:id')
   .get(transactionController.getTransaction);
 
-// إلغاء معاملة (للمدير فقط)
-router.put('/:id/cancel', authorize('admin'), transactionController.cancelTransaction);
+// إلغاء معاملة
+router.put('/:id/cancel', requirePermission('finance.cancelTransaction'), transactionController.cancelTransaction);
 
 module.exports = router;

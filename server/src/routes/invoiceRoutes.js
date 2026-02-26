@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect, authorize } = require('../middlewares/auth');
+const { protect, requirePermission } = require('../middlewares/auth');
 const {
   getInvoices,
   getInvoice,
@@ -16,6 +16,7 @@ const {
 
 // حماية جميع المسارات
 router.use(protect);
+router.use(requirePermission('finance.invoices'));
 
 // إحصائيات الفواتير
 router.get('/stats', getInvoiceStats);
@@ -28,18 +29,18 @@ router.route('/')
 router.route('/:id')
   .get(getInvoice)
   .put(updateInvoice)
-  .delete(authorize('admin'), cancelInvoice);
+  .delete(requirePermission('finance.cancelTransaction'), cancelInvoice);
 
-// تسجيل دفعة (للموظفين والمدراء)
-router.post('/:id/payment', authorize('employee', 'admin'), addPayment);
+// تسجيل دفعة
+router.post('/:id/payment', addPayment);
 
-// سجل دفعات الفاتورة (للموظفين والمدراء)
-router.get('/:id/payments', authorize('employee', 'admin'), getInvoicePayments);
+// سجل دفعات الفاتورة
+router.get('/:id/payments', getInvoicePayments);
 
-// استرداد دفعة (للمدير فقط)
-router.post('/:id/payments/:paymentId/refund', authorize('admin'), refundPayment);
+// استرداد دفعة
+router.post('/:id/payments/:paymentId/refund', requirePermission('finance.cancelTransaction'), refundPayment);
 
-// تحويل عرض سعر لفاتورة (للموظفين والمدراء)
-router.post('/:id/convert', authorize('employee', 'admin'), convertQuoteToInvoice);
+// تحويل عرض سعر لفاتورة
+router.post('/:id/convert', convertQuoteToInvoice);
 
 module.exports = router;

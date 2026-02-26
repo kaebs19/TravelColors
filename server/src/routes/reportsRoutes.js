@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const reportsController = require('../controllers/reportsController');
-const { protect, authorize } = require('../middlewares/auth');
+const { protect, requirePermission } = require('../middlewares/auth');
 
-// جميع التقارير للمدراء فقط
+// جميع التقارير تحتاج صلاحية عرض التقارير
 router.use(protect);
-router.use(authorize('admin'));
+router.use(requirePermission('reports.view'));
 
 // التقرير العام
 router.get('/overview', reportsController.getOverviewReport);

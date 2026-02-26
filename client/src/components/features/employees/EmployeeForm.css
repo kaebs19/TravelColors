@@ -197,6 +197,119 @@
   cursor: not-allowed;
 }
 
+/* Permissions Section */
+.permissions-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--border-color);
+}
+
+.permissions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.permissions-header h3 {
+  margin: 0;
+  font-size: var(--font-md);
+  color: var(--text-color);
+}
+
+.reset-perms-btn {
+  padding: 0.4rem 0.8rem;
+  background: var(--bg-color);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: var(--font-xs);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.reset-perms-btn:hover {
+  background: var(--border-color);
+  color: var(--text-color);
+}
+
+.permissions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.permission-module {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.module-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: white;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  user-select: none;
+}
+
+.module-header:hover {
+  background: var(--bg-color);
+}
+
+.module-icon {
+  font-size: 1rem;
+}
+
+.module-label {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--text-color);
+  flex: 1;
+}
+
+.module-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary-color);
+  cursor: pointer;
+}
+
+.module-permissions {
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.permission-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.25rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: var(--font-sm);
+  font-weight: 400;
+  color: var(--text-color);
+  transition: background var(--transition);
+}
+
+.permission-item:hover {
+  background: white;
+}
+
+.permission-item input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--primary-color);
+  cursor: pointer;
+}
+
 /* Responsive */
 @media (max-width: 480px) {
   .avatar-section {

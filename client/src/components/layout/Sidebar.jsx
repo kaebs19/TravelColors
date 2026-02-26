@@ -5,7 +5,7 @@ import { settingsApi } from '../../api';
 import './Sidebar.css';
 
 const Sidebar = () => {
-  const { user } = useAuth();
+  const { user, hasPermission } = useAuth();
   const location = useLocation();
   const [logoUrl, setLogoUrl] = useState('/favicon.svg');
   const [openMenus, setOpenMenus] = useState({
@@ -74,13 +74,13 @@ const Sidebar = () => {
   ];
 
   const financeSubMenu = [
-    { path: '/control/transactions', label: 'السجل المالي', icon: '📒', adminOnly: true },
-    { path: '/control/reports', label: 'التقارير', icon: '📈', adminOnly: true },
-    { path: '/control/audit-log', label: 'سجل التدقيق', icon: '🔍', adminOnly: true }
+    { path: '/control/transactions', label: 'السجل المالي', icon: '📒', permission: 'finance.transactions' },
+    { path: '/control/reports', label: 'التقارير', icon: '📈', permission: 'reports.view' },
+    { path: '/control/audit-log', label: 'سجل التدقيق', icon: '🔍', permission: 'audit.view' }
   ];
 
   const bottomMenuItems = [
-    ...(user?.role === 'admin' ? [
+    ...(hasPermission('employees.manage') ? [
       { path: '/control/employees', label: 'الموظفين', icon: '🧑‍💼' }
     ] : []),
     { path: '/control/settings', label: 'الإعدادات', icon: '⚙️' },
@@ -186,12 +186,12 @@ const Sidebar = () => {
           </button>
           <div className="sidebar-dropdown-menu">
             {financeSubMenu.map(item => {
-              const isLocked = item.adminOnly && user?.role !== 'admin';
+              const isLocked = item.permission && !hasPermission(item.permission);
               return isLocked ? (
                 <div
                   key={item.path}
                   className="sidebar-sublink locked"
-                  title="هذا القسم للمدراء فقط"
+                  title="غير مصرح لك بالوصول"
                 >
                   <span className="sidebar-icon">{item.icon}</span>
                   <span className="sidebar-label">{item.label}</span>

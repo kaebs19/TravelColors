@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { protect, authorize } = require('../middlewares/auth');
+const { protect, requirePermission } = require('../middlewares/auth');
 const auditController = require('../controllers/auditController');
 
-// حماية جميع المسارات - للمدير فقط
+// حماية جميع المسارات - تحتاج صلاحية عرض سجل المراجعة
 router.use(protect);
-router.use(authorize('admin'));
+router.use(requirePermission('audit.view'));
 
 // مسارات خاصة (يجب أن تكون قبل /:id)
 router.get('/recent', auditController.getRecentActivity);

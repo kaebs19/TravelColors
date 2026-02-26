@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const taskController = require('../controllers/taskController');
-const { protect, authorize } = require('../middlewares/auth');
+const { protect, requirePermission } = require('../middlewares/auth');
 
 // جميع الـ routes تتطلب تسجيل دخول
 router.use(protect);
-router.use(authorize('employee', 'admin'));
+router.use(requirePermission('tasks.view'));
 
 // الإحصائيات
 router.get('/stats', taskController.getTaskStats);
@@ -30,13 +30,13 @@ router.get('/:id', taskController.getTask);
 router.get('/:id/activity-log', taskController.getTaskActivityLog);
 
 // عمليات المهمة
-router.put('/:id/start', taskController.startTask);
-router.put('/:id/complete', taskController.completeTask);
-router.put('/:id/cancel', taskController.cancelTask);
-router.put('/:id/transfer', taskController.transferTask);
+router.put('/:id/start', requirePermission('tasks.edit'), taskController.startTask);
+router.put('/:id/complete', requirePermission('tasks.edit'), taskController.completeTask);
+router.put('/:id/cancel', requirePermission('tasks.edit'), taskController.cancelTask);
+router.put('/:id/transfer', requirePermission('tasks.edit'), taskController.transferTask);
 
 // الملاحظات والمرفقات
-router.post('/:id/notes', taskController.addTaskNote);
-router.post('/:id/attachments', taskController.addTaskAttachment);
+router.post('/:id/notes', requirePermission('tasks.add'), taskController.addTaskNote);
+router.post('/:id/attachments', requirePermission('tasks.add'), taskController.addTaskAttachment);
 
 module.exports = router;

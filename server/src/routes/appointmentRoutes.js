@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const appointmentController = require('../controllers/appointmentController');
-const { protect, authorize } = require('../middlewares');
+const { protect, requirePermission } = require('../middlewares');
+const upload = require('../middlewares/upload');
 
 // جميع المسارات تحتاج تسجيل دخول
 router.use(protect);
-router.use(authorize('employee', 'admin'));
+router.use(requirePermission('appointments.view'));
 
 // إحصائيات ومواعيد اليوم
 router.get('/stats', appointmentController.getStats);
@@ -15,10 +16,16 @@ router.get('/today', appointmentController.getTodayAppointments);
 // CRUD
 router.get('/', appointmentController.getAppointments);
 router.get('/:id', appointmentController.getAppointment);
-router.post('/', appointmentController.createAppointment);
-router.put('/:id', appointmentController.updateAppointment);
-router.put('/:id/status', appointmentController.changeStatus);
+router.post('/', requirePermission('appointments.add'), upload.array('attachments', 5), appointmentController.createAppointment);
+router.put('/:id', requirePermission('appointments.edit'), appointmentController.updateAppointment);
+router.put('/:id/status', requirePermission('appointments.edit'), appointmentController.changeStatus);
 router.post('/:id/log-quick-update', appointmentController.logQuickUpdate);
-router.delete('/:id', appointmentController.deleteAppointment);
+
+// مرفقات الموعد
+router.post('/:id/attachments', upload.array('attachments', 5), appointmentController.addAttachments);
+router.delete('/:id/attachments/:attachmentId', appointmentController.deleteAttachment);
+
+// حذف الموعد
+router.delete('/:id', requirePermission('appointments.delete'), appointmentController.deleteAppointment);
 
 module.exports = router;

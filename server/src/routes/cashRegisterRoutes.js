@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect, authorize } = require('../middlewares/auth');
+const { protect, requirePermission } = require('../middlewares/auth');
 const {
   getCashRegister,
   getTransactions,
@@ -11,6 +11,7 @@ const {
 
 // حماية جميع المسارات
 router.use(protect);
+router.use(requirePermission('finance.cashRegister'));
 
 // بيانات الصندوق
 router.get('/', getCashRegister);
@@ -24,7 +25,7 @@ router.get('/transactions', getTransactions);
 // إضافة حركة مالية
 router.post('/transaction', addTransaction);
 
-// تقرير الصندوق (للمدير فقط)
-router.get('/report', authorize('admin'), getCashReport);
+// تقرير الصندوق
+router.get('/report', requirePermission('finance.reports'), getCashReport);
 
 module.exports = router;

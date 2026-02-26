@@ -121,6 +121,7 @@ const Employees = () => {
   const stats = {
     total: employees.length,
     admins: employees.filter(e => e.role === 'admin').length,
+    accountants: employees.filter(e => e.role === 'accountant').length,
     employees: employees.filter(e => e.role === 'employee').length,
     active: employees.filter(e => e.isActive).length,
     totalAppointments: employees.reduce((sum, e) => sum + (e.stats?.totalAppointments || 0), 0),
@@ -130,11 +131,13 @@ const Employees = () => {
   };
 
   const getRoleBadge = (role) => {
-    return role === 'admin' ? 'مدير' : 'موظف';
+    const map = { admin: 'مدير', accountant: 'محاسب', employee: 'موظف' };
+    return map[role] || role;
   };
 
   const getRoleClass = (role) => {
-    return role === 'admin' ? 'role-admin' : 'role-employee';
+    const map = { admin: 'role-admin', accountant: 'role-accountant', employee: 'role-employee' };
+    return map[role] || 'role-employee';
   };
 
   const getStatusBadge = (status) => {
@@ -161,7 +164,7 @@ const Employees = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="stats-grid stats-grid-6">
+      <div className="stats-grid stats-grid-7">
         <div className="stat-card stat-total">
           <div className="stat-icon">👥</div>
           <div className="stat-info">
@@ -174,6 +177,13 @@ const Employees = () => {
           <div className="stat-info">
             <span className="stat-value">{stats.admins}</span>
             <span className="stat-label">مدراء</span>
+          </div>
+        </div>
+        <div className="stat-card stat-accountants">
+          <div className="stat-icon">📊</div>
+          <div className="stat-info">
+            <span className="stat-value">{stats.accountants}</span>
+            <span className="stat-label">محاسبين</span>
           </div>
         </div>
         <div className="stat-card stat-employees">
@@ -238,6 +248,7 @@ const Employees = () => {
           >
             <option value="all">جميع الصلاحيات</option>
             <option value="admin">مدير</option>
+            <option value="accountant">محاسب</option>
             <option value="employee">موظف</option>
           </select>
           <span className="results-count">{filteredEmployees.length} نتيجة</span>
@@ -504,6 +515,21 @@ const Employees = () => {
                 </div>
               </div>
             </div>
+
+            {/* الصلاحيات */}
+            {viewEmployee.role !== 'admin' && viewEmployee.permissions && Object.keys(viewEmployee.permissions).length > 0 && (
+              <div className="detail-section">
+                <h3>🔐 الصلاحيات</h3>
+                <div className="permissions-tags">
+                  {Object.entries(viewEmployee.permissions)
+                    .filter(([, v]) => v === true)
+                    .map(([key]) => (
+                      <span key={key} className="permission-tag">{key}</span>
+                    ))
+                  }
+                </div>
+              </div>
+            )}
 
             {/* آخر المواعيد */}
             {viewEmployeeData.recentAppointments?.length > 0 && (

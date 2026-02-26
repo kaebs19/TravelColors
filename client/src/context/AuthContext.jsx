@@ -83,13 +83,23 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify({ ...user, ...userData }));
   };
 
+  // التحقق من صلاحية معينة
+  const hasPermission = (permissionKey) => {
+    if (!user) return false;
+    if (user.role === 'admin') return true;
+    const perms = user.permissions || {};
+    return perms[permissionKey] === true;
+  };
+
   const value = {
     user,
     loading,
     error,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',
-    isEmployee: user?.role === 'employee' || user?.role === 'admin',
+    isAccountant: user?.role === 'accountant',
+    isEmployee: user?.role === 'employee' || user?.role === 'accountant' || user?.role === 'admin',
+    hasPermission,
     login,
     register,
     logout,

@@ -33,8 +33,13 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'employee', 'admin'],
+    enum: ['user', 'employee', 'accountant', 'admin'],
     default: 'user'
+  },
+  permissions: {
+    type: Map,
+    of: Boolean,
+    default: undefined
   },
   avatar: {
     type: String,
@@ -58,6 +63,14 @@ userSchema.pre('save', async function() {
   if (!this.isModified('password')) return;
   const salt = await bcrypt.genSalt(12);
   this.password = await bcrypt.hash(this.password, salt);
+});
+
+// تعيين الصلاحيات الافتراضية للمستخدمين الجدد
+userSchema.pre('save', function() {
+  if (this.isNew && !this.permissions && this.role !== 'admin' && this.role !== 'user') {
+    const { getDefaultPermissions } = require('../utils/permissions');
+    this.permissions = getDefaultPermissions(this.role);
+  }
 });
 
 // مقارنة كلمة المرور

@@ -185,6 +185,18 @@ exports.createAppointment = async (req, res, next) => {
 
     const appointment = await Appointment.create(appointmentData);
 
+    // معالجة المرفقات إن وُجدت
+    if (req.files && req.files.length > 0) {
+      appointment.attachments = req.files.map(file => ({
+        filename: file.filename,
+        originalName: file.originalname,
+        path: file.path,
+        mimetype: file.mimetype,
+        size: file.size
+      }));
+      await appointment.save();
+    }
+
     // إنشاء إيصال ومعاملة إذا تم الدفع
     if (appointmentData.paidAmount > 0) {
       try {
@@ -561,6 +573,85 @@ exports.deleteAppointment = async (req, res, next) => {
     res.json({
       success: true,
       message: 'تم حذف الموعد بنجاح'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    إضافة مرفقات لموعد موجود
+// @route   POST /api/appointments/:id/attachments
+// @access  Private
+exports.addAttachments = async (req, res, next) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id);
+
+    if (!checkExists(res, appointment, 'الموعد')) return;
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'لم يتم رفع أي ملفات'
+      });
+    }
+
+    const newAttachments = req.files.map(file => ({
+      filename: file.filename,
+      originalName: file.originalname,
+      path: file.path,
+      mimetype: file.mimetype,
+      size: file.size
+    }));
+
+    appointment.attachments.push(...newAttachments);
+    await appointment.save();
+
+    const populatedAppointment = await Appointment.findById(req.params.id)
+      .populate('department', 'title cities submissionType processingDays')
+      .populate('customer', 'name phone email')
+      .populate('createdBy', 'name');
+
+    res.json({
+      success: true,
+      message: `تم إضافة ${newAttachments.length} مرفق بنجاح`,
+      data: { appointment: populatedAppointment }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    حذف مرفق من موعد
+// @route   DELETE /api/appointments/:id/attachments/:attachmentId
+// @access  Private
+exports.deleteAttachment = async (req, res, next) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id);
+
+    if (!checkExists(res, appointment, 'الموعد')) return;
+
+    const attachment = appointment.attachments.id(req.params.attachmentId);
+    if (!attachment) {
+      return res.status(404).json({
+        success: false,
+        message: 'المرفق غير موجود'
+      });
+    }
+
+    // حذف الملف من القرص
+    const fs = require('fs');
+    const filePath = attachment.path;
+    if (filePath && fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    attachment.deleteOne();
+    await appointment.save();
+
+    res.json({
+      success: true,
+      message: 'تم حذف المرفق بنجاح',
+      data: { appointment }
     });
   } catch (error) {
     next(error);

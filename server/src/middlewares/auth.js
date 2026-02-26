@@ -43,10 +43,38 @@ exports.protect = async (req, res, next) => {
   }
 };
 
-// التحقق من الصلاحيات
+// التحقق من الصلاحيات حسب الدور
 exports.authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'غير مصرح لك بالوصول لهذه الصفحة'
+      });
+    }
+    next();
+  };
+};
+
+// التحقق من صلاحيات مخصصة
+exports.requirePermission = (...permissions) => {
+  return (req, res, next) => {
+    // المدير دائماً يمر
+    if (req.user.role === 'admin') return next();
+
+    const { getDefaultPermissions } = require('../utils/permissions');
+
+    // الحصول على صلاحيات المستخدم (المحفوظة أو الافتراضية)
+    let userPerms;
+    if (req.user.permissions && req.user.permissions.size > 0) {
+      userPerms = Object.fromEntries(req.user.permissions);
+    } else {
+      userPerms = getDefaultPermissions(req.user.role);
+    }
+
+    const hasAll = permissions.every(perm => userPerms[perm] === true);
+
+    if (!hasAll) {
       return res.status(403).json({
         success: false,
         message: 'غير مصرح لك بالوصول لهذه الصفحة'

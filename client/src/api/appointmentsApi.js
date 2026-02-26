@@ -4,7 +4,42 @@ export const getAppointments = (params) => axios.get('/appointments', { params }
 
 export const getAppointment = (id) => axios.get(`/appointments/${id}`);
 
-export const createAppointment = (data) => axios.post('/appointments', data);
+export const createAppointment = (data) => {
+  // إذا كان هناك ملفات جديدة، إرسال FormData
+  if (data.newFiles && data.newFiles.length > 0) {
+    const formData = new FormData();
+
+    // إضافة الحقول النصية
+    const fields = [
+      'type', 'customerName', 'customer', 'phone', 'personsCount',
+      'isSubmission', 'isVIP', 'appointmentDate', 'appointmentTime',
+      'duration', 'dateFrom', 'dateTo', 'reminderDate', 'reminderTime',
+      'department', 'city', 'notes', 'paymentType', 'totalAmount',
+      'paidAmount', 'visibility', 'reminderEnabled'
+    ];
+
+    fields.forEach(field => {
+      if (data[field] !== undefined && data[field] !== null && data[field] !== '') {
+        formData.append(field, data[field]);
+      }
+    });
+
+    // إضافة الملفات
+    data.newFiles.forEach(file => {
+      formData.append('attachments', file);
+    });
+
+    return axios.post('/appointments', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  }
+
+  // بدون ملفات، إرسال JSON عادي
+  const cleanData = { ...data };
+  delete cleanData.newFiles;
+  delete cleanData.existingAttachments;
+  return axios.post('/appointments', cleanData);
+};
 
 export const updateAppointment = (id, data) => axios.put(`/appointments/${id}`, data);
 
@@ -20,6 +55,14 @@ export const getDashboardStats = () => axios.get('/appointments/dashboard-stats'
 
 export const logQuickUpdate = (id, data) => axios.post(`/appointments/${id}/log-quick-update`, data);
 
+export const addAttachments = (id, formData) =>
+  axios.post(`/appointments/${id}/attachments`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+
+export const deleteAttachment = (id, attachmentId) =>
+  axios.delete(`/appointments/${id}/attachments/${attachmentId}`);
+
 export default {
   getAppointments,
   getAppointment,
@@ -30,5 +73,7 @@ export default {
   getTodayAppointments,
   getStats,
   getDashboardStats,
-  logQuickUpdate
+  logQuickUpdate,
+  addAttachments,
+  deleteAttachment
 };

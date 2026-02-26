@@ -79,8 +79,8 @@ const canModifyResource = (res, user, resource, ownerField = 'createdBy') => {
   // Admin يمكنه التعديل على أي مورد
   if (user.role === 'admin') return true;
 
-  // التحقق من الملكية للـ employee
-  if (user.role === 'employee') {
+  // التحقق من الملكية للموظف والمحاسب
+  if (user.role === 'employee' || user.role === 'accountant') {
     return checkAuthorization(res, user, resource, ownerField);
   }
 
@@ -99,6 +99,9 @@ const canModifyResource = (res, user, resource, ownerField = 'createdBy') => {
 const canAddTransactionType = (res, user, transactionType) => {
   // Admin يمكنه إضافة أي نوع
   if (user.role === 'admin') return true;
+
+  // المحاسب يمكنه إضافة أي نوع
+  if (user.role === 'accountant') return true;
 
   // Employee لا يمكنه إضافة مصروفات
   if (user.role === 'employee' && transactionType === 'expense') {

@@ -7,9 +7,11 @@ import { generateAppointmentReceipt, shareReceiptToWhatsApp } from '../../utils/
 import { generateAppointmentMessage, generateQuickUpdateMessage } from '../../utils/messageGenerator';
 import './Appointments.css';
 
+const UPLOADS_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:5002/api').replace(/\/api\/?$/, '');
+
 const Appointments = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, hasPermission } = useAuth();
   const [searchParams] = useSearchParams();
   const urlDepartment = searchParams.get('department') || '';
 
@@ -50,6 +52,10 @@ const Appointments = () => {
   const [quickMessageText, setQuickMessageText] = useState('');
   const [quickCopySuccess, setQuickCopySuccess] = useState(false);
   const [quickSending, setQuickSending] = useState(false);
+
+  // حالة رفع المرفقات في نافذة التفاصيل
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const viewAttachmentInputRef = useRef(null);
 
   // استخراج قائمة المدن الفريدة
   const uniqueCities = [...new Set(appointments.map(a => a.city).filter(Boolean))];
@@ -194,6 +200,61 @@ const Appointments = () => {
       fetchData();
     } catch (error) {
       console.error('Error changing status:', error);
+    }
+  };
+
+  // رفع مرفقات جديدة من نافذة التفاصيل
+  const handleViewAttachmentUpload = async (e) => {
+    if (!viewAppointment || !e.target.files?.length) return;
+    const files = Array.from(e.target.files);
+
+    const validFiles = files.filter(file => {
+      const isValidType = file.type.startsWith('image/') || file.type === 'application/pdf';
+      const isValidSize = file.size <= 10 * 1024 * 1024;
+      return isValidType && isValidSize;
+    });
+
+    if (validFiles.length === 0) {
+      alert('الملفات غير مدعومة أو تتجاوز الحجم المسموح (10MB)');
+      return;
+    }
+
+    setUploadingAttachment(true);
+    try {
+      const formData = new FormData();
+      validFiles.forEach(file => formData.append('attachments', file));
+
+      const res = await appointmentsApi.addAttachments(viewAppointment._id, formData);
+      const updated = res.data?.data?.appointment;
+      if (updated) {
+        setViewAppointment(updated);
+        // تحديث القائمة
+        setAppointments(prev => prev.map(a => a._id === updated._id ? updated : a));
+      }
+    } catch (error) {
+      console.error('Error uploading attachments:', error);
+      alert('حدث خطأ أثناء رفع المرفقات');
+    } finally {
+      setUploadingAttachment(false);
+      e.target.value = '';
+    }
+  };
+
+  // حذف مرفق
+  const handleDeleteAttachment = async (appointmentId, attachmentId) => {
+    if (!window.confirm('هل أنت متأكد من حذف هذا المرفق؟')) return;
+    try {
+      await appointmentsApi.deleteAttachment(appointmentId, attachmentId);
+      // تحديث البيانات
+      const res = await appointmentsApi.getAppointment(appointmentId);
+      const updated = res.data?.data?.appointment;
+      if (updated) {
+        setViewAppointment(updated);
+        setAppointments(prev => prev.map(a => a._id === updated._id ? updated : a));
+      }
+    } catch (error) {
+      console.error('Error deleting attachment:', error);
+      alert('حدث خطأ أثناء حذف المرفق');
     }
   };
 
@@ -1009,6 +1070,9 @@ const Appointments = () => {
                     {appointment.department && (
                       <p className="card-dept">🏢 {appointment.department.title}</p>
                     )}
+                    {appointment.attachments?.length > 0 && (
+                      <span className="card-attachments-badge">📎 {appointment.attachments.length} مرفق</span>
+                    )}
                   </div>
                   <div className="card-actions">
                     <button className="card-action-btn view" onClick={() => handleView(appointment)} title="تفاصيل">👁️</button>
@@ -1020,7 +1084,9 @@ const Appointments = () => {
                     {appointment.type === 'unconfirmed' && (
                       <button className="card-action-btn convert" onClick={() => handleOpenConvertModal(appointment)} title="تحويل">🔄</button>
                     )}
-                    <button className="card-action-btn delete" onClick={() => handleDelete(appointment._id)} title="حذف">🗑️</button>
+                    {hasPermission('appointments.delete') && (
+                      <button className="card-action-btn delete" onClick={() => handleDelete(appointment._id)} title="حذف">🗑️</button>
+                    )}
                   </div>
                 </div>
               );
@@ -1218,12 +1284,12 @@ const Appointments = () => {
                           </select>
                         ) : (
                           <span
-                            className={`created-by-cell ${user?.role === 'admin' ? 'clickable' : ''}`}
-                            onClick={() => { if (user?.role === 'admin') setChangingCreatedBy(appointment._id); }}
-                            title={user?.role === 'admin' ? 'انقر لتغيير الموظف' : ''}
+                            className={`created-by-cell ${hasPermission('employees.manage') ? 'clickable' : ''}`}
+                            onClick={() => { if (hasPermission('employees.manage')) setChangingCreatedBy(appointment._id); }}
+                            title={hasPermission('employees.manage') ? 'انقر لتغيير الموظف' : ''}
                           >
                             {appointment.createdBy?.name || '-'}
-                            {user?.role === 'admin' && <span className="edit-icon-small"> ✎</span>}
+                            {hasPermission('employees.manage') && <span className="edit-icon-small"> ✎</span>}
                           </span>
                         )}
                       </td>
@@ -1294,11 +1360,15 @@ const Appointments = () => {
                                 </button>
                               </>
                             )}
-                            <div className="menu-divider"></div>
-                            <button className="action-menu-item danger" onClick={() => { handleDelete(appointment._id); setOpenActionsMenu(null); }}>
-                              <span>🗑️</span>
-                              حذف الموعد
-                            </button>
+                            {hasPermission('appointments.delete') && (
+                              <>
+                                <div className="menu-divider"></div>
+                                <button className="action-menu-item danger" onClick={() => { handleDelete(appointment._id); setOpenActionsMenu(null); }}>
+                                  <span>🗑️</span>
+                                  حذف الموعد
+                                </button>
+                              </>
+                            )}
                           </div>
                         )}
                       </div>
@@ -1414,18 +1484,56 @@ const Appointments = () => {
               </div>
             )}
 
-            {viewAppointment.attachments && viewAppointment.attachments.length > 0 && (
-              <div className="detail-row">
-                <span className="detail-label">المرفقات:</span>
-                <div className="detail-attachments">
-                  {viewAppointment.attachments.map((att, i) => (
-                    <span key={i} className="attachment-badge">
-                      {att.mimetype?.includes('image') ? '🖼️' : '📄'} {att.originalName || att.filename}
-                    </span>
-                  ))}
-                </div>
+            {/* قسم المرفقات */}
+            <div className="detail-divider">📎 المرفقات ({viewAppointment.attachments?.length || 0})</div>
+            {viewAppointment.attachments && viewAppointment.attachments.length > 0 ? (
+              <div className="view-attachments-grid">
+                {viewAppointment.attachments.map((att, i) => (
+                  <div key={att._id || i} className="view-attachment-card">
+                    {att.mimetype?.startsWith('image/') ? (
+                      <img src={`${UPLOADS_BASE}/uploads/${att.filename}`} alt={att.originalName} className="view-attachment-preview" />
+                    ) : (
+                      <div className="view-attachment-preview pdf-preview">📄 PDF</div>
+                    )}
+                    <div className="view-attachment-name">{att.originalName || att.filename}</div>
+                    {att.size && (
+                      <div className="view-attachment-size">
+                        {att.size > 1024 * 1024
+                          ? `${(att.size / (1024 * 1024)).toFixed(1)} MB`
+                          : `${(att.size / 1024).toFixed(0)} KB`}
+                      </div>
+                    )}
+                    <div className="view-attachment-actions">
+                      <a href={`${UPLOADS_BASE}/uploads/${att.filename}`} target="_blank" rel="noopener noreferrer" className="att-btn view-btn" title="عرض">👁️</a>
+                      <a href={`${UPLOADS_BASE}/uploads/${att.filename}`} download={att.originalName} className="att-btn download-btn" title="تنزيل">⬇️</a>
+                      {hasPermission('appointments.delete') && (
+                        <button className="att-btn delete-btn" onClick={() => handleDeleteAttachment(viewAppointment._id, att._id)} title="حذف">🗑️</button>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
+            ) : (
+              <p className="no-attachments-text">لا توجد مرفقات</p>
             )}
+            <div className="add-attachment-row">
+              <input
+                type="file"
+                ref={viewAttachmentInputRef}
+                onChange={handleViewAttachmentUpload}
+                accept="image/*,.pdf"
+                multiple
+                style={{ display: 'none' }}
+              />
+              <button
+                type="button"
+                className="add-attachment-btn"
+                onClick={() => viewAttachmentInputRef.current?.click()}
+                disabled={uploadingAttachment}
+              >
+                {uploadingAttachment ? '⏳ جاري الرفع...' : '➕ إضافة مرفقات'}
+              </button>
+            </div>
 
             <div className="detail-row">
               <span className="detail-label">حالة الموعد:</span>

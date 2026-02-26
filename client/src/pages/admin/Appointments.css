@@ -987,6 +987,122 @@
   border-top: 2px solid var(--border-color);
 }
 
+/* عرض المرفقات في نافذة التفاصيل */
+.view-attachments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin: 0.5rem 0;
+}
+
+.view-attachment-card {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  overflow: hidden;
+  text-align: center;
+}
+
+.view-attachment-preview {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  display: block;
+}
+
+.view-attachment-preview.pdf-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fef3c7;
+  font-size: 1.5rem;
+  color: #92400e;
+}
+
+.view-attachment-name {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.7rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-color);
+}
+
+.view-attachment-size {
+  padding: 0 0.5rem 0.25rem;
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+}
+
+.view-attachment-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.att-btn {
+  padding: 0.25rem 0.5rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: inherit;
+}
+
+.att-btn:hover {
+  background: var(--border-color);
+}
+
+.att-btn.delete-btn:hover {
+  background: #fee2e2;
+}
+
+.no-attachments-text {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  padding: 0.5rem;
+}
+
+.add-attachment-row {
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.add-attachment-btn {
+  padding: 0.5rem 1rem;
+  background: var(--bg-color);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  transition: all var(--transition);
+  font-family: inherit;
+}
+
+.add-attachment-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  background: #f0f7ff;
+}
+
+.add-attachment-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.card-attachments-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
 .appointment-details .remaining-warning {
   color: #dc2626;
   font-weight: 600;

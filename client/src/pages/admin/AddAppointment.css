@@ -437,7 +437,7 @@
 .add-appointment-page .attachment-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   padding: 0.5rem 0.75rem;
   background: var(--bg-color);
   border: 1px solid var(--border-color);
@@ -445,15 +445,39 @@
   font-size: var(--font-xs);
 }
 
+.add-appointment-page .attachment-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+}
+
 .add-appointment-page .attachment-icon {
-  font-size: 1rem;
+  font-size: 1.5rem;
+  width: 40px;
+  text-align: center;
+}
+
+.add-appointment-page .attachment-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
 }
 
 .add-appointment-page .attachment-name {
-  max-width: 150px;
+  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: var(--text-primary);
+}
+
+.add-appointment-page .attachment-size {
+  color: var(--text-secondary);
+  font-size: 0.7rem;
 }
 
 .add-appointment-page .remove-attachment {
@@ -464,6 +488,7 @@
   padding: 0.25rem;
   font-size: 0.75rem;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .add-appointment-page .remove-attachment:hover {

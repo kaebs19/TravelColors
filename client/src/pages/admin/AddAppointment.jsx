@@ -8,6 +8,8 @@ import { generateAppointmentMessage } from '../../utils/messageGenerator';
 // import { parseArabicNumber, arabicToEnglishNumbers } from '../../utils/formatters';
 import './AddAppointment.css';
 
+const UPLOADS_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:5002/api').replace(/\/api\/?$/, '');
+
 // دالة تحويل الأرقام العربية للإنجليزية
 const convertArabicToEnglish = (str) => {
   if (!str) return str;
@@ -435,12 +437,12 @@ const AddAppointment = () => {
     const files = Array.from(e.target.files);
     const validFiles = files.filter(file => {
       const isValidType = file.type.startsWith('image/') || file.type === 'application/pdf';
-      const isValidSize = file.size <= 5 * 1024 * 1024;
+      const isValidSize = file.size <= 10 * 1024 * 1024;
       return isValidType && isValidSize;
     });
 
     if (validFiles.length !== files.length) {
-      alert('بعض الملفات غير مدعومة أو تتجاوز الحجم المسموح (5MB)');
+      alert('بعض الملفات غير مدعومة أو تتجاوز الحجم المسموح (10MB)');
     }
 
     const newAttachments = validFiles.map(file => ({
@@ -934,16 +936,29 @@ const AddAppointment = () => {
                     className="upload-btn"
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <span>📤</span> رفع ملفات (صور / PDF)
+                    <span>📤</span> رفع ملفات (صور / PDF - حتى 10MB)
                   </button>
                   {attachments.length > 0 && (
                     <div className="attachments-list">
                       {attachments.map((file, index) => (
                         <div key={index} className="attachment-item">
-                          <span className="attachment-icon">
-                            {file.mimetype?.includes('image') ? '🖼️' : '📄'}
-                          </span>
-                          <span className="attachment-name">{file.originalName || file.filename}</span>
+                          {file.isNew && file.mimetype?.startsWith('image/') ? (
+                            <img src={file.filename} alt={file.originalName} className="attachment-thumb" />
+                          ) : !file.isNew && file.mimetype?.startsWith('image/') ? (
+                            <img src={`${UPLOADS_BASE}/uploads/${file.filename}`} alt={file.originalName} className="attachment-thumb" />
+                          ) : (
+                            <span className="attachment-icon">📄</span>
+                          )}
+                          <div className="attachment-info">
+                            <span className="attachment-name">{file.originalName || file.filename}</span>
+                            {file.size && (
+                              <span className="attachment-size">
+                                {file.size > 1024 * 1024
+                                  ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+                                  : `${(file.size / 1024).toFixed(0)} KB`}
+                              </span>
+                            )}
+                          </div>
                           <button
                             type="button"
                             className="remove-attachment"
@@ -1234,16 +1249,29 @@ const AddAppointment = () => {
                     className="upload-btn"
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <span>📤</span> رفع ملفات (صور / PDF)
+                    <span>📤</span> رفع ملفات (صور / PDF - حتى 10MB)
                   </button>
                   {attachments.length > 0 && (
                     <div className="attachments-list">
                       {attachments.map((file, index) => (
                         <div key={index} className="attachment-item">
-                          <span className="attachment-icon">
-                            {file.mimetype?.includes('image') ? '🖼️' : '📄'}
-                          </span>
-                          <span className="attachment-name">{file.originalName || file.filename}</span>
+                          {file.isNew && file.mimetype?.startsWith('image/') ? (
+                            <img src={file.filename} alt={file.originalName} className="attachment-thumb" />
+                          ) : !file.isNew && file.mimetype?.startsWith('image/') ? (
+                            <img src={`${UPLOADS_BASE}/uploads/${file.filename}`} alt={file.originalName} className="attachment-thumb" />
+                          ) : (
+                            <span className="attachment-icon">📄</span>
+                          )}
+                          <div className="attachment-info">
+                            <span className="attachment-name">{file.originalName || file.filename}</span>
+                            {file.size && (
+                              <span className="attachment-size">
+                                {file.size > 1024 * 1024
+                                  ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+                                  : `${(file.size / 1024).toFixed(0)} KB`}
+                              </span>
+                            )}
+                          </div>
                           <button
                             type="button"
                             className="remove-attachment"

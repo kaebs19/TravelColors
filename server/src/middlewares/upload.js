@@ -14,21 +14,21 @@ const storage = multer.diskStorage({
 
 // فلتر الملفات
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|gif|webp/;
+  const allowedTypes = /jpeg|jpg|png|gif|webp|pdf/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = allowedTypes.test(file.mimetype);
+  const mimetype = allowedTypes.test(file.mimetype) || file.mimetype === 'application/pdf';
 
   if (extname && mimetype) {
     return cb(null, true);
   } else {
-    cb(new Error('يسمح فقط بملفات الصور (jpeg, jpg, png, gif, webp)'));
+    cb(new Error('يسمح فقط بملفات الصور و PDF (jpeg, jpg, png, gif, webp, pdf)'));
   }
 };
 
 const upload = multer({
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB
+    fileSize: 10 * 1024 * 1024 // 10MB
   },
   fileFilter
 });

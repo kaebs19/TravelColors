@@ -5,8 +5,8 @@ import { Card, Loader } from '../../components/common';
 import './Settings.css';
 
 const Settings = () => {
-  const { user } = useAuth();
-  const isAdmin = user?.role === 'admin';
+  const { user, hasPermission } = useAuth();
+  const isAdmin = hasPermission('settings.edit');
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

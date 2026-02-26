@@ -8,7 +8,7 @@ exports.getEmployees = async (req, res, next) => {
     const { page = 1, limit = 50, search, role } = req.query;
 
     const query = {
-      role: { $in: ['employee', 'admin'] }
+      role: { $in: ['employee', 'accountant', 'admin'] }
     };
 
     if (search) {
@@ -19,7 +19,7 @@ exports.getEmployees = async (req, res, next) => {
       ];
     }
 
-    if (role && ['employee', 'admin'].includes(role)) {
+    if (role && ['employee', 'accountant', 'admin'].includes(role)) {
       query.role = role;
     }
 
@@ -198,7 +198,7 @@ exports.getEmployee = async (req, res, next) => {
 // @access  Private/Admin
 exports.createEmployee = async (req, res, next) => {
   try {
-    const { name, email, password, phone, jobTitle, role, avatar } = req.body;
+    const { name, email, password, phone, jobTitle, role, avatar, permissions } = req.body;
 
     // التحقق من وجود الإيميل
     const existingUser = await User.findOne({ email });
@@ -209,7 +209,7 @@ exports.createEmployee = async (req, res, next) => {
       });
     }
 
-    const employee = await User.create({
+    const employeeData = {
       name,
       email,
       password,
@@ -218,7 +218,14 @@ exports.createEmployee = async (req, res, next) => {
       role: role || 'employee',
       avatar: avatar || '/favicon.svg',
       isActive: true
-    });
+    };
+
+    // إضافة الصلاحيات المخصصة (إذا لم يكن مدير)
+    if (role !== 'admin' && permissions) {
+      employeeData.permissions = permissions;
+    }
+
+    const employee = await User.create(employeeData);
 
     // إزالة كلمة المرور من الاستجابة
     const employeeResponse = employee.toObject();
@@ -239,7 +246,7 @@ exports.createEmployee = async (req, res, next) => {
 // @access  Private/Admin
 exports.updateEmployee = async (req, res, next) => {
   try {
-    const { name, email, phone, jobTitle, role, avatar, password } = req.body;
+    const { name, email, phone, jobTitle, role, avatar, password, permissions } = req.body;
 
     const employee = await User.findById(req.params.id);
 
@@ -268,6 +275,13 @@ exports.updateEmployee = async (req, res, next) => {
     employee.jobTitle = jobTitle !== undefined ? jobTitle : employee.jobTitle;
     employee.role = role || employee.role;
     employee.avatar = avatar !== undefined ? avatar : employee.avatar;
+
+    // تحديث الصلاحيات (إذا لم يكن مدير)
+    if (employee.role !== 'admin' && permissions) {
+      employee.permissions = permissions;
+    } else if (employee.role === 'admin') {
+      employee.permissions = undefined;
+    }
 
     // تحديث كلمة المرور إذا تم إرسالها
     if (password) {

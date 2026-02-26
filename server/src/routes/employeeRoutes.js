@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const employeeController = require('../controllers/employeeController');
-const { protect, authorize } = require('../middlewares');
+const { protect, requirePermission } = require('../middlewares');
 
-// جميع المسارات تحتاج صلاحيات مدير فقط
+// جميع المسارات تحتاج صلاحيات إدارة الموظفين
 router.use(protect);
-router.use(authorize('admin'));
+router.use(requirePermission('employees.manage'));
 
 router.get('/', employeeController.getEmployees);
 router.get('/:id', employeeController.getEmployee);

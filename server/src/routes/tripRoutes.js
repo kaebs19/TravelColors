@@ -13,7 +13,7 @@ router.get('/:id', tripController.getTrip);
 // Protected routes
 router.post('/',
   protect,
-  authorize('employee', 'admin'),
+  authorize('employee', 'admin', 'accountant'),
   createTripValidator,
   validate,
   tripController.createTrip
@@ -21,7 +21,7 @@ router.post('/',
 
 router.put('/:id',
   protect,
-  authorize('employee', 'admin'),
+  authorize('employee', 'admin', 'accountant'),
   updateTripValidator,
   validate,
   tripController.updateTrip

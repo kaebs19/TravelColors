@@ -30,8 +30,8 @@
   margin-bottom: 1.5rem;
 }
 
-.employees-page .stats-grid.stats-grid-6 {
-  grid-template-columns: repeat(6, 1fr);
+.employees-page .stats-grid.stats-grid-7 {
+  grid-template-columns: repeat(7, 1fr);
 }
 
 .employees-page .stat-card {
@@ -63,6 +63,7 @@
 
 .employees-page .stat-total .stat-icon { background: #e0f2fe; }
 .employees-page .stat-admins .stat-icon { background: #fef3c7; }
+.employees-page .stat-accountants .stat-icon { background: #d1fae5; }
 .employees-page .stat-employees .stat-icon { background: #e0e7ff; }
 .employees-page .stat-active .stat-icon { background: #d1fae5; }
 .employees-page .stat-appointments .stat-icon { background: #fce7f3; }
@@ -336,6 +337,11 @@
 .role-badge.role-admin {
   background: #fef3c7;
   color: #92400e;
+}
+
+.role-badge.role-accountant {
+  background: #d1fae5;
+  color: #065f46;
 }
 
 .role-badge.role-employee {
@@ -806,9 +812,26 @@
   color: #991b1b;
 }
 
+/* Permission Tags */
+.permissions-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.permission-tag {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  background: #e0f2fe;
+  color: #0369a1;
+  border-radius: var(--radius-full);
+  font-size: var(--font-xs);
+  font-weight: 500;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
-  .employees-page .stats-grid.stats-grid-6 {
+  .employees-page .stats-grid.stats-grid-7 {
     grid-template-columns: repeat(3, 1fr);
   }
 
@@ -825,7 +848,7 @@
 
 @media (max-width: 768px) {
   .employees-page .stats-grid,
-  .employees-page .stats-grid.stats-grid-6 {
+  .employees-page .stats-grid.stats-grid-7 {
     grid-template-columns: repeat(2, 1fr);
   }
 

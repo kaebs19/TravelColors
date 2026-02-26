@@ -31,8 +31,8 @@ import AuditLog from './pages/admin/AuditLog';
 import Tasks from './pages/admin/Tasks';
 
 // Protected Route Component
-const ProtectedRoute = ({ children, allowedRoles = [] }) => {
-  const { isAuthenticated, user, loading } = useAuth();
+const ProtectedRoute = ({ children, allowedRoles = [], requiredPermission }) => {
+  const { isAuthenticated, user, hasPermission, loading } = useAuth();
 
   if (loading) {
     return <div>Loading...</div>;
@@ -44,6 +44,10 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
     return <Navigate to="/" replace />;
+  }
+
+  if (requiredPermission && !hasPermission(requiredPermission)) {
+    return <Navigate to="/control/dashboard" replace />;
   }
 
   return children;
@@ -89,7 +93,7 @@ const router = createBrowserRouter([
   {
     path: '/control',
     element: (
-      <ProtectedRoute allowedRoles={['employee', 'admin']}>
+      <ProtectedRoute allowedRoles={['employee', 'accountant', 'admin']}>
         <AdminLayout />
       </ProtectedRoute>
     ),
@@ -157,7 +161,7 @@ const router = createBrowserRouter([
       {
         path: 'audit-log',
         element: (
-          <ProtectedRoute allowedRoles={['admin']}>
+          <ProtectedRoute requiredPermission="audit.view">
             <AuditLog />
           </ProtectedRoute>
         )
@@ -165,7 +169,7 @@ const router = createBrowserRouter([
       {
         path: 'employees',
         element: (
-          <ProtectedRoute allowedRoles={['admin']}>
+          <ProtectedRoute requiredPermission="employees.manage">
             <Employees />
           </ProtectedRoute>
         )
@@ -177,7 +181,7 @@ const router = createBrowserRouter([
       {
         path: 'reports',
         element: (
-          <ProtectedRoute allowedRoles={['admin']}>
+          <ProtectedRoute requiredPermission="reports.view">
             <Reports />
           </ProtectedRoute>
         )
