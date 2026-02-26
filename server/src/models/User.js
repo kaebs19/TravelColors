@@ -69,7 +69,7 @@ userSchema.pre('save', async function() {
 userSchema.pre('save', function() {
   if (this.isNew && !this.permissions && this.role !== 'admin' && this.role !== 'user') {
     const { getDefaultPermissions } = require('../utils/permissions');
-    this.permissions = getDefaultPermissions(this.role);
+    this.permissions = new Map(Object.entries(getDefaultPermissions(this.role)));
   }
 });
 

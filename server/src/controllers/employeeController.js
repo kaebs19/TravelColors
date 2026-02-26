@@ -222,7 +222,7 @@ exports.createEmployee = async (req, res, next) => {
 
     // إضافة الصلاحيات المخصصة (إذا لم يكن مدير)
     if (role !== 'admin' && permissions) {
-      employeeData.permissions = permissions;
+      employeeData.permissions = new Map(Object.entries(permissions));
     }
 
     const employee = await User.create(employeeData);
@@ -278,7 +278,7 @@ exports.updateEmployee = async (req, res, next) => {
 
     // تحديث الصلاحيات (إذا لم يكن مدير)
     if (employee.role !== 'admin' && permissions) {
-      employee.permissions = permissions;
+      employee.permissions = new Map(Object.entries(permissions));
     } else if (employee.role === 'admin') {
       employee.permissions = undefined;
     }
