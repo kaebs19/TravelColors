@@ -16,5 +16,7 @@ module.exports = {
   InvoicePayment: require('./InvoicePayment'),
   AuditLog: require('./AuditLog'),
   // نظام المهام
-  Task: require('./Task')
+  Task: require('./Task'),
+  // محتوى الموقع
+  WebsiteContent: require('./WebsiteContent')
 };

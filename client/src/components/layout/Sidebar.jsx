@@ -83,6 +83,7 @@ const Sidebar = () => {
     ...(hasPermission('employees.manage') ? [
       { path: '/control/employees', label: 'الموظفين', icon: '🧑‍💼' }
     ] : []),
+    { path: '/control/website', label: 'إدارة الموقع', icon: '🌐' },
     { path: '/control/settings', label: 'الإعدادات', icon: '⚙️' },
   ];
 

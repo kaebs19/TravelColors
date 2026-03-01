@@ -1,0 +1,343 @@
+.wm-page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.wm-loading, .wm-error {
+  text-align: center;
+  padding: 60px 20px;
+  color: #64748b;
+  font-size: 1.1rem;
+}
+
+.wm-error button {
+  background: var(--primary-color, #4f46e5);
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 12px;
+  font-family: inherit;
+}
+
+/* Header */
+.wm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.wm-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.wm-header p {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 4px 0 0;
+}
+
+.wm-header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.wm-btn-preview {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #475569;
+  text-decoration: none;
+  font-family: inherit;
+  transition: 0.2s;
+}
+
+.wm-btn-preview:hover { background: #f8fafc; }
+
+.wm-btn-save {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: #16a34a;
+  color: white;
+  font-family: inherit;
+  transition: 0.2s;
+}
+
+.wm-btn-save:hover { background: #15803d; }
+.wm-btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Message */
+.wm-message {
+  padding: 12px 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.wm-message.success { background: #dcfce7; color: #166534; }
+.wm-message.error { background: #fef2f2; color: #991b1b; }
+
+/* Layout */
+.wm-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+/* Tabs */
+.wm-tabs {
+  flex: 0 0 200px;
+  background: white;
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border: 1px solid #e2e8f0;
+  position: sticky;
+  top: 80px;
+}
+
+.wm-tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #475569;
+  text-align: right;
+  transition: 0.2s;
+}
+
+.wm-tab:hover { background: #f8fafc; }
+
+.wm-tab.active {
+  background: #f0fdf4;
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.wm-tab-icon { font-size: 1.1rem; }
+
+/* Content */
+.wm-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.wm-form-section {
+  background: white;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border: 1px solid #e2e8f0;
+}
+
+.wm-form-section h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 20px;
+}
+
+.wm-form-section h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #334155;
+  margin: 0;
+}
+
+/* Form Groups */
+.wm-form-group {
+  margin-bottom: 18px;
+}
+
+.wm-form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+.wm-form-group input[type="text"],
+.wm-form-group input[type="email"],
+.wm-form-group textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: #1e293b;
+  transition: 0.2s;
+  background: #fafafa;
+}
+
+.wm-form-group input:focus,
+.wm-form-group textarea:focus {
+  outline: none;
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+  background: white;
+}
+
+.wm-form-group textarea { resize: vertical; }
+
+.wm-form-group input[type="file"] {
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.wm-form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.wm-form-row .wm-form-group { flex: 1; }
+
+/* Image Preview */
+.wm-image-preview {
+  margin-top: 10px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  max-width: 400px;
+}
+
+.wm-image-preview img {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 200px;
+  object-fit: cover;
+}
+
+.wm-image-preview.small {
+  max-width: 160px;
+}
+
+.wm-image-preview.small img {
+  max-height: 80px;
+  object-fit: contain;
+  padding: 8px;
+}
+
+/* Section Header */
+.wm-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.wm-section-header h3 { margin: 0; }
+.wm-section-header h4 { margin: 0; }
+
+.wm-btn-add {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.wm-btn-add:hover { background: #dcfce7; }
+
+/* Array Items */
+.wm-array-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+
+.wm-array-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.wm-array-item-header span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.wm-btn-remove {
+  background: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+  padding: 4px 14px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.wm-btn-remove:hover { background: #fee2e2; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .wm-page { padding: 16px; }
+
+  .wm-header { flex-direction: column; align-items: flex-start; }
+
+  .wm-layout { flex-direction: column; }
+
+  .wm-tabs {
+    flex: none;
+    width: 100%;
+    display: flex;
+    overflow-x: auto;
+    gap: 4px;
+    position: static;
+  }
+
+  .wm-tab {
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+  }
+
+  .wm-form-row { flex-direction: column; gap: 0; }
+
+  .wm-form-section { padding: 20px; }
+}

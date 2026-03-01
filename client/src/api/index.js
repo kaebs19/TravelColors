@@ -17,3 +17,5 @@ export { default as receiptsApi } from './receiptsApi';
 export { default as auditApi } from './auditApi';
 // نظام المهام
 export { default as tasksApi } from './tasksApi';
+// محتوى الموقع
+export { websiteApi } from './websiteApi';

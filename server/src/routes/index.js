@@ -22,4 +22,7 @@ router.use('/audit', require('./auditRoutes'));
 // نظام المهام
 router.use('/tasks', require('./taskRoutes'));
 
+// محتوى الموقع
+router.use('/website', require('./websiteRoutes'));
+
 module.exports = router;

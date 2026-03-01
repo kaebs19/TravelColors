@@ -29,6 +29,7 @@ import Receipts from './pages/admin/Receipts';
 import Transactions from './pages/admin/Transactions';
 import AuditLog from './pages/admin/AuditLog';
 import Tasks from './pages/admin/Tasks';
+import WebsiteManagement from './pages/admin/WebsiteManagement';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles = [], requiredPermission }) => {
@@ -173,6 +174,10 @@ const router = createBrowserRouter([
             <Employees />
           </ProtectedRoute>
         )
+      },
+      {
+        path: 'website',
+        element: <WebsiteManagement />
       },
       {
         path: 'settings',
