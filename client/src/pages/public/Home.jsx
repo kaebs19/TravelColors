@@ -114,20 +114,21 @@ const Home = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Scroll animations — يجب إعادة الإنشاء عند تحميل التأشيرات أو المحتوى
-  // لأن قسم التأشيرات يُعرض شرطياً (visas.length > 0) بعد تحميل البيانات
+  // Scroll animations — يستخدم data-visible بدل className لتجنب تعارض مع React
+  // React يعيد كتابة className عند إعادة الرسم لكن لا يمس data attributes اليدوية
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
+            entry.target.setAttribute('data-visible', '');
+            observer.unobserve(entry.target); // تحسين الأداء — مرة واحدة فقط
           }
         });
       },
       { threshold: 0.1 }
     );
-    document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+    document.querySelectorAll('.animate-on-scroll:not([data-visible])').forEach(el => observer.observe(el));
     return () => observer.disconnect();
   }, [content, visas]);
 
