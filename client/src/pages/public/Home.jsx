@@ -78,13 +78,23 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    const loadVisas = async () => {
+    let cancelled = false;
+    const loadVisas = async (attempt = 1) => {
       try {
         const res = await visaCatalogApi.getPublicVisas();
-        if (res.success) setVisas((res.data?.visas || res.data) || []);
-      } catch (err) { /* ignore */ }
+        if (!cancelled && res.success) {
+          setVisas((res.data?.visas || res.data) || []);
+        }
+      } catch (err) {
+        console.warn(`[Home] Visa load attempt ${attempt} failed:`, err.message);
+        if (!cancelled && attempt < 3) {
+          await new Promise(r => setTimeout(r, attempt * 1500));
+          return loadVisas(attempt + 1);
+        }
+      }
     };
     loadVisas();
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
@@ -170,7 +180,7 @@ const Home = () => {
         <div className="nav-container">
           <div className="nav-brand" onClick={() => scrollTo('home')}>
             {content.general?.logo ? (
-              <img src={getImageUrl(content.general.logo)} alt={content.general?.siteName} className="nav-logo-img" />
+              <img src={getImageUrl(content.general.logo)} alt={content.general?.siteName} className="nav-logo-img" width="140" height="44" />
             ) : (
               <div className="nav-logo-text">
                 <span className="nav-logo-ar">{content.general?.siteName || 'ألوان المسافر'}</span>
@@ -268,6 +278,7 @@ const Home = () => {
         </div>
       </nav>
 
+      <main>
       {/* Hero - Compact Cards */}
       <section className="hero-compact" ref={el => sectionsRef.current.home = el}>
         <div className="hero-compact-container">
@@ -500,7 +511,7 @@ const Home = () => {
               <div className={`about-feature animate-on-scroll delay-${(i % 2) + 1}`} key={i}>
                 <div className="about-feature-icon">{getIconSvg(feature.icon, 28)}</div>
                 <div className="about-feature-text">
-                  <h4>{feature.title}</h4>
+                  <h3>{feature.title}</h3>
                   <p>{feature.description}</p>
                 </div>
               </div>
@@ -669,6 +680,8 @@ const Home = () => {
         </div>
       </section>
 
+      </main>
+
       {/* Footer */}
       <footer className="footer-main">
         <div className="footer-container">
@@ -677,7 +690,7 @@ const Home = () => {
             <div className="footer-col">
               <div className="footer-brand">
                 {content.general?.logo ? (
-                  <img src={getImageUrl(content.general.logo)} alt={content.general?.siteName} className="footer-logo-img" />
+                  <img src={getImageUrl(content.general.logo)} alt={content.general?.siteName} className="footer-logo-img" width="140" height="48" />
                 ) : (
                   <span className="footer-logo-text">{content.general?.siteName || 'ألوان المسافر'}</span>
                 )}
@@ -692,7 +705,7 @@ const Home = () => {
 
             {/* Col 2: Services */}
             <div className="footer-col">
-              <h4 className="footer-col-title">خدماتنا</h4>
+              <h3 className="footer-col-title">خدماتنا</h3>
               <ul className="footer-links">
                 <li><button onClick={() => scrollTo('services')}>حجوزات الفنادق</button></li>
                 <li><button onClick={() => scrollTo('services')}>حجوزات الطيران</button></li>
@@ -703,7 +716,7 @@ const Home = () => {
 
             {/* Col 3: Company */}
             <div className="footer-col">
-              <h4 className="footer-col-title">الشركة</h4>
+              <h3 className="footer-col-title">الشركة</h3>
               <ul className="footer-links">
                 <li><button onClick={() => scrollTo('about')}>من نحن</button></li>
                 <li><button onClick={() => scrollTo('contact')}>تواصل معنا</button></li>
@@ -714,7 +727,7 @@ const Home = () => {
 
             {/* Col 4: Contact */}
             <div className="footer-col">
-              <h4 className="footer-col-title">تواصل معنا</h4>
+              <h3 className="footer-col-title">تواصل معنا</h3>
               <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="footer-whatsapp-card">
                 <span><span style={{ display: 'inline-flex', verticalAlign: 'middle', marginLeft: '6px' }}>{getIconSvg('💬', 16)}</span> تواصل عبر واتساب</span>
                 <span className="footer-whatsapp-sub">احصل على استشارة مجانية من خبرائنا</span>

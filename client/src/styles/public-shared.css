@@ -315,7 +315,7 @@
 /* Secondary — Outline Teal */
 .pbtn.pbtn-secondary {
   background: white;
-  color: var(--teal);
+  color: #0a7a70;
   border: 1.5px solid var(--teal);
 }
 .pbtn.pbtn-secondary:hover:not(:disabled) {

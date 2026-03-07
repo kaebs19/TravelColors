@@ -7,7 +7,15 @@ const generalLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => {
-    return req.headers.authorization && req.headers.authorization.startsWith('Bearer');
+    // إعفاء المستخدمين المسجلين
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) return true;
+    // إعفاء طلبات القراءة العامة (التأشيرات + محتوى الموقع)
+    if (req.method === 'GET' && (
+      req.path === '/visa-catalog' ||
+      req.path === '/website/public' ||
+      req.path.startsWith('/visa-catalog/')
+    )) return true;
+    return false;
   },
   message: {
     success: false,

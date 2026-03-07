@@ -84,7 +84,11 @@
       "Bash(find /Users/mohammedsaleh/TrColors/client/src -name \"*.jsx\" -exec grep -l \"empty\\\\|no.*found\\\\|no.*data\" {} ;)",
       "Bash(find /Users/mohammedsaleh/TrColors/server/src -name \"*.js\" -exec wc -l {} +)",
       "Bash(npx react-scripts build --no-progress)",
-      "Bash(npx pm2 restart all)"
+      "Bash(npx pm2 restart all)",
+      "Bash(ssh root@69.62.159.2 \"cd /var/www/trcolors && git stash 2>/dev/null; git pull origin main 2>&1 && cd server && npm install --production 2>&1 | tail -3 && pm2 restart trcolors-api 2>&1 | tail -5\")",
+      "Bash(ssh -o ConnectTimeout=15 root@69.62.159.2 \"cd /var/www/trcolors && git stash 2>/dev/null; git pull origin main && cd server && npm install --production 2>&1 | tail -3 && pm2 restart trcolors-api 2>&1 | tail -5\")",
+      "Bash(du -sh /Users/mohammedsaleh/TrColors/client/build/static/js/*)",
+      "Bash(du -h /Users/mohammedsaleh/TrColors/server/uploads/*)"
     ]
   }
 }

@@ -1,63 +1,71 @@
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { useAuth } from './context';
 import { useClientAuth } from './context/ClientAuthContext';
 import { Loader } from './components/common';
 import NotFound from './pages/public/NotFound';
 
-// Layouts
+// Layouts — eager (needed for admin shell)
 import AdminLayout from './components/layout/AdminLayout';
 
-// Auth Pages
-import Login from './pages/auth/Login';
-
-// Public Pages
+// Eager imports — الصفحات الأساسية التي يزورها الزائر فوراً
 import Home from './pages/public/Home';
-import UsVisa from './pages/public/UsVisa';
-import UsVisaForm from './pages/public/UsVisaForm';
-import PrivacyPolicy from './pages/public/PrivacyPolicy';
-import Terms from './pages/public/Terms';
-import ContactUs from './pages/public/ContactUs';
-import InternationalLicense from './pages/public/InternationalLicense';
-import LicenseForm from './pages/public/LicenseForm';
-import VisaCatalog from './pages/public/VisaCatalog';
-import VisaDetail from './pages/public/VisaDetail';
-import VisaServiceForm from './pages/public/VisaServiceForm';
-
-// Portal Pages (Client)
+import Login from './pages/auth/Login';
 import ClientLogin from './pages/portal/ClientLogin';
-import ClientRegister from './pages/portal/ClientRegister';
-import ClientDashboard from './pages/portal/ClientDashboard';
-import ClientApplicationView from './pages/portal/ClientApplicationView';
-import ClientLicenseView from './pages/portal/ClientLicenseView';
-import ClientProfile from './pages/portal/ClientProfile';
-import ForgotPassword from './pages/portal/ForgotPassword';
-import ResetPassword from './pages/portal/ResetPassword';
 
-// Admin Pages
-import Dashboard from './pages/admin/Dashboard';
-import Appointments from './pages/admin/Appointments';
-import AddAppointment from './pages/admin/AddAppointment';
-import Trips from './pages/admin/Trips';
-import Bookings from './pages/admin/Bookings';
-import Customers from './pages/admin/Customers';
-import CustomerDetails from './pages/admin/CustomerDetails';
-import Departments from './pages/admin/Departments';
-import Employees from './pages/admin/Employees';
-import Settings from './pages/admin/Settings';
-import Notes from './pages/admin/Notes';
-import Reports from './pages/admin/Reports';
-import CashRegister from './pages/admin/CashRegister';
-import Invoices from './pages/admin/Invoices';
-import Receipts from './pages/admin/Receipts';
-import Transactions from './pages/admin/Transactions';
-import AuditLog from './pages/admin/AuditLog';
-import Tasks from './pages/admin/Tasks';
-import WebsiteManagement from './pages/admin/WebsiteManagement';
-import VisaApplications from './pages/admin/VisaApplications';
-import VisaApplicationDetails from './pages/admin/VisaApplicationDetails';
-import LicenseApplicationDetails from './pages/admin/LicenseApplicationDetails';
-import VisaServiceApplications from './pages/admin/VisaServiceApplications';
-import VisaServiceAppDetails from './pages/admin/VisaServiceAppDetails';
+// Lazy wrapper — يعرض Loader أثناء تحميل الصفحة
+const L = (Component) => (
+  <Suspense fallback={<Loader fullScreen />}>
+    <Component />
+  </Suspense>
+);
+
+// Public Pages — lazy loaded
+const UsVisa = lazy(() => import('./pages/public/UsVisa'));
+const UsVisaForm = lazy(() => import('./pages/public/UsVisaForm'));
+const PrivacyPolicy = lazy(() => import('./pages/public/PrivacyPolicy'));
+const Terms = lazy(() => import('./pages/public/Terms'));
+const ContactUs = lazy(() => import('./pages/public/ContactUs'));
+const InternationalLicense = lazy(() => import('./pages/public/InternationalLicense'));
+const LicenseForm = lazy(() => import('./pages/public/LicenseForm'));
+const VisaCatalog = lazy(() => import('./pages/public/VisaCatalog'));
+const VisaDetail = lazy(() => import('./pages/public/VisaDetail'));
+const VisaServiceForm = lazy(() => import('./pages/public/VisaServiceForm'));
+
+// Portal Pages — lazy loaded
+const ClientRegister = lazy(() => import('./pages/portal/ClientRegister'));
+const ClientDashboard = lazy(() => import('./pages/portal/ClientDashboard'));
+const ClientApplicationView = lazy(() => import('./pages/portal/ClientApplicationView'));
+const ClientLicenseView = lazy(() => import('./pages/portal/ClientLicenseView'));
+const ClientProfile = lazy(() => import('./pages/portal/ClientProfile'));
+const ForgotPassword = lazy(() => import('./pages/portal/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/portal/ResetPassword'));
+
+// Admin Pages — lazy loaded (أكبر قسم — ~20 صفحة)
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const Appointments = lazy(() => import('./pages/admin/Appointments'));
+const AddAppointment = lazy(() => import('./pages/admin/AddAppointment'));
+const Trips = lazy(() => import('./pages/admin/Trips'));
+const Bookings = lazy(() => import('./pages/admin/Bookings'));
+const Customers = lazy(() => import('./pages/admin/Customers'));
+const CustomerDetails = lazy(() => import('./pages/admin/CustomerDetails'));
+const Departments = lazy(() => import('./pages/admin/Departments'));
+const Employees = lazy(() => import('./pages/admin/Employees'));
+const Settings = lazy(() => import('./pages/admin/Settings'));
+const Notes = lazy(() => import('./pages/admin/Notes'));
+const Reports = lazy(() => import('./pages/admin/Reports'));
+const CashRegister = lazy(() => import('./pages/admin/CashRegister'));
+const Invoices = lazy(() => import('./pages/admin/Invoices'));
+const Receipts = lazy(() => import('./pages/admin/Receipts'));
+const Transactions = lazy(() => import('./pages/admin/Transactions'));
+const AuditLog = lazy(() => import('./pages/admin/AuditLog'));
+const Tasks = lazy(() => import('./pages/admin/Tasks'));
+const WebsiteManagement = lazy(() => import('./pages/admin/WebsiteManagement'));
+const VisaApplications = lazy(() => import('./pages/admin/VisaApplications'));
+const VisaApplicationDetails = lazy(() => import('./pages/admin/VisaApplicationDetails'));
+const LicenseApplicationDetails = lazy(() => import('./pages/admin/LicenseApplicationDetails'));
+const VisaServiceApplications = lazy(() => import('./pages/admin/VisaServiceApplications'));
+const VisaServiceAppDetails = lazy(() => import('./pages/admin/VisaServiceAppDetails'));
 
 // Protected Route Component (Admin/Employee)
 const ProtectedRoute = ({ children, allowedRoles = [], requiredPermission }) => {
@@ -135,7 +143,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/us-visa',
-    element: <UsVisa />
+    element: L(UsVisa)
   },
   {
     path: '/us-visa/apply',
@@ -143,27 +151,27 @@ const router = createBrowserRouter([
   },
   {
     path: '/privacy',
-    element: <PrivacyPolicy />
+    element: L(PrivacyPolicy)
   },
   {
     path: '/terms',
-    element: <Terms />
+    element: L(Terms)
   },
   {
     path: '/ContactUs',
-    element: <ContactUs />
+    element: L(ContactUs)
   },
   {
     path: '/visas',
-    element: <VisaCatalog />
+    element: L(VisaCatalog)
   },
   {
     path: '/visas/:slug',
-    element: <VisaDetail />
+    element: L(VisaDetail)
   },
   {
     path: '/international-license',
-    element: <InternationalLicense />
+    element: L(InternationalLicense)
   },
   {
     path: '/login',
@@ -187,7 +195,7 @@ const router = createBrowserRouter([
     path: '/portal/register',
     element: (
       <ClientPublicRoute>
-        <ClientRegister />
+        <Suspense fallback={<Loader fullScreen />}><ClientRegister /></Suspense>
       </ClientPublicRoute>
     )
   },
@@ -195,7 +203,7 @@ const router = createBrowserRouter([
     path: '/portal/forgot-password',
     element: (
       <ClientPublicRoute>
-        <ForgotPassword />
+        <Suspense fallback={<Loader fullScreen />}><ForgotPassword /></Suspense>
       </ClientPublicRoute>
     )
   },
@@ -203,7 +211,7 @@ const router = createBrowserRouter([
     path: '/portal/reset-password/:token',
     element: (
       <ClientPublicRoute>
-        <ResetPassword />
+        <Suspense fallback={<Loader fullScreen />}><ResetPassword /></Suspense>
       </ClientPublicRoute>
     )
   },
@@ -211,7 +219,7 @@ const router = createBrowserRouter([
     path: '/portal/dashboard',
     element: (
       <ClientProtectedRoute>
-        <ClientDashboard />
+        <Suspense fallback={<Loader fullScreen />}><ClientDashboard /></Suspense>
       </ClientProtectedRoute>
     )
   },
@@ -219,7 +227,7 @@ const router = createBrowserRouter([
     path: '/portal/apply',
     element: (
       <ClientProtectedRoute>
-        <UsVisaForm />
+        <Suspense fallback={<Loader fullScreen />}><UsVisaForm /></Suspense>
       </ClientProtectedRoute>
     )
   },
@@ -227,7 +235,7 @@ const router = createBrowserRouter([
     path: '/portal/apply/:id',
     element: (
       <ClientProtectedRoute>
-        <UsVisaForm />
+        <Suspense fallback={<Loader fullScreen />}><UsVisaForm /></Suspense>
       </ClientProtectedRoute>
     )
   },
@@ -235,7 +243,7 @@ const router = createBrowserRouter([
     path: '/portal/view/:id',
     element: (
       <ClientProtectedRoute>
-        <ClientApplicationView />
+        <Suspense fallback={<Loader fullScreen />}><ClientApplicationView /></Suspense>
       </ClientProtectedRoute>
     )
   },
@@ -243,7 +251,7 @@ const router = createBrowserRouter([
     path: '/portal/license/apply',
     element: (
       <ClientProtectedRoute>
-        <LicenseForm />
+        <Suspense fallback={<Loader fullScreen />}><LicenseForm /></Suspense>
       </ClientProtectedRoute>
     )
   },
@@ -251,7 +259,7 @@ const router = createBrowserRouter([
     path: '/portal/license/apply/:id',
     element: (
       <ClientProtectedRoute>
-        <LicenseForm />
+        <Suspense fallback={<Loader fullScreen />}><LicenseForm /></Suspense>
       </ClientProtectedRoute>
     )
   },
@@ -259,7 +267,7 @@ const router = createBrowserRouter([
     path: '/portal/profile',
     element: (
       <ClientProtectedRoute>
-        <ClientProfile />
+        <Suspense fallback={<Loader fullScreen />}><ClientProfile /></Suspense>
       </ClientProtectedRoute>
     )
   },
@@ -267,7 +275,7 @@ const router = createBrowserRouter([
     path: '/portal/license/view/:id',
     element: (
       <ClientProtectedRoute>
-        <ClientLicenseView />
+        <Suspense fallback={<Loader fullScreen />}><ClientLicenseView /></Suspense>
       </ClientProtectedRoute>
     )
   },
@@ -275,7 +283,7 @@ const router = createBrowserRouter([
     path: '/portal/visa-apply/:visaId',
     element: (
       <ClientProtectedRoute>
-        <VisaServiceForm />
+        <Suspense fallback={<Loader fullScreen />}><VisaServiceForm /></Suspense>
       </ClientProtectedRoute>
     )
   },
@@ -283,7 +291,7 @@ const router = createBrowserRouter([
     path: '/portal/visa-apply/:visaId/:id',
     element: (
       <ClientProtectedRoute>
-        <VisaServiceForm />
+        <Suspense fallback={<Loader fullScreen />}><VisaServiceForm /></Suspense>
       </ClientProtectedRoute>
     )
   },
@@ -309,65 +317,65 @@ const router = createBrowserRouter([
       },
       {
         path: 'dashboard',
-        element: <Dashboard />
+        element: <Suspense fallback={<Loader />}><Dashboard /></Suspense>
       },
       {
         path: 'appointments',
-        element: <Appointments />
+        element: <Suspense fallback={<Loader />}><Appointments /></Suspense>
       },
       {
         path: 'appointments/add',
-        element: <AddAppointment />
+        element: <Suspense fallback={<Loader />}><AddAppointment /></Suspense>
       },
       {
         path: 'tasks',
-        element: <Tasks />
+        element: <Suspense fallback={<Loader />}><Tasks /></Suspense>
       },
       {
         path: 'notes',
-        element: <Notes />
+        element: <Suspense fallback={<Loader />}><Notes /></Suspense>
       },
       {
         path: 'trips',
-        element: <Trips />
+        element: <Suspense fallback={<Loader />}><Trips /></Suspense>
       },
       {
         path: 'bookings',
-        element: <Bookings />
+        element: <Suspense fallback={<Loader />}><Bookings /></Suspense>
       },
       {
         path: 'customers',
-        element: <Customers />
+        element: <Suspense fallback={<Loader />}><Customers /></Suspense>
       },
       {
         path: 'customers/:id',
-        element: <CustomerDetails />
+        element: <Suspense fallback={<Loader />}><CustomerDetails /></Suspense>
       },
       {
         path: 'departments',
-        element: <Departments />
+        element: <Suspense fallback={<Loader />}><Departments /></Suspense>
       },
       {
         path: 'cash-register',
-        element: <CashRegister />
+        element: <Suspense fallback={<Loader />}><CashRegister /></Suspense>
       },
       {
         path: 'invoices',
-        element: <Invoices />
+        element: <Suspense fallback={<Loader />}><Invoices /></Suspense>
       },
       {
         path: 'receipts',
-        element: <Receipts />
+        element: <Suspense fallback={<Loader />}><Receipts /></Suspense>
       },
       {
         path: 'transactions',
-        element: <Transactions />
+        element: <Suspense fallback={<Loader />}><Transactions /></Suspense>
       },
       {
         path: 'audit-log',
         element: (
           <ProtectedRoute requiredPermission="audit.view">
-            <AuditLog />
+            <Suspense fallback={<Loader />}><AuditLog /></Suspense>
           </ProtectedRoute>
         )
       },
@@ -375,51 +383,51 @@ const router = createBrowserRouter([
         path: 'employees',
         element: (
           <ProtectedRoute requiredPermission="employees.manage">
-            <Employees />
+            <Suspense fallback={<Loader />}><Employees /></Suspense>
           </ProtectedRoute>
         )
       },
       {
         path: 'visa-applications',
-        element: <VisaApplications />
+        element: <Suspense fallback={<Loader />}><VisaApplications /></Suspense>
       },
       {
         path: 'visa-applications/:id',
-        element: <VisaApplicationDetails />
+        element: <Suspense fallback={<Loader />}><VisaApplicationDetails /></Suspense>
       },
       {
         path: 'website',
-        element: <WebsiteManagement />
+        element: <Suspense fallback={<Loader />}><WebsiteManagement /></Suspense>
       },
       {
         path: 'contacts',
-        element: <WebsiteManagement initialTab="contact" />
+        element: <Suspense fallback={<Loader />}><WebsiteManagement initialTab="contact" /></Suspense>
       },
       {
         path: 'license-applications',
-        element: <WebsiteManagement initialTab="licenseApps" />
+        element: <Suspense fallback={<Loader />}><WebsiteManagement initialTab="licenseApps" /></Suspense>
       },
       {
         path: 'license-applications/:id',
-        element: <LicenseApplicationDetails />
+        element: <Suspense fallback={<Loader />}><LicenseApplicationDetails /></Suspense>
       },
       {
         path: 'visa-service-applications',
-        element: <VisaServiceApplications />
+        element: <Suspense fallback={<Loader />}><VisaServiceApplications /></Suspense>
       },
       {
         path: 'visa-service-applications/:id',
-        element: <VisaServiceAppDetails />
+        element: <Suspense fallback={<Loader />}><VisaServiceAppDetails /></Suspense>
       },
       {
         path: 'settings',
-        element: <Settings />
+        element: <Suspense fallback={<Loader />}><Settings /></Suspense>
       },
       {
         path: 'reports',
         element: (
           <ProtectedRoute requiredPermission="reports.view">
-            <Reports />
+            <Suspense fallback={<Loader />}><Reports /></Suspense>
           </ProtectedRoute>
         )
       }

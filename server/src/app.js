@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const compression = require('compression');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
 const path = require('path');
@@ -27,6 +28,9 @@ const { generalLimiter } = require('./middlewares/rateLimiter');
 // Initialize express
 const app = express();
 
+// Gzip compression — يقلل حجم الاستجابات ~60-70%
+app.use(compression());
+
 // Body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -52,6 +56,7 @@ app.use(cors({
 app.use('/uploads', (req, res, next) => {
   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cache-Control', 'public, max-age=2592000'); // 30 يوم
   next();
 }, express.static(path.join(__dirname, '../uploads')));
 
