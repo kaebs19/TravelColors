@@ -83,7 +83,8 @@
       "Bash(npx pm2 start src/app.js --name trcolors-api --update-env)",
       "Bash(find /Users/mohammedsaleh/TrColors/client/src -name \"*.jsx\" -exec grep -l \"empty\\\\|no.*found\\\\|no.*data\" {} ;)",
       "Bash(find /Users/mohammedsaleh/TrColors/server/src -name \"*.js\" -exec wc -l {} +)",
-      "Bash(npx react-scripts build --no-progress)"
+      "Bash(npx react-scripts build --no-progress)",
+      "Bash(npx pm2 restart all)"
     ]
   }
 }

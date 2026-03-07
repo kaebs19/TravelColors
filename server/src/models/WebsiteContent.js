@@ -39,6 +39,15 @@ const websiteContentSchema = new mongoose.Schema({
     answer: { type: String, required: true }
   }],
 
+  // آراء العملاء
+  testimonials: [{
+    name: { type: String, required: true },
+    text: { type: String, required: true },
+    stars: { type: Number, default: 5, min: 1, max: 5 },
+    source: { type: String, default: 'google' },
+    isActive: { type: Boolean, default: true }
+  }],
+
   // معلومات التواصل
   contact: {
     phone: { type: String, default: '+966 55 922 9597' },
@@ -193,6 +202,12 @@ const DEFAULT_WORKING_HOURS = {
   fridayIsOff: true
 };
 
+const DEFAULT_TESTIMONIALS = [
+  { name: 'أحمد م.', text: 'تجربة ممتازة في استخراج تأشيرة الشنقن. الفريق محترف وسريع في الإنجاز. أنصح بالتعامل معهم.', stars: 5, source: 'google', isActive: true },
+  { name: 'سارة ع.', text: 'حجزت رحلة شهر العسل عن طريقهم وكانت التجربة مذهلة. التنظيم كان ممتاز والأسعار منافسة.', stars: 5, source: 'google', isActive: true },
+  { name: 'خالد ف.', text: 'ساعدوني في استخراج التأشيرة الأمريكية بكل سهولة. الدعم كان متواصل من البداية للنهاية.', stars: 5, source: 'google', isActive: true }
+];
+
 const DEFAULT_MAP_EMBED = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3550.813903803563!2d46.646181899999995!3d24.810952199999996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e2f01b654ba264b%3A0x30a7fd8506bf489a!2z2KfZhNmI2KfZhiDYp9mE2YXYs9in2YHYsSDZhNmE2LPZgdixINmIINin2YTYs9mK2KfYrdip!5e1!3m2!1sar!2sus!4v1772396758449!5m2!1sar!2sus';
 
 // إنشاء المحتوى الافتراضي إذا لم يكن موجوداً
@@ -226,6 +241,11 @@ websiteContentSchema.statics.getContent = async function() {
         { question: 'هل يمكن إلغاء الحجز واسترداد المبلغ؟', answer: 'نعم، حسب سياسة الإلغاء الخاصة بكل خدمة. رسوم التأشيرة غير قابلة للاسترداد بعد التقديم.' },
         { question: 'هل تقدمون خدمات لجميع مدن المملكة؟', answer: 'نعم، نخدم عملاءنا في جميع مدن المملكة مع توفير مواعيد في الرياض وجدة والدمام.' }
       ],
+      testimonials: [
+        { name: 'أحمد م.', text: 'تجربة ممتازة في استخراج تأشيرة الشنقن. الفريق محترف وسريع في الإنجاز. أنصح بالتعامل معهم.', stars: 5, source: 'google', isActive: true },
+        { name: 'سارة ع.', text: 'حجزت رحلة شهر العسل عن طريقهم وكانت التجربة مذهلة. التنظيم كان ممتاز والأسعار منافسة.', stars: 5, source: 'google', isActive: true },
+        { name: 'خالد ف.', text: 'ساعدوني في استخراج التأشيرة الأمريكية بكل سهولة. الدعم كان متواصل من البداية للنهاية.', stars: 5, source: 'google', isActive: true }
+      ],
       contactDepartments: DEFAULT_CONTACT_DEPARTMENTS,
       workingHours: DEFAULT_WORKING_HOURS,
       mapEmbed: DEFAULT_MAP_EMBED,
@@ -256,6 +276,9 @@ websiteContentSchema.statics.getContent = async function() {
     }
     if (!content.mapEmbed) {
       updates.mapEmbed = DEFAULT_MAP_EMBED;
+    }
+    if (!content.testimonials || content.testimonials.length === 0) {
+      updates.testimonials = DEFAULT_TESTIMONIALS;
     }
     if (Object.keys(updates).length > 0) {
       content = await this.findOneAndUpdate(

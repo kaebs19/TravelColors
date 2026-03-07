@@ -17,6 +17,7 @@ const TABS = [
   { id: 'licenseApps', label: 'طلبات الرخصة', icon: '🪪' },
   { id: 'clients', label: 'المستخدمين', icon: '👥' },
   { id: 'email', label: 'خدمات البريد', icon: '📧' },
+  { id: 'testimonials', label: 'آراء العملاء', icon: '⭐' },
   { id: 'visaCatalog', label: 'كتالوج التأشيرات', icon: '🌍' }
 ];
 
@@ -547,6 +548,72 @@ const WebsiteManagement = ({ initialTab = 'hero' }) => {
           </div>
         </div>
       ))}
+    </div>
+  );
+
+  const renderTestimonialsTab = () => (
+    <div className="wm-form-section">
+      <div className="wm-section-header">
+        <h3>آراء العملاء ({(content.testimonials || []).filter(t => t.isActive !== false).length} مفعّل من {content.testimonials?.length || 0})</h3>
+        <button className="wm-btn-add" onClick={() => addArrayItem('testimonials', { name: '', text: '', stars: 5, source: 'google', isActive: true })}>
+          + إضافة رأي
+        </button>
+      </div>
+      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '16px' }}>
+        أضف آراء العملاء يدوياً من تقييمات قوقل أو غيرها. فقط الآراء المفعّلة ستظهر في الصفحة الرئيسية.
+      </p>
+      {(content.testimonials || []).map((item, i) => (
+        <div className="wm-array-item" key={i} style={{ borderRight: item.isActive !== false ? '4px solid var(--primary-color)' : '4px solid #ccc', opacity: item.isActive !== false ? 1 : 0.6 }}>
+          <div className="wm-array-item-header">
+            <span>رأي {i + 1} {item.isActive === false ? '(مخفي)' : ''}</span>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                className="wm-btn-remove"
+                style={{ background: item.isActive !== false ? '#f59e0b' : '#22c55e', color: '#fff' }}
+                onClick={() => updateArrayItem('testimonials', i, 'isActive', item.isActive === false ? true : false)}
+              >
+                {item.isActive !== false ? 'إخفاء' : 'تفعيل'}
+              </button>
+              <button className="wm-btn-remove" onClick={() => removeArrayItem('testimonials', i)}>حذف</button>
+            </div>
+          </div>
+          <div className="wm-form-row">
+            <div className="wm-form-group">
+              <label>اسم العميل</label>
+              <input type="text" value={item.name || ''} onChange={e => updateArrayItem('testimonials', i, 'name', e.target.value)} placeholder="مثال: أحمد م." />
+            </div>
+            <div className="wm-form-group" style={{ maxWidth: '120px' }}>
+              <label>التقييم</label>
+              <select value={item.stars || 5} onChange={e => updateArrayItem('testimonials', i, 'stars', Number(e.target.value))}>
+                <option value={5}>★★★★★</option>
+                <option value={4}>★★★★</option>
+                <option value={3}>★★★</option>
+                <option value={2}>★★</option>
+                <option value={1}>★</option>
+              </select>
+            </div>
+            <div className="wm-form-group" style={{ maxWidth: '150px' }}>
+              <label>المصدر</label>
+              <select value={item.source || 'google'} onChange={e => updateArrayItem('testimonials', i, 'source', e.target.value)}>
+                <option value="google">Google</option>
+                <option value="twitter">Twitter</option>
+                <option value="instagram">Instagram</option>
+                <option value="direct">مباشر</option>
+              </select>
+            </div>
+          </div>
+          <div className="wm-form-group">
+            <label>نص الرأي</label>
+            <textarea rows={3} value={item.text || ''} onChange={e => updateArrayItem('testimonials', i, 'text', e.target.value)} placeholder="اكتب رأي العميل هنا..." />
+          </div>
+        </div>
+      ))}
+      {(!content.testimonials || content.testimonials.length === 0) && (
+        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
+          <p style={{ fontSize: '2rem', marginBottom: '8px' }}>⭐</p>
+          <p>لا توجد آراء بعد. أضف أول رأي من الزر أعلاه.</p>
+        </div>
+      )}
     </div>
   );
 
@@ -1738,6 +1805,7 @@ const WebsiteManagement = ({ initialTab = 'hero' }) => {
       case 'services': return renderServicesTab();
       case 'about': return renderAboutTab();
       case 'faq': return renderFaqTab();
+      case 'testimonials': return renderTestimonialsTab();
       case 'contact': return renderContactTab();
       case 'general': return renderGeneralTab();
       case 'americanVisa': return renderAmericanVisaTab();

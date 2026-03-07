@@ -81,7 +81,7 @@ const Home = () => {
     const loadVisas = async () => {
       try {
         const res = await visaCatalogApi.getPublicVisas();
-        if (res.success) setVisas(((res.data?.visas || res.data) || []).slice(0, 6));
+        if (res.success) setVisas((res.data?.visas || res.data) || []);
       } catch (err) { /* ignore */ }
     };
     loadVisas();
@@ -376,104 +376,117 @@ const Home = () => {
       </section>
 
       {/* Visa Catalog */}
-      {visas.length > 0 && (
-        <section className="visa-catalog-section">
-          <div className="section-container">
-            <div className="visa-catalog-header animate-on-scroll">
-              <h2>تأشيراتنا</h2>
-              <span className="visa-catalog-header-line"></span>
-              <p>اختر وجهتك واحصل على تأشيرتك بأسرع وقت</p>
-            </div>
-            <div className="visa-catalog-grid">
-              {visas.map((visa, i) => (
-                <div
-                  className={`visa-catalog-card animate-on-scroll delay-${(i % 3) + 1}`}
-                  key={visa._id}
-                  onClick={() => navigate(`/visas/${visa.slug}`)}
-                >
-                  {/* Cover Image */}
-                  <div className="visa-catalog-cover">
-                    {visa.coverImage ? (
-                      <img src={getImageUrl(visa.coverImage)} alt={visa.countryName} loading="lazy" />
-                    ) : (
-                      <div className="visa-catalog-cover-placeholder">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="48" height="48"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                      </div>
-                    )}
-                    <div className="visa-catalog-overlay"></div>
+      {visas.length > 0 && (() => {
+        const electronicVisas = visas.filter(v => v.visaType === 'إلكترونية').slice(0, 5);
+        const regularVisas = visas.filter(v => v.visaType !== 'إلكترونية').slice(0, 5);
 
-                    {/* Flag */}
-                    <div className="visa-catalog-flag">
-                      {visa.flagImage ? (
-                        <img src={getImageUrl(visa.flagImage)} alt="علم" loading="lazy" />
-                      ) : (
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" width="24" height="24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" strokeLinecap="round" strokeLinejoin="round"/><line x1="4" y1="22" x2="4" y2="15" strokeLinecap="round"/></svg>
-                      )}
-                    </div>
-
-                    {/* Rating Stars */}
-                    {visa.rating > 0 && (
-                      <span className="visa-catalog-rating">
-                        <span className="star-rating">
-                          {[1, 2, 3, 4, 5].map(star => (
-                            <svg key={star} viewBox="0 0 24 24" fill={star <= visa.rating ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" width="14" height="14" className={star <= visa.rating ? 'star-filled' : 'star-empty'}>
-                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                            </svg>
-                          ))}
-                        </span>
-                      </span>
-                    )}
-
-                    {/* Popular Badge */}
-                    {visa.isFeatured && (
-                      <span className="visa-catalog-popular">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M12 2L9 9H2l5.5 4.5L5 21l7-4.5L19 21l-2.5-7.5L22 9h-7L12 2z"/></svg>
-                        الأكثر طلباً
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Card Body */}
-                  <div className="visa-catalog-body">
-                    <h3 className="visa-catalog-name">{visa.countryName?.replace(/^التأشيرة\s*/i, '')}</h3>
-
-                    {visa.requirements?.[0]?.title && (
-                      <p className="visa-catalog-desc">{visa.requirements[0].title}</p>
-                    )}
-
-                    {/* Price Row */}
-                    <div className="visa-catalog-price-row">
-                      <div className="visa-catalog-price">
-                        {visa.offerEnabled && visa.offerPrice ? (
-                          <>
-                            <span className="visa-catalog-price-old">{visa.price} {visa.currency || 'ريال'}</span>
-                            <span className="visa-catalog-price-new">{visa.offerPrice} {visa.currency || 'ريال'}</span>
-                          </>
-                        ) : (
-                          <span className="visa-catalog-price-current">{visa.price} <small>{visa.currency || 'ريال'}</small></span>
-                        )}
-                      </div>
-                      <span className="visa-catalog-available">متاح</span>
-                    </div>
-
-                    {/* CTA */}
-                    <button className="pbtn pbtn-full pbtn-primary visa-catalog-btn">
-                      {visa.visaType === 'إلكترونية' ? 'قدّم الآن' : 'احجز الآن'}
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    </button>
-                  </div>
+        const renderVisaCard = (visa, i) => (
+          <div
+            className="visa-catalog-card animate-on-scroll"
+            key={visa._id}
+            style={{ animationDelay: `${i * 0.1}s` }}
+            onClick={() => navigate(`/visas/${visa.slug}`)}
+          >
+            <div className="visa-catalog-cover">
+              {visa.coverImage ? (
+                <img src={getImageUrl(visa.coverImage)} alt={visa.countryName} loading="lazy" />
+              ) : (
+                <div className="visa-catalog-cover-placeholder">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="40" height="40"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
-              ))}
+              )}
+              <div className="visa-catalog-overlay"></div>
+              <div className="visa-catalog-flag">
+                {visa.flagImage ? (
+                  <img src={getImageUrl(visa.flagImage)} alt="علم" loading="lazy" />
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" width="22" height="22"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" strokeLinecap="round" strokeLinejoin="round"/><line x1="4" y1="22" x2="4" y2="15" strokeLinecap="round"/></svg>
+                )}
+              </div>
+              {visa.isFeatured && (
+                <span className="visa-catalog-popular">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="11" height="11"><path d="M12 2L9 9H2l5.5 4.5L5 21l7-4.5L19 21l-2.5-7.5L22 9h-7L12 2z"/></svg>
+                  الأكثر طلباً
+                </span>
+              )}
             </div>
-            <div className="visa-catalog-browse animate-on-scroll">
-              <button className="pbtn pbtn-lg pbtn-secondary visa-catalog-browse-btn" onClick={() => navigate('/visas')}>
-                تصفح جميع التأشيرات
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <div className="visa-catalog-body">
+              <h3 className="visa-catalog-name">{visa.countryName?.replace(/^التأشيرة\s*/i, '')}</h3>
+              <p className="visa-catalog-desc">احصل على تأشيرتك {visa.countryName?.replace(/^التأشيرة\s*/i, '')} بسهولة وأمان</p>
+              <div className="visa-catalog-price-row">
+                <div className="visa-catalog-price">
+                  {visa.offerEnabled && visa.offerPrice ? (
+                    <>
+                      <span className="visa-catalog-price-old">{visa.price} {visa.currency || 'ريال'}</span>
+                      <span className="visa-catalog-price-new">{visa.offerPrice} {visa.currency || 'ريال'}</span>
+                    </>
+                  ) : (
+                    <span className="visa-catalog-price-current">{visa.price} <small>{visa.currency || 'ريال'}</small></span>
+                  )}
+                </div>
+                <span className="visa-catalog-available">متاح</span>
+              </div>
+              <button className="pbtn pbtn-full pbtn-primary visa-catalog-btn">
+                {visa.visaType === 'إلكترونية' ? 'قدّم الآن' : 'احجز الآن'}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </button>
             </div>
           </div>
-        </section>
-      )}
+        );
+
+        return (
+          <section className="visa-catalog-section">
+            <div className="section-container">
+              <div className="visa-catalog-header animate-on-scroll">
+                <div className="visa-catalog-header-top">
+                  <div>
+                    <h2>تأشيراتنا</h2>
+                    <span className="visa-catalog-header-line"></span>
+                    <p>اختر وجهتك واحصل على تأشيرتك بأسرع وقت</p>
+                  </div>
+                  <button className="pbtn pbtn-secondary visa-catalog-browse-btn" onClick={() => navigate('/visas')}>
+                    تصفح جميع التأشيرات
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Electronic Visas Row */}
+              {electronicVisas.length > 0 && (
+                <>
+                  <div className="visa-catalog-row-header animate-on-scroll">
+                    <span className="visa-catalog-row-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round"/><path d="M14 2v6h6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </span>
+                    <h3>تأشيرات إلكترونية</h3>
+                    <span className="visa-catalog-row-badge elec">قدّم أونلاين</span>
+                  </div>
+                  <div className="visa-catalog-grid">
+                    {electronicVisas.map((visa, i) => renderVisaCard(visa, i))}
+                  </div>
+                </>
+              )}
+
+              {/* Regular Visas Row */}
+              {regularVisas.length > 0 && (
+                <>
+                  <div className="visa-catalog-row-header animate-on-scroll">
+                    <span className="visa-catalog-row-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20"><path d="M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><circle cx="12" cy="10" r="3"/><path d="M8 17h8"/></svg>
+                    </span>
+                    <h3>تأشيرات عادية</h3>
+                    <span className="visa-catalog-row-badge regular">نجهّزها لك</span>
+                  </div>
+                  <div className="visa-catalog-grid">
+                    {regularVisas.map((visa, i) => renderVisaCard(visa, i))}
+                  </div>
+                </>
+              )}
+
+            </div>
+          </section>
+        );
+      })()}
 
       {/* About */}
       <section className="about-section" ref={el => sectionsRef.current.about = el}>
@@ -543,28 +556,33 @@ const Home = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="testimonials-section">
-        <div className="section-container">
-          <div className="section-header animate-on-scroll">
-            <h2>آراء عملائنا</h2>
-            <p>ثقة عملائنا هي أكبر إنجاز لنا</p>
+      {(content.testimonials || []).filter(t => t.isActive !== false).length > 0 && (
+        <section className="testimonials-section">
+          <div className="section-container">
+            <div className="section-header animate-on-scroll">
+              <h2>آراء عملائنا</h2>
+              <p>ثقة عملائنا هي أكبر إنجاز لنا</p>
+            </div>
+            <div className="testimonials-grid">
+              {(content.testimonials || []).filter(t => t.isActive !== false).map((t, i) => (
+                <div className={`testimonial-card animate-on-scroll delay-${(i % 3) + 1}`} key={i}>
+                  <div className="testimonial-quote">"</div>
+                  <div className="testimonial-stars">{'★'.repeat(t.stars || 5)}</div>
+                  <p className="testimonial-text">{t.text}</p>
+                  <div className="testimonial-author">
+                    <span>{t.name}</span>
+                    {t.source && t.source !== 'direct' && (
+                      <span className="testimonial-source">
+                        {t.source === 'google' ? '— Google' : t.source === 'twitter' ? '— Twitter' : t.source === 'instagram' ? '— Instagram' : ''}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="testimonials-grid">
-            {[
-              { name: 'أحمد م.', text: 'تجربة ممتازة في استخراج تأشيرة الشنقن. الفريق محترف وسريع في الإنجاز. أنصح بالتعامل معهم.', stars: 5 },
-              { name: 'سارة ع.', text: 'حجزت رحلة شهر العسل عن طريقهم وكانت التجربة مذهلة. التنظيم كان ممتاز والأسعار منافسة.', stars: 5 },
-              { name: 'خالد ف.', text: 'ساعدوني في استخراج التأشيرة الأمريكية بكل سهولة. الدعم كان متواصل من البداية للنهاية.', stars: 5 }
-            ].map((t, i) => (
-              <div className={`testimonial-card animate-on-scroll delay-${i + 1}`} key={i}>
-                <div className="testimonial-quote">"</div>
-                <div className="testimonial-stars">{'★'.repeat(t.stars)}</div>
-                <p className="testimonial-text">{t.text}</p>
-                <div className="testimonial-author">{t.name}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Contact + Map */}
       <section className="contact-section" ref={el => sectionsRef.current.contact = el}>
