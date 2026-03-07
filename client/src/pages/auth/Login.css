@@ -113,6 +113,37 @@
   background: #f3f4f6;
 }
 
+/* Password toggle wrapper */
+.login-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.login-input-wrapper .login-input {
+  padding-left: 44px;
+}
+
+.login-toggle-pass {
+  position: absolute;
+  left: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: color 200ms ease, background 200ms ease;
+}
+
+.login-toggle-pass:hover {
+  color: #5a9bd5;
+  background: rgba(90, 155, 213, 0.08);
+}
+
 /* زر تسجيل الدخول */
 .login-button {
   width: 100%;

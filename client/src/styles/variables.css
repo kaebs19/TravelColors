@@ -3,28 +3,69 @@
   --primary-color: #2563eb;
   --primary-dark: #1d4ed8;
   --primary-light: #3b82f6;
+  --primary-bg: #eff6ff;
+  --primary-bg-hover: #dbeafe;
 
   /* Secondary Colors */
   --secondary-color: #64748b;
   --secondary-dark: #475569;
   --secondary-light: #94a3b8;
 
+  /* Brand Colors */
+  --brand-navy: #1e3a5f;
+  --brand-navy-dark: #0f2a4a;
+  --whatsapp-color: #25D366;
+  --whatsapp-dark: #1da851;
+  --whatsapp-bg: #128C7E;
+
+  /* Teal Theme (Public Pages) */
+  --teal: #0d9488;
+  --teal-dark: #0f766e;
+  --teal-darker: #115e59;
+  --teal-light: #14b8a6;
+  --teal-bg: #f0fdfa;
+  --teal-bg-hover: #ccfbf1;
+
   /* Accent Colors */
   --accent-color: #f59e0b;
   --success-color: #10b981;
+  --success-dark: #047857;
+  --success-light: #d1fae5;
+  --success-bg: #f0fdf4;
   --danger-color: #ef4444;
+  --danger-light: #fee2e2;
   --warning-color: #f59e0b;
+  --warning-light: #fef3c7;
   --info-color: #3b82f6;
+  --info-light: #dbeafe;
+
+  /* Status Colors */
+  --status-draft: #64748b;
+  --status-draft-bg: #f1f5f9;
+  --status-submitted: #2563eb;
+  --status-submitted-bg: #eff6ff;
+  --status-review: #d97706;
+  --status-review-bg: #fffbeb;
+  --status-approved: #16a34a;
+  --status-approved-bg: #f0fdf4;
+  --status-rejected: #dc2626;
+  --status-rejected-bg: #fef2f2;
+  --status-completed: #7c3aed;
+  --status-completed-bg: #f5f3ff;
+  --status-received: #0891b2;
+  --status-received-bg: #ecfeff;
 
   /* Text Colors */
   --text-color: #1f2937;
   --text-secondary: #6b7280;
   --text-light: #9ca3af;
+  --text-dark: #374151;
 
   /* Background Colors */
   --bg-color: #f9fafb;
   --bg-white: #ffffff;
   --bg-dark: #111827;
+  --bg-light: #f8fafc;
 
   /* Border Colors */
   --border-color: #e5e7eb;

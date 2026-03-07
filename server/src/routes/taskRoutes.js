@@ -34,6 +34,7 @@ router.put('/:id/start', requirePermission('tasks.edit'), taskController.startTa
 router.put('/:id/complete', requirePermission('tasks.edit'), taskController.completeTask);
 router.put('/:id/cancel', requirePermission('tasks.edit'), taskController.cancelTask);
 router.put('/:id/transfer', requirePermission('tasks.edit'), taskController.transferTask);
+router.put('/:id/link-application', requirePermission('tasks.edit'), taskController.linkApplication);
 
 // الملاحظات والمرفقات
 router.post('/:id/notes', requirePermission('tasks.add'), taskController.addTaskNote);

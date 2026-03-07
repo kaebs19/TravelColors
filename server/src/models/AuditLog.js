@@ -23,7 +23,10 @@ const auditLogSchema = new mongoose.Schema({
       'complete_task', // إكمال المهمة
       'cancel_task',  // إلغاء المهمة
       'transfer_task', // تحويل المهمة
-      'send_message'   // إرسال رسالة واتساب
+      'send_message',  // إرسال رسالة واتساب
+      'client_update', // تحديث من بوابة العميل
+      'link_customer', // ربط بعميل
+      'link_application' // ربط بطلب
     ],
     required: true
   },
@@ -38,8 +41,11 @@ const auditLogSchema = new mongoose.Schema({
       'appointment',  // موعد
       'customer',     // عميل
       'user',         // مستخدم
-      'settings',     // إعدادات
-      'task'          // مهمة
+      'settings',                // إعدادات
+      'task',                    // مهمة
+      'visa_application',        // طلب تأشيرة أمريكية
+      'license_application',     // طلب رخصة دولية
+      'visa_service_application' // طلب تأشيرة إلكترونية
     ],
     required: true
   },

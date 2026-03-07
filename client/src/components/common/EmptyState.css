@@ -1,0 +1,46 @@
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state-title {
+  font-size: var(--font-lg, 1.125rem);
+  font-weight: 600;
+  color: var(--text-color, #1f2937);
+  margin: 0;
+}
+
+.empty-state-desc {
+  font-size: var(--font-sm, 0.875rem);
+  color: var(--text-secondary, #6b7280);
+  margin: 0;
+  max-width: 320px;
+}
+
+.empty-state-btn {
+  margin-top: 0.75rem;
+  padding: 0.5rem 1.25rem;
+  border: none;
+  border-radius: var(--radius, 8px);
+  background: var(--primary-color, #2563eb);
+  color: #fff;
+  font-size: var(--font-sm, 0.875rem);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition-fast, 150ms ease);
+}
+
+.empty-state-btn:hover {
+  background: var(--primary-dark, #1d4ed8);
+}

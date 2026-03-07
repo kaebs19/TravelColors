@@ -35,5 +35,11 @@ export const customersApi = {
   deleteCustomer: async (id) => {
     const response = await api.delete(`/customers/${id}`);
     return response.data;
+  },
+
+  // جلب طلبات عميل معين (المربوطة)
+  getCustomerApplications: async (id) => {
+    const response = await api.get(`/customers/${id}/applications`);
+    return response.data;
   }
 };

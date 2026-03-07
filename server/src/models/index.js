@@ -18,5 +18,14 @@ module.exports = {
   // نظام المهام
   Task: require('./Task'),
   // محتوى الموقع
-  WebsiteContent: require('./WebsiteContent')
+  WebsiteContent: require('./WebsiteContent'),
+  // نظام التأشيرة الأمريكية
+  VisaApplication: require('./VisaApplication'),
+  // بوابة العميل
+  ClientProfile: require('./ClientProfile'),
+  // الرخصة الدولية
+  LicenseApplication: require('./LicenseApplication'),
+  // كتالوج التأشيرات
+  Visa: require('./Visa'),
+  VisaServiceApplication: require('./VisaServiceApplication')
 };

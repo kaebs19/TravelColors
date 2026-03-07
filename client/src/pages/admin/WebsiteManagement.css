@@ -250,6 +250,28 @@
   padding: 8px;
 }
 
+/* Section Container */
+.wm-section {
+  background: white;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border: 1px solid #e2e8f0;
+}
+
+.wm-section h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 4px;
+}
+
+.wm-section-desc {
+  font-size: 0.88rem;
+  color: #64748b;
+  margin: 0 0 20px;
+}
+
 /* Section Header */
 .wm-section-header {
   display: flex;
@@ -313,6 +335,409 @@
 
 .wm-btn-remove:hover { background: #fee2e2; }
 
+/* ===== American Visa Tab ===== */
+.wm-visa-section { padding: 20px; }
+
+.wm-visa-stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.wm-visa-stats {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.wm-visa-stat {
+  text-align: center;
+  padding: 16px 12px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  border-top: 3px solid #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wm-visa-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.wm-visa-stat.active {
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.wm-visa-stat-num {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.wm-visa-stat-label {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.wm-visa-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 18px;
+  align-items: center;
+}
+
+.wm-visa-search {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+}
+
+.wm-visa-search input {
+  flex: 1;
+  padding: 9px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  background: #fafafa;
+}
+
+.wm-visa-search input:focus {
+  outline: none;
+  border-color: #16a34a;
+  background: white;
+}
+
+.wm-visa-search button {
+  padding: 9px 18px;
+  background: var(--primary-color, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.wm-visa-filters select {
+  padding: 9px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  background: white;
+  cursor: pointer;
+}
+
+.wm-visa-empty {
+  text-align: center;
+  padding: 40px;
+  color: #94a3b8;
+  font-size: 1rem;
+}
+
+.wm-visa-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 16px;
+}
+
+.wm-visa-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.wm-visa-table th {
+  background: #f8fafc;
+  padding: 10px 12px;
+  text-align: right;
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.wm-visa-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+}
+
+.wm-visa-table tr:hover td {
+  background: #f8fafc;
+}
+
+.wm-visa-app-num {
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: #64748b;
+  direction: ltr;
+}
+
+.wm-visa-badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.wm-visa-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.wm-visa-btn-view {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  padding: 4px 14px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.wm-visa-btn-view:hover { background: #dbeafe; }
+
+.wm-visa-view-btn {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+  flex-shrink: 0;
+}
+
+.wm-visa-view-btn:hover { background: #dbeafe; }
+
+/* Full page button */
+.wm-visa-btn-full-page {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  white-space: nowrap;
+}
+
+.wm-visa-btn-full-page:hover { background: #dcfce7; }
+
+/* Clickable table rows */
+.wm-visa-row-clickable {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.wm-visa-row-clickable:hover td {
+  background: #eff6ff !important;
+}
+
+/* Applicant cell with thumbnail */
+.wm-visa-applicant-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wm-visa-applicant-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.wm-visa-applicant-name {
+  display: block;
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.9rem;
+}
+
+.wm-visa-applicant-meta {
+  display: block;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+/* Empty state improved */
+.wm-visa-empty {
+  text-align: center;
+  padding: 50px 20px;
+  color: #94a3b8;
+}
+
+.wm-visa-empty p {
+  margin: 10px 0 16px;
+  font-size: 1rem;
+}
+
+/* Detail panel */
+.wm-visa-detail {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.wm-visa-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.wm-visa-detail-header h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.wm-visa-status-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.wm-visa-status-btn {
+  padding: 5px 14px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #475569;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.wm-visa-status-btn:hover {
+  background: var(--btn-bg);
+  color: var(--btn-color);
+  border-color: var(--btn-color);
+}
+
+.wm-visa-status-btn.active {
+  background: var(--btn-bg);
+  color: var(--btn-color);
+  border-color: var(--btn-color);
+}
+
+.wm-visa-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.wm-visa-detail-section {
+  background: white;
+  border-radius: 8px;
+  padding: 14px 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.wm-visa-detail-section h5 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary-color, #2563eb);
+  margin: 0 0 10px;
+}
+
+.wm-visa-detail-section p {
+  font-size: 0.85rem;
+  margin: 0 0 5px;
+  color: #475569;
+}
+
+.wm-visa-detail-section p strong {
+  color: #334155;
+}
+
+.wm-visa-detail-notes {
+  margin-top: 16px;
+}
+
+.wm-visa-detail-notes label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+.wm-visa-detail-notes textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: #1e293b;
+  background: white;
+  resize: vertical;
+}
+
+.wm-visa-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding-top: 12px;
+}
+
+.wm-visa-pagination button {
+  padding: 6px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  color: #475569;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.wm-visa-pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.wm-visa-pagination span {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .wm-page { padding: 16px; }
@@ -340,4 +765,1652 @@
   .wm-form-row { flex-direction: column; gap: 0; }
 
   .wm-form-section { padding: 20px; }
+
+  .wm-visa-stats { grid-template-columns: repeat(3, 1fr); }
+  .wm-visa-filters { flex-direction: column; }
+  .wm-visa-detail-grid { grid-template-columns: 1fr; }
+  .wm-visa-detail-header { flex-direction: column; align-items: flex-start; }
+  .wm-visa-applicant-thumb { width: 30px; height: 30px; }
+
+  .wm-clients-table { overflow-x: auto; }
+  .wm-clients-table table { min-width: 650px; }
+}
+
+/* ===== Clients Tab ===== */
+.wm-clients-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.wm-clients-search {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  transition: border-color 200ms;
+}
+
+.wm-clients-search:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.wm-clients-count {
+  font-size: 0.88rem;
+  color: #6b7280;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.wm-clients-table {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.wm-clients-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.wm-clients-table th {
+  background: #f9fafb;
+  padding: 12px 16px;
+  text-align: right;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.wm-clients-table td {
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
+}
+
+.wm-clients-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.wm-clients-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.wm-client-name {
+  font-weight: 600;
+  color: #1e3a5f;
+}
+
+.wm-client-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.wm-client-badge.active {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.wm-client-badge.inactive {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* ===== Client Row Clickable ===== */
+.wm-client-row-clickable {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.wm-client-row-clickable:hover td {
+  background: #eff6ff !important;
+}
+
+.wm-client-name-link {
+  color: #2563eb !important;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+
+.wm-client-name-link:hover {
+  color: #1d4ed8 !important;
+  text-decoration-style: solid;
+}
+
+/* ===== Client Detail Panel ===== */
+.wm-client-detail-panel {
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.wm-client-detail-back {
+  margin-bottom: 20px;
+}
+
+.wm-client-detail-back button {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.wm-client-detail-back button:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.wm-client-info-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.wm-client-info-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.wm-client-info-body {
+  flex: 1;
+}
+
+.wm-client-info-body h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 12px;
+}
+
+.wm-client-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 24px;
+}
+
+.wm-client-info-grid div {
+  font-size: 0.88rem;
+  color: #475569;
+}
+
+.wm-label {
+  font-weight: 600;
+  color: #64748b;
+  margin-left: 6px;
+}
+
+/* Client action buttons */
+.wm-client-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.wm-client-action-btn {
+  padding: 7px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: white;
+}
+
+.wm-client-action-btn.ban {
+  color: #d97706;
+  border-color: #fde68a;
+}
+
+.wm-client-action-btn.ban:hover {
+  background: #fffbeb;
+  border-color: #d97706;
+}
+
+.wm-client-action-btn.unban {
+  color: #16a34a;
+  border-color: #bbf7d0;
+}
+
+.wm-client-action-btn.unban:hover {
+  background: #f0fdf4;
+  border-color: #16a34a;
+}
+
+.wm-client-action-btn.delete {
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.wm-client-action-btn.delete:hover {
+  background: #fef2f2;
+  border-color: #dc2626;
+}
+
+/* Client apps sections */
+.wm-client-apps-section {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.wm-client-apps-section h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 14px;
+}
+
+.wm-client-apps-empty {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 20px;
+  margin: 0;
+}
+
+.wm-client-apps-table {
+  overflow-x: auto;
+}
+
+.wm-client-apps-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.wm-client-apps-table th {
+  background: #f8fafc;
+  padding: 8px 12px;
+  text-align: right;
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.wm-client-apps-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+}
+
+.wm-client-apps-table tr:hover td {
+  background: #f8fafc;
+}
+
+/* ===== License Settings Box ===== */
+.wm-license-settings {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.wm-license-settings h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px;
+}
+
+/* License status select */
+.wm-license-status-select {
+  padding: 5px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  background: white;
+  cursor: pointer;
+  color: #475569;
+}
+
+.wm-license-status-select:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+/* ===== Offer / Discount Section ===== */
+.wm-offer-section {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 18px;
+}
+
+.wm-offer-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.wm-offer-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #d97706;
+}
+
+.wm-offer-toggle-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.wm-offer-price-row {
+  margin-top: 14px;
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.wm-offer-price-row .wm-form-group {
+  flex: 0 0 200px;
+  margin-bottom: 0;
+}
+
+.wm-offer-price-input {
+  border-color: #fbbf24 !important;
+  background: white !important;
+}
+
+.wm-offer-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.wm-offer-preview-label {
+  font-size: 0.82rem;
+  color: #92400e;
+  font-weight: 600;
+}
+
+.wm-offer-old-price {
+  font-size: 0.95rem;
+  color: #dc2626;
+  text-decoration: line-through;
+  font-weight: 500;
+}
+
+.wm-offer-new-price {
+  font-size: 1.1rem;
+  color: #16a34a;
+  font-weight: 700;
+}
+
+/* Responsive adjustments for client detail */
+@media (max-width: 768px) {
+  .wm-client-info-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .wm-client-info-grid {
+    grid-template-columns: 1fr;
+    text-align: right;
+  }
+
+  .wm-client-apps-table table {
+    min-width: 500px;
+  }
+}
+
+/* ===== Add-ons Section ===== */
+.wm-addons-section,
+.wm-coupons-section {
+  background: var(--bg-white, #fff);
+  border: 1.5px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-top: 20px;
+}
+
+.wm-addons-section .wm-section-header,
+.wm-coupons-section .wm-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.wm-addons-section h4,
+.wm-coupons-section h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--brand-navy, #1e293b);
+  margin: 0;
+}
+
+.wm-empty-hint {
+  color: var(--text-secondary, #94a3b8);
+  font-size: 0.88rem;
+  text-align: center;
+  padding: 20px;
+}
+
+.wm-addon-item,
+.wm-coupon-item {
+  background: var(--bg-color, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.wm-addon-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.wm-addon-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
+}
+
+.wm-addon-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--primary-color, #4f46e5);
+}
+
+.wm-coupon-usage {
+  font-size: 0.82rem;
+  color: var(--text-secondary, #94a3b8);
+  background: var(--bg-white, #fff);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, #e2e8f0);
+}
+
+/* ===== Pricing Preview ===== */
+.wm-pricing-preview {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 16px;
+}
+
+.wm-pricing-preview h5 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #166534;
+  margin: 0 0 10px 0;
+}
+
+.wm-pricing-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 0.88rem;
+  color: #334155;
+  border-bottom: 1px dashed #d1fae5;
+}
+
+.wm-pricing-line:last-child {
+  border-bottom: none;
+}
+
+.wm-pricing-total {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #166534;
+  border-top: 2px solid #86efac;
+  margin-top: 8px;
+  padding-top: 10px;
+}
+
+/* ===== Coupons Section ===== */
+.wm-coupons-section {
+  border-color: #c7d2fe;
+  background: #fafaff;
+}
+
+.wm-coupon-item {
+  background: #fff;
+  border-color: #c7d2fe;
+}
+
+.wm-coupon-item select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1.5px solid var(--border-color, #e2e8f0);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  background: var(--bg-color, #f8fafc);
+  color: var(--text-color, #1e293b);
+}
+
+.wm-coupon-item select:focus {
+  outline: none;
+  border-color: var(--primary-color, #4f46e5);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* ===== License Stats (7 columns) ===== */
+.wm-license-stats {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 1024px) {
+  .wm-license-stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .wm-license-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ===== Delivery Config Section ===== */
+.wm-delivery-section {
+  background: var(--bg-white, #fff);
+  border: 1.5px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-top: 20px;
+}
+
+.wm-delivery-section h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--brand-navy, #1e293b);
+  margin: 0;
+}
+
+.wm-delivery-item {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.wm-delivery-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+  white-space: nowrap;
+}
+
+/* ===== Email Settings Tab ===== */
+.wm-email-tab-desc {
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0 0 20px;
+  padding: 14px 18px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+}
+
+.wm-email-section {
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.wm-email-section.open {
+  border-color: #93c5fd;
+}
+
+.wm-email-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+
+.wm-email-section-header:hover {
+  background: #f8fafc;
+}
+
+.wm-email-section-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wm-email-section-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.wm-email-section-desc {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.wm-email-section-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wm-email-custom-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #2563eb;
+  background: #dbeafe;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.wm-email-arrow {
+  font-size: 1.1rem;
+  color: #94a3b8;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+
+.wm-email-arrow.open {
+  transform: rotate(180deg);
+}
+
+.wm-email-section-body {
+  padding: 4px 20px 20px;
+  border-top: 1px solid #f1f5f9;
+  animation: wmEmailFadeIn 0.2s ease;
+}
+
+@keyframes wmEmailFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.wm-email-section-body .wm-form-group {
+  margin-bottom: 14px;
+}
+
+.wm-email-section-body .wm-form-group:last-of-type {
+  margin-bottom: 10px;
+}
+
+.wm-email-section-body textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+  min-height: 72px;
+  color: #1e293b;
+  background: #f8fafc;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.wm-email-section-body textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  background: #fff;
+}
+
+.wm-email-reset-btn {
+  background: none;
+  border: 1px solid #e2e8f0;
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-top: 4px;
+}
+
+.wm-email-reset-btn:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .wm-email-section-header {
+    padding: 14px 16px;
+  }
+
+  .wm-email-section-body {
+    padding: 4px 16px 16px;
+  }
+}
+
+/* ========================================
+   Visa Catalog Tab Styles
+   ======================================== */
+
+/* ====== Card (used in VisaCatalogTab form) ====== */
+.wm-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.wm-card h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.wm-card .wm-form-group input[type="text"],
+.wm-card .wm-form-group input[type="number"],
+.wm-card .wm-form-group input[type="email"],
+.wm-card .wm-form-group select,
+.wm-card .wm-form-group textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: #1e293b;
+  transition: all 0.2s;
+  background: #fafbfc;
+  box-sizing: border-box;
+}
+
+.wm-card .wm-form-group input:focus,
+.wm-card .wm-form-group select:focus,
+.wm-card .wm-form-group textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: white;
+}
+
+.wm-card .wm-form-group select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 12px center;
+  padding-left: 32px;
+}
+
+/* Save Button (VisaCatalogTab) */
+.wm-save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.wm-save-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+}
+
+.wm-save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ====== VisaCatalogTab ====== */
+.vc-tab {
+  animation: wmEmailFadeIn 0.3s ease;
+}
+
+.vc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.vc-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vc-filter-row select {
+  padding: 8px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  background: white;
+  cursor: pointer;
+}
+
+.vc-count {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.vc-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #94a3b8;
+  font-size: 1rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 2px dashed #e2e8f0;
+}
+
+/* Visa Card List */
+.vc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vc-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s;
+}
+
+.vc-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-color: #cbd5e1;
+}
+
+.vc-card-disabled {
+  opacity: 0.5;
+}
+
+.vc-card-flag {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vc-card-flag img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vc-no-flag {
+  font-size: 1.5rem;
+}
+
+.vc-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.vc-card-info h4 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.vc-card-en {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.vc-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.vc-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.vc-badge-normal {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.vc-badge-elec {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.vc-price {
+  font-size: 0.85rem;
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.vc-price s {
+  color: #94a3b8;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.vc-dept {
+  display: block;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+.vc-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.vc-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.vc-btn-edit {
+  padding: 6px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.vc-btn-edit:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.vc-btn-delete {
+  padding: 6px 10px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.vc-btn-delete:hover {
+  background: #fef2f2;
+}
+
+/* Form Header */
+.vc-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  background: white;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.vc-form-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.vc-btn-back {
+  padding: 8px 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #475569;
+  transition: all 0.2s;
+}
+
+.vc-btn-back:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+/* Form Image Upload */
+.vc-img-upload {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 12px;
+  background: #f8fafc;
+  border: 2px dashed #e2e8f0;
+  border-radius: 12px;
+  transition: border-color 0.2s;
+}
+
+.vc-img-upload:hover {
+  border-color: #cbd5e1;
+}
+
+.vc-img-preview {
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.vc-img-flag {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+}
+
+.vc-img-cover {
+  width: 140px;
+  height: 80px;
+  border-radius: 10px;
+}
+
+.vc-uploading {
+  color: #2563eb;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.vc-img-upload input[type="file"] {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+/* Form Actions */
+.vc-form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 20px 24px;
+  background: white;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.vc-btn-cancel {
+  padding: 12px 24px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #64748b;
+  transition: all 0.2s;
+}
+
+.vc-btn-cancel:hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+@media (max-width: 768px) {
+  .vc-card {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: right;
+  }
+
+  .vc-card-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .vc-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .vc-form-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* ====== Section Tabs (محتوى / إعدادات / أرشفة) ====== */
+.vc-section-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+  background: white;
+  border-radius: 14px;
+  padding: 6px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.vc-section-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: #64748b;
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+
+.vc-section-tab:hover {
+  color: #1e293b;
+  background: #f8fafc;
+}
+
+.vc-section-tab.active {
+  color: white;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
+/* ====== Country Picker (اختيار الدولة) ====== */
+.vc-country-picker {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.vc-country-picker label {
+  display: block;
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.vc-country-search {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.vc-country-search:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.vc-country-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 100;
+  margin-top: 4px;
+}
+
+.vc-country-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.vc-country-option:last-child {
+  border-bottom: none;
+}
+
+.vc-country-option:hover {
+  background: #eff6ff;
+}
+
+.vc-country-ar {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.vc-country-en {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  direction: ltr;
+}
+
+.vc-country-no-result {
+  padding: 16px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+/* ====== Keywords (الكلمات المفتاحية) ====== */
+.vc-keywords-input {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.vc-keywords-input input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.vc-keywords-input input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.vc-keywords-input button {
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.vc-keywords-input button:hover {
+  background: #2563eb;
+}
+
+.vc-keywords-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 32px;
+}
+
+.vc-keyword-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: #eff6ff;
+  color: #1e40af;
+  border-radius: 16px;
+  font-size: 0.85rem;
+}
+
+.vc-keyword-tag button {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.vc-keyword-tag button:hover {
+  color: #ef4444;
+}
+
+/* ====== Requirements Admin UI ====== */
+.vc-req-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.vc-btn-templates {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.vc-btn-templates svg {
+  width: 16px;
+  height: 16px;
+}
+
+.vc-btn-templates:hover {
+  background: #dbeafe;
+}
+
+/* Templates Panel */
+.vc-templates-panel {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  animation: wmEmailFadeIn 0.2s ease;
+}
+
+.vc-templates-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0c4a6e;
+}
+
+.vc-btn-add-all {
+  padding: 5px 14px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.vc-btn-add-all:hover {
+  background: #1d4ed8;
+}
+
+.vc-templates-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.vc-template-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: white;
+  border: 1px solid #e0f2fe;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.vc-template-item:hover {
+  border-color: #2563eb;
+  background: #eff6ff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+}
+
+.vc-template-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #dbeafe;
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.vc-template-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.vc-template-title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+/* Requirement Items in Admin */
+.vc-req-item-admin {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-top: 12px;
+  transition: border-color 0.15s;
+}
+
+.vc-req-item-admin:hover {
+  border-color: #cbd5e1;
+}
+
+.vc-req-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+
+.vc-req-icon-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e0f2fe, #dbeafe);
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.vc-req-icon-display svg {
+  width: 20px;
+  height: 20px;
+}
+
+.vc-req-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vc-req-icon-select {
+  padding: 4px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  background: white;
+  cursor: pointer;
+  color: #475569;
+}
+
+.vc-req-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.vc-req-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.vc-req-badge-req {
+  color: #dc2626;
+  font-weight: 600;
+  font-size: 0.78rem;
+}
+
+.vc-req-badge-opt {
+  color: #16a34a;
+  font-weight: 600;
+  font-size: 0.78rem;
+}
+
+.vc-req-btn-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid #fecaca;
+  background: white;
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.vc-req-btn-delete:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
+}
+
+.vc-req-title-input {
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+}
+
+.vc-req-details-input {
+  font-size: 0.88rem !important;
+  line-height: 1.6 !important;
+  color: #475569 !important;
+}
+
+@media (max-width: 768px) {
+  .vc-templates-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vc-req-item-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .vc-req-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }

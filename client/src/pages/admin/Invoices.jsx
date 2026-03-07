@@ -4,6 +4,7 @@ import { invoicesApi, customersApi, settingsApi } from '../../api';
 import { Card, Button, Loader, Modal, NumberInput, PhoneInput } from '../../components/common';
 import { parseArabicNumber, arabicToEnglishNumbers } from '../../utils/formatters';
 import { printContent, formatInvoiceForPrint } from '../../utils/printUtils';
+import { useToast } from '../../context';
 import './Invoices.css';
 
 // دالة لتنسيق العنوان والمدينة بشكل صحيح
@@ -40,6 +41,7 @@ const formatAddress = (address, city) => {
 };
 
 const Invoices = () => {
+  const { showToast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [invoices, setInvoices] = useState([]);
@@ -223,7 +225,7 @@ const Invoices = () => {
       fetchData();
     } catch (error) {
       console.error('Error creating invoice:', error);
-      alert(error.response?.data?.message || 'حدث خطأ');
+      showToast(error.response?.data?.message || 'حدث خطأ', 'error');
     }
   };
 
@@ -239,7 +241,7 @@ const Invoices = () => {
       setSelectedInvoice(res.data.data.invoice);
     } catch (error) {
       console.error('Error adding payment:', error);
-      alert(error.response?.data?.message || 'حدث خطأ');
+      showToast(error.response?.data?.message || 'حدث خطأ', 'error');
     }
   };
 
@@ -249,7 +251,7 @@ const Invoices = () => {
       fetchData();
     } catch (error) {
       console.error('Error converting:', error);
-      alert(error.response?.data?.message || 'حدث خطأ');
+      showToast(error.response?.data?.message || 'حدث خطأ', 'error');
     }
   };
 

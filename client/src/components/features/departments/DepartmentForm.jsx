@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useToast } from '../../../context';
 import settingsApi from '../../../api/settingsApi';
 import './DepartmentForm.css';
 
 const DepartmentForm = ({ department, onSubmit, onCancel }) => {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     title: '',
     cities: [],
@@ -44,11 +46,11 @@ const DepartmentForm = ({ department, onSubmit, onCancel }) => {
   const handleAddCity = () => {
     if (!newCity.name) return;
     if (formData.cities.length >= 3) {
-      alert('لا يمكن إضافة أكثر من 3 مدن');
+      showToast('لا يمكن إضافة أكثر من 3 مدن', 'warning');
       return;
     }
     if (formData.cities.find(c => c.name === newCity.name)) {
-      alert('المدينة مضافة مسبقاً');
+      showToast('المدينة مضافة مسبقاً', 'warning');
       return;
     }
 
@@ -70,7 +72,7 @@ const DepartmentForm = ({ department, onSubmit, onCancel }) => {
     e.preventDefault();
 
     if (!formData.title.trim()) {
-      alert('عنوان القسم مطلوب');
+      showToast('عنوان القسم مطلوب', 'warning');
       return;
     }
 

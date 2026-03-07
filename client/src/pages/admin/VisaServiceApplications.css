@@ -1,0 +1,456 @@
+/* ===== Visa Service Applications Page ===== */
+.vsa-page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header */
+.vsa-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.vsa-header-title h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.vsa-header-title p {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 4px 0 0;
+}
+
+/* Stats Cards */
+.vsa-stats {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.vsa-stat-card {
+  text-align: center;
+  padding: 18px 12px;
+  background: var(--stat-bg, #f8fafc);
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  border-top: 3px solid var(--stat-border, #64748b);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.vsa-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.vsa-stat-card.active {
+  border-color: var(--stat-border, #64748b);
+  box-shadow: 0 0 0 2px var(--stat-border, #64748b), 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.vsa-stat-count {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--stat-color, #1e293b);
+}
+
+.vsa-stat-label {
+  display: block;
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* Toolbar: Search + Filters */
+.vsa-toolbar {
+  background: white;
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.vsa-search-form {
+  display: flex;
+  gap: 8px;
+}
+
+.vsa-search-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: #1e293b;
+  background: #fafafa;
+  transition: 0.2s;
+}
+
+.vsa-search-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  background: white;
+}
+
+.vsa-search-btn {
+  padding: 10px 22px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: 0.2s;
+  white-space: nowrap;
+}
+
+.vsa-search-btn:hover {
+  background: #1d4ed8;
+}
+
+.vsa-filter-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.vsa-filter-btn {
+  padding: 7px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  background: white;
+  color: #475569;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+  white-space: nowrap;
+}
+
+.vsa-filter-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.vsa-filter-btn.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+/* Loading */
+.vsa-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #64748b;
+  font-size: 1rem;
+  gap: 16px;
+}
+
+.vsa-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: vsa-spin 0.8s linear infinite;
+}
+
+@keyframes vsa-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.vsa-empty {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.vsa-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+.vsa-empty p {
+  color: #94a3b8;
+  font-size: 1.1rem;
+  margin: 0 0 16px;
+}
+
+.vsa-empty-reset {
+  padding: 8px 20px;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.vsa-empty-reset:hover {
+  background: #e2e8f0;
+}
+
+/* Table */
+.vsa-table-wrap {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+  overflow-x: auto;
+  margin-bottom: 16px;
+}
+
+.vsa-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.vsa-table th {
+  background: #f8fafc;
+  padding: 12px 14px;
+  text-align: right;
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
+  font-size: 0.85rem;
+}
+
+.vsa-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.vsa-table-row {
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.vsa-table-row:hover td {
+  background: #f8fafc;
+}
+
+.vsa-table-row:active td {
+  background: #f1f5f9;
+}
+
+/* App Number Cell */
+.vsa-app-num {
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: #475569;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.5px;
+}
+
+/* Country Cell */
+.vsa-country {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vsa-flag {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Date Cell */
+.vsa-date-cell {
+  white-space: nowrap;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+/* Status Badge */
+.vsa-status-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Actions */
+.vsa-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.vsa-action-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: 0.2s;
+  padding: 0;
+  line-height: 1;
+}
+
+.vsa-action-view:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.vsa-action-delete:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.vsa-action-export:hover {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+/* Pagination */
+.vsa-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.vsa-pagination-btn {
+  padding: 8px 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  color: #475569;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.vsa-pagination-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.vsa-pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.vsa-pagination-info {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1024px) {
+  .vsa-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .vsa-page {
+    padding: 16px;
+  }
+
+  .vsa-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .vsa-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .vsa-toolbar {
+    padding: 14px;
+  }
+
+  .vsa-search-form {
+    flex-direction: column;
+  }
+
+  .vsa-filter-buttons {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+  }
+
+  .vsa-table th,
+  .vsa-table td {
+    padding: 10px 10px;
+    font-size: 0.82rem;
+  }
+
+  .vsa-pagination {
+    gap: 10px;
+  }
+
+  .vsa-pagination-btn {
+    padding: 6px 14px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .vsa-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .vsa-stat-card {
+    padding: 14px 8px;
+  }
+
+  .vsa-stat-count {
+    font-size: 1.3rem;
+  }
+
+  .vsa-stat-label {
+    font-size: 0.75rem;
+  }
+}

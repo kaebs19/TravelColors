@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { customersApi } from '../../api';
+import { useToast } from '../../context';
 import { Button, Card, Loader, Modal, PhoneInput } from '../../components/common';
 import { formatCurrency, formatDate } from '../../utils';
 import { arabicToEnglishNumbers } from '../../utils/formatters';
@@ -8,6 +9,7 @@ import './Customers.css';
 
 const Customers = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -112,7 +114,7 @@ const Customers = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) {
-      alert('الرجاء إدخال اسم العميل');
+      showToast('الرجاء إدخال اسم العميل', 'warning');
       return;
     }
 
@@ -127,7 +129,7 @@ const Customers = () => {
       fetchCustomers();
     } catch (error) {
       console.error('Error saving customer:', error);
-      alert('حدث خطأ أثناء حفظ العميل');
+      showToast('حدث خطأ أثناء حفظ العميل', 'error');
     } finally {
       setSaving(false);
     }
@@ -140,7 +142,7 @@ const Customers = () => {
         fetchCustomers();
       } catch (error) {
         console.error('Error deleting customer:', error);
-        alert('حدث خطأ أثناء حذف العميل');
+        showToast('حدث خطأ أثناء حذف العميل', 'error');
       }
     }
   };

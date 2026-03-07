@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { cashRegisterApi, invoicesApi } from '../../api';
 import { Card, Button, Loader, Modal, NumberInput } from '../../components/common';
 import { parseArabicNumber } from '../../utils/formatters';
+import { useToast } from '../../context';
 import './CashRegister.css';
 
 const CashRegister = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [cashData, setCashData] = useState(null);
   const [transactions, setTransactions] = useState([]);
@@ -90,7 +92,7 @@ const CashRegister = () => {
       fetchData();
     } catch (error) {
       console.error('Error adding transaction:', error);
-      alert(error.response?.data?.message || 'حدث خطأ');
+      showToast(error.response?.data?.message || 'حدث خطأ', 'error');
     }
   };
 

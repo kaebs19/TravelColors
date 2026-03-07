@@ -4,10 +4,12 @@ import { receiptsApi, customersApi, appointmentsApi, settingsApi } from '../../a
 import { Card, Button, Loader, Modal, NumberInput } from '../../components/common';
 import { formatCurrency, formatDateTime } from '../../utils/formatters';
 import { printContent, formatReceiptForPrint } from '../../utils/printUtils';
+import { useToast } from '../../context';
 import './Receipts.css';
 
 const Receipts = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [receipts, setReceipts] = useState([]);
   const [stats, setStats] = useState({});
@@ -137,7 +139,7 @@ const Receipts = () => {
     e.preventDefault();
 
     if (!receiptForm.customerName || !receiptForm.amount || receiptForm.amount <= 0) {
-      alert('يرجى إدخال اسم العميل والمبلغ');
+      showToast('يرجى إدخال اسم العميل والمبلغ', 'warning');
       return;
     }
 
@@ -145,14 +147,14 @@ const Receipts = () => {
       setSubmitting(true);
       const res = await receiptsApi.createReceipt(receiptForm);
       if (res.data?.success) {
-        alert('تم إنشاء الإيصال بنجاح');
+        showToast('تم إنشاء الإيصال بنجاح', 'success');
         setShowCreateModal(false);
         resetForm();
         fetchData();
       }
     } catch (error) {
       console.error('Error creating receipt:', error);
-      alert(error.response?.data?.message || 'حدث خطأ أثناء إنشاء الإيصال');
+      showToast(error.response?.data?.message || 'حدث خطأ أثناء إنشاء الإيصال', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -165,7 +167,7 @@ const Receipts = () => {
       setSubmitting(true);
       const res = await receiptsApi.convertToInvoice(selectedReceipt._id, {});
       if (res.data?.success) {
-        alert('تم تحويل الإيصال إلى فاتورة بنجاح');
+        showToast('تم تحويل الإيصال إلى فاتورة بنجاح', 'success');
         setShowConvertModal(false);
         setSelectedReceipt(null);
         fetchData();
@@ -176,7 +178,7 @@ const Receipts = () => {
       }
     } catch (error) {
       console.error('Error converting receipt:', error);
-      alert(error.response?.data?.message || 'حدث خطأ أثناء التحويل');
+      showToast(error.response?.data?.message || 'حدث خطأ أثناء التحويل', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -191,12 +193,12 @@ const Receipts = () => {
 
       const res = await receiptsApi.cancelReceipt(receipt._id, { reason });
       if (res.data?.success) {
-        alert('تم إلغاء الإيصال بنجاح');
+        showToast('تم إلغاء الإيصال بنجاح', 'success');
         fetchData();
       }
     } catch (error) {
       console.error('Error cancelling receipt:', error);
-      alert(error.response?.data?.message || 'حدث خطأ أثناء الإلغاء');
+      showToast(error.response?.data?.message || 'حدث خطأ أثناء الإلغاء', 'error');
     }
   };
 

@@ -19,3 +19,11 @@ export { default as auditApi } from './auditApi';
 export { default as tasksApi } from './tasksApi';
 // محتوى الموقع
 export { websiteApi } from './websiteApi';
+// نظام التأشيرة الأمريكية
+export { default as visaApi } from './visaApi';
+// بوابة العميل
+export { default as clientApi } from './clientApi';
+// كتالوج التأشيرات
+export { default as visaCatalogApi } from './visaCatalogApi';
+// خدمة التأشيرة الإلكترونية
+export { default as visaServiceApi } from './visaServiceApi';

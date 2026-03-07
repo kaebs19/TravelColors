@@ -1,12 +1,12 @@
 import './Loader.css';
 
-const Loader = ({ size = 'medium', fullScreen = false }) => {
+const Loader = ({ size = 'medium', fullScreen = false, text }) => {
   if (fullScreen) {
     return (
       <div className="loader-fullscreen">
         <div className={`loader loader-${size}`}>
           <div className="loader-spinner" />
-          <span>جاري التحميل...</span>
+          <span>{text || 'جاري التحميل...'}</span>
         </div>
       </div>
     );
@@ -15,6 +15,7 @@ const Loader = ({ size = 'medium', fullScreen = false }) => {
   return (
     <div className={`loader loader-${size}`}>
       <div className="loader-spinner" />
+      {text && <span>{text}</span>}
     </div>
   );
 };

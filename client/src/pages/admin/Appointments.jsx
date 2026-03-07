@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { appointmentsApi, departmentsApi, settingsApi, tasksApi, employeesApi } from '../../api';
 import { Card, Loader, Modal } from '../../components/common';
-import { useAuth } from '../../context';
+import { useAuth, useToast } from '../../context';
 import { generateAppointmentReceipt, shareReceiptToWhatsApp } from '../../utils/receiptGenerator';
 import { generateAppointmentMessage, generateQuickUpdateMessage } from '../../utils/messageGenerator';
 import './Appointments.css';
@@ -12,6 +12,7 @@ const UPLOADS_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:5002/ap
 const Appointments = () => {
   const navigate = useNavigate();
   const { user, hasPermission } = useAuth();
+  const { showToast } = useToast();
   const [searchParams] = useSearchParams();
   const urlDepartment = searchParams.get('department') || '';
 
@@ -179,7 +180,7 @@ const Appointments = () => {
       setChangingCreatedBy(null);
     } catch (error) {
       console.error('Error changing createdBy:', error);
-      alert('حدث خطأ أثناء تغيير الموظف');
+      showToast('حدث خطأ أثناء تغيير الموظف', 'error');
     }
   };
 
@@ -215,7 +216,7 @@ const Appointments = () => {
     });
 
     if (validFiles.length === 0) {
-      alert('الملفات غير مدعومة أو تتجاوز الحجم المسموح (10MB)');
+      showToast('الملفات غير مدعومة أو تتجاوز الحجم المسموح (10MB)', 'warning');
       return;
     }
 
@@ -233,7 +234,7 @@ const Appointments = () => {
       }
     } catch (error) {
       console.error('Error uploading attachments:', error);
-      alert('حدث خطأ أثناء رفع المرفقات');
+      showToast('حدث خطأ أثناء رفع المرفقات', 'error');
     } finally {
       setUploadingAttachment(false);
       e.target.value = '';
@@ -254,7 +255,7 @@ const Appointments = () => {
       }
     } catch (error) {
       console.error('Error deleting attachment:', error);
-      alert('حدث خطأ أثناء حذف المرفق');
+      showToast('حدث خطأ أثناء حذف المرفق', 'error');
     }
   };
 
@@ -277,7 +278,7 @@ const Appointments = () => {
   // تحويل الموعد غير المؤكد إلى مؤكد
   const handleConvertToConfirmed = async () => {
     if (!convertData.appointmentDate || !convertData.appointmentTime) {
-      alert('يرجى تحديد التاريخ والوقت');
+      showToast('يرجى تحديد التاريخ والوقت', 'warning');
       return;
     }
 
@@ -285,7 +286,7 @@ const Appointments = () => {
     const selectedDate = new Date(convertData.appointmentDate);
     const dayOfWeek = selectedDate.getDay();
     if (dayOfWeek === 5 || dayOfWeek === 6) {
-      alert('لا يمكن اختيار يوم الجمعة أو السبت');
+      showToast('لا يمكن اختيار يوم الجمعة أو السبت', 'warning');
       return;
     }
 
@@ -302,7 +303,7 @@ const Appointments = () => {
       fetchData();
     } catch (error) {
       console.error('Error converting appointment:', error);
-      alert('حدث خطأ أثناء تحويل الموعد');
+      showToast('حدث خطأ أثناء تحويل الموعد', 'error');
     } finally {
       setConverting(false);
     }
@@ -477,7 +478,7 @@ const Appointments = () => {
     const message = generateQuickUpdateMessage(template, appointment, dept);
 
     if (!message) {
-      alert('لم يتم تعيين قالب الرسالة في الإعدادات');
+      showToast('لم يتم تعيين قالب الرسالة في الإعدادات', 'warning');
       return;
     }
 
@@ -600,7 +601,7 @@ const Appointments = () => {
       setOpenActionsMenu(null);
     } catch (error) {
       console.error('Error printing receipt:', error);
-      alert('حدث خطأ أثناء إنشاء الإيصال');
+      showToast('حدث خطأ أثناء إنشاء الإيصال', 'error');
     }
   };
 
@@ -625,11 +626,11 @@ const Appointments = () => {
       });
       setOpenActionsMenu(null);
       if (result.message) {
-        alert(result.message);
+        showToast(result.message, 'success');
       }
     } catch (error) {
       console.error('Error sharing receipt:', error);
-      alert('حدث خطأ أثناء مشاركة الإيصال');
+      showToast('حدث خطأ أثناء مشاركة الإيصال', 'error');
     }
   };
 

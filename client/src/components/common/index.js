@@ -8,3 +8,5 @@ export { default as NumberInput } from './NumberInput';
 export { default as PhoneInput } from './PhoneInput';
 export { default as KeyboardShortcutsHelp } from './KeyboardShortcutsHelp';
 export { default as NotificationBell } from './NotificationBell';
+export { default as EmptyState } from './EmptyState';
+export { default as ErrorBoundary } from './ErrorBoundary';

@@ -15,6 +15,17 @@ const taskSchema = new mongoose.Schema({
     unique: true
   },
 
+  // ربط اختياري بطلب (تأشيرة أمريكية، رخصة دولية، تأشيرة إلكترونية)
+  application: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: null
+  },
+  applicationType: {
+    type: String,
+    enum: ['visa', 'license', 'visa_service', null],
+    default: null
+  },
+
   // حالة المهمة
   status: {
     type: String,
@@ -147,6 +158,7 @@ taskSchema.pre('save', async function() {
 // Index للبحث السريع
 taskSchema.index({ status: 1, assignedTo: 1 });
 taskSchema.index({ appointment: 1 });
+taskSchema.index({ application: 1, applicationType: 1 });
 taskSchema.index({ createdAt: -1 });
 taskSchema.index({ taskNumber: 1 });
 

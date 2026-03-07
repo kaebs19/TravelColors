@@ -1,0 +1,647 @@
+/* ===== US Visa Details Page ===== */
+.usvisa-page {
+  font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif;
+  color: var(--text-color);
+  line-height: 1.7;
+  background: var(--bg-color);
+  min-height: 100vh;
+}
+
+.usvisa-page * { box-sizing: border-box; margin: 0; padding: 0; }
+.usvisa-page h1, .usvisa-page h2, .usvisa-page h3, .usvisa-page h4 { color: var(--bg-dark); line-height: 1.3; }
+.usvisa-page a { text-decoration: none; color: inherit; }
+
+/* Scroll Animations */
+.usvisa-page .animate-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.usvisa-page .animate-on-scroll.visible { opacity: 1; transform: translateY(0); }
+.usvisa-page .animate-on-scroll.delay-1 { transition-delay: 0.1s; }
+.usvisa-page .animate-on-scroll.delay-2 { transition-delay: 0.2s; }
+.usvisa-page .animate-on-scroll.delay-3 { transition-delay: 0.3s; }
+
+/* Top Bar */
+.usvisa-topbar {
+  background: #0f172a;
+  padding: 8px 0;
+  font-size: 0.8rem;
+  position: relative;
+  z-index: 1001;
+}
+
+.usvisa-topbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.usvisa-topbar-link {
+  color: rgba(255,255,255,0.85) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.3s;
+}
+
+.usvisa-topbar-link:hover { color: #5eead4 !important; }
+
+.usvisa-topbar-text {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.75rem;
+}
+
+/* Navbar */
+.usvisa-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 16px 0;
+  transition: var(--transition-slow);
+  background: transparent;
+}
+
+.usvisa-nav.scrolled {
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+  padding: 10px 0;
+}
+
+.usvisa-nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.usvisa-nav-brand {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.usvisa-nav-ar {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  transition: var(--transition-slow);
+}
+
+.usvisa-nav-en {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.7);
+  transition: var(--transition-slow);
+}
+
+.usvisa-nav.scrolled .usvisa-nav-ar { color: var(--bg-dark); }
+.usvisa-nav.scrolled .usvisa-nav-en { color: var(--text-secondary); }
+
+.usvisa-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.usvisa-nav-link {
+  color: rgba(255,255,255,0.85) !important;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+.usvisa-nav-link:hover { color: #5eead4 !important; }
+
+.usvisa-nav.scrolled .usvisa-nav-link {
+  color: var(--text-color) !important;
+}
+
+.usvisa-nav.scrolled .usvisa-nav-link:hover {
+  color: #0d9488 !important;
+}
+
+.usvisa-back-btn {
+  /* shared .btn .btn-sm .btn-ghost handles base styling */
+}
+
+.usvisa-nav.scrolled .usvisa-back-btn {
+  background: var(--bg-color);
+  border-color: var(--border-color);
+  color: var(--text-color);
+}
+
+.usvisa-nav.scrolled .usvisa-back-btn:hover {
+  background: var(--teal-bg-hover);
+  color: var(--teal);
+}
+
+/* Banner */
+.usvisa-banner {
+  background: linear-gradient(135deg, #0f172a 0%, #134e4a 40%, #0d9488 80%, #14b8a6 100%);
+  padding: 130px 24px 50px;
+  text-align: center;
+  position: relative;
+}
+
+.usvisa-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: var(--bg-color);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+}
+
+.usvisa-banner-icon {
+  width: 64px;
+  height: 64px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  color: white;
+}
+
+.usvisa-banner h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 12px;
+}
+
+.usvisa-banner p {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.85);
+}
+
+/* Content */
+.usvisa-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+}
+
+/* Visa Types */
+.usvisa-types-section {
+  margin-bottom: 48px;
+}
+
+.usvisa-types-section h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.usvisa-types-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.usvisa-type-card {
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  padding: 28px 20px;
+  text-align: center;
+  border: 2px solid var(--border-color);
+  transition: var(--transition-slow);
+  position: relative;
+  overflow: hidden;
+}
+
+.usvisa-type-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #0d9488, #14b8a6);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.usvisa-type-card:hover {
+  border-color: #0d9488;
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.usvisa-type-card:hover::before { transform: scaleX(1); }
+
+.usvisa-type-icon {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0d9488;
+}
+
+.usvisa-type-card h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.usvisa-type-card > p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.usvisa-type-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-color);
+}
+
+.usvisa-price-amount {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0d9488;
+  line-height: 1;
+}
+
+.usvisa-price-currency {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Blocks */
+.usvisa-block {
+  margin-bottom: 32px;
+}
+
+.usvisa-block-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.usvisa-block-icon {
+  width: 48px;
+  height: 48px;
+  background: #ccfbf1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0d9488;
+  flex-shrink: 0;
+}
+
+.usvisa-block-header h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+/* Document cards */
+.usvisa-doc {
+  display: flex;
+  gap: 16px;
+  padding: 24px;
+  background: var(--bg-white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  margin-bottom: 16px;
+  transition: var(--transition-slow);
+}
+
+.usvisa-doc:hover {
+  border-color: #0d9488;
+  box-shadow: var(--shadow-md);
+}
+
+.usvisa-doc-num {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #0d9488, #14b8a6);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.usvisa-doc-body { flex: 1; }
+
+.usvisa-doc-body h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.usvisa-doc-body > p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* Checklist */
+.usvisa-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+}
+
+.usvisa-checklist li {
+  position: relative;
+  padding-right: 28px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  line-height: 1.7;
+}
+
+.usvisa-checklist li::before {
+  content: '\2713';
+  position: absolute;
+  right: 0;
+  top: 6px;
+  color: #0d9488;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+/* Specs box (yellow) */
+.usvisa-specs-box {
+  background: #fef9c3;
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-top: 12px;
+  border-right: 4px solid #eab308;
+}
+
+.usvisa-specs-box strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--bg-dark);
+  margin-bottom: 8px;
+}
+
+.usvisa-specs-box ul { list-style: none; padding: 0; margin: 0; }
+
+.usvisa-specs-box ul li {
+  font-size: 0.85rem;
+  color: var(--text-color);
+  padding: 3px 0;
+  padding-right: 16px;
+  position: relative;
+}
+
+.usvisa-specs-box ul li::before {
+  content: '\2022';
+  position: absolute;
+  right: 0;
+  color: #92400e;
+}
+
+/* Note */
+.usvisa-note {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  font-style: italic;
+  line-height: 1.7;
+}
+
+/* Info card */
+.usvisa-info-card {
+  background: var(--bg-white);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.usvisa-info-card p {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--bg-dark);
+}
+
+/* Warning card */
+.usvisa-warning-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #fef2f2;
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  border-right: 4px solid #ef4444;
+  margin-bottom: 12px;
+}
+
+.usvisa-warning-icon {
+  flex-shrink: 0;
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+}
+
+.usvisa-warning-card p {
+  font-size: 0.88rem;
+  color: #991b1b;
+  line-height: 1.7;
+}
+
+/* Privacy card */
+.usvisa-privacy-card {
+  background: linear-gradient(135deg, #0f172a 0%, #134e4a 100%);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  text-align: center;
+  color: white;
+  margin-bottom: 24px;
+}
+
+.usvisa-privacy-icon {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5eead4;
+}
+
+.usvisa-privacy-card h4 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.usvisa-privacy-card p {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.8;
+}
+
+/* Important card */
+.usvisa-important-card {
+  background: #f0fdfa;
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 32px;
+  border-right: 4px solid #0d9488;
+}
+
+.usvisa-important-card strong {
+  display: block;
+  font-size: 1rem;
+  color: var(--bg-dark);
+  margin-bottom: 8px;
+}
+
+/* CTA */
+.usvisa-cta-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 0;
+}
+
+.usvisa-cta-btn {
+  /* shared .btn .btn-lg .btn-primary handles base styling */
+  color: white !important;
+  padding: 16px 48px;
+}
+
+.usvisa-cta-btn:hover {
+  color: white !important;
+}
+
+.usvisa-consult-btn {
+  /* shared .btn .btn-lg .btn-whatsapp handles base styling */
+  color: white !important;
+}
+
+.usvisa-consult-btn:hover {
+  color: white !important;
+}
+
+/* Footer */
+.usvisa-footer {
+  background: #0f172a;
+  color: rgba(255,255,255,0.7);
+  padding: 48px 0 24px;
+}
+
+.usvisa-footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.usvisa-footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.usvisa-footer-brand-ar {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: white;
+}
+
+.usvisa-footer-brand-en {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 2px;
+}
+
+.usvisa-footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.usvisa-footer-links a {
+  color: rgba(255,255,255,0.6) !important;
+  font-size: 0.9rem;
+  transition: color 0.3s;
+}
+
+.usvisa-footer-links a:hover { color: #5eead4 !important; }
+
+.usvisa-footer-copy {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.4);
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+/* WhatsApp Float */
+.usvisa-whatsapp-float {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 999;
+  width: 60px;
+  height: 60px;
+  background: #25D366;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+  transition: var(--transition-slow);
+  animation: usvisa-pulse 2s infinite;
+}
+
+.usvisa-whatsapp-float:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(37,211,102,0.5); }
+
+@keyframes usvisa-pulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(37,211,102,0.4); }
+  50% { box-shadow: 0 4px 30px rgba(37,211,102,0.6); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .usvisa-banner { padding: 110px 16px 36px; }
+  .usvisa-banner h1 { font-size: 1.8rem; }
+  .usvisa-types-grid { grid-template-columns: 1fr; max-width: 360px; margin: 0 auto; }
+  .usvisa-doc { flex-direction: column; gap: 12px; padding: 18px; }
+  .usvisa-block-header h3 { font-size: 1.15rem; }
+  .usvisa-privacy-card { padding: 24px 18px; }
+  .usvisa-cta-wrapper { flex-direction: column; align-items: center; }
+  .usvisa-cta-btn, .usvisa-consult-btn { width: 100%; max-width: 320px; justify-content: center; padding: 14px 32px; }
+  .usvisa-nav-links { display: none; }
+}
+
+@media (max-width: 480px) {
+  .usvisa-banner h1 { font-size: 1.5rem; }
+  .usvisa-content { padding: 24px 16px 40px; }
+}

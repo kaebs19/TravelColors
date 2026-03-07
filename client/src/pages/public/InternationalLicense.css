@@ -1,0 +1,850 @@
+/* ===== International License Page ===== */
+.license-page {
+  font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif;
+  color: var(--text-color);
+  line-height: 1.7;
+  background: var(--bg-color);
+  min-height: 100vh;
+}
+
+.license-page * { box-sizing: border-box; margin: 0; padding: 0; }
+.license-page h1, .license-page h2, .license-page h3, .license-page h4 { color: var(--bg-dark); line-height: 1.3; }
+.license-page a { text-decoration: none; color: inherit; }
+
+/* Scroll Animations */
+.license-page .animate-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.license-page .animate-on-scroll.visible { opacity: 1; transform: translateY(0); }
+.license-page .animate-on-scroll.delay-1 { transition-delay: 0.1s; }
+.license-page .animate-on-scroll.delay-2 { transition-delay: 0.2s; }
+.license-page .animate-on-scroll.delay-3 { transition-delay: 0.3s; }
+
+/* Top Bar */
+.license-topbar {
+  background: #0f172a;
+  padding: 8px 0;
+  font-size: 0.8rem;
+  position: relative;
+  z-index: 1001;
+}
+
+.license-topbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.license-topbar-link {
+  color: rgba(255,255,255,0.85) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.3s;
+}
+
+.license-topbar-link:hover { color: #5eead4 !important; }
+
+.license-topbar-text {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.75rem;
+}
+
+/* Navbar */
+.license-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 16px 0;
+  transition: var(--transition-slow);
+  background: transparent;
+}
+
+.license-nav.scrolled {
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+  padding: 10px 0;
+}
+
+.license-nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.license-nav-brand {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.license-nav-ar {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  transition: var(--transition-slow);
+}
+
+.license-nav-en {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.7);
+  transition: var(--transition-slow);
+}
+
+.license-nav.scrolled .license-nav-ar { color: var(--bg-dark); }
+.license-nav.scrolled .license-nav-en { color: var(--text-secondary); }
+
+.license-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.license-nav-link {
+  color: rgba(255,255,255,0.85) !important;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+.license-nav-link:hover { color: #5eead4 !important; }
+
+.license-nav.scrolled .license-nav-link {
+  color: var(--text-color) !important;
+}
+
+.license-nav.scrolled .license-nav-link:hover {
+  color: #0d9488 !important;
+}
+
+.license-back-btn {
+  /* shared .btn .btn-sm .btn-ghost handles base styling */
+}
+
+.license-nav.scrolled .license-back-btn {
+  background: var(--bg-color);
+  border-color: var(--border-color);
+  color: var(--text-color);
+}
+
+.license-nav.scrolled .license-back-btn:hover {
+  background: var(--teal-bg-hover);
+  color: var(--teal);
+}
+
+/* Banner */
+.license-banner {
+  background: linear-gradient(135deg, #0f172a 0%, #134e4a 40%, #0d9488 80%, #14b8a6 100%);
+  padding: 130px 24px 50px;
+  text-align: center;
+  position: relative;
+}
+
+.license-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: var(--bg-color);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+}
+
+.license-banner-icon {
+  width: 64px;
+  height: 64px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  color: white;
+}
+
+.license-banner h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 12px;
+}
+
+.license-banner p {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.85);
+}
+
+/* Content */
+.license-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+}
+
+/* Price Card */
+.license-price-card {
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  text-align: center;
+  border: 2px solid var(--border-color);
+  margin-bottom: 40px;
+  transition: var(--transition-slow);
+  position: relative;
+  overflow: hidden;
+}
+
+.license-price-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #0d9488, #14b8a6);
+}
+
+.license-price-card:hover {
+  border-color: #0d9488;
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.license-price-icon {
+  font-size: 2.8rem;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0d9488;
+}
+
+.license-price-card h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.license-price-card > p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.license-price-amount-wrapper {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.license-price-amount {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #0d9488;
+  line-height: 1;
+}
+
+.license-price-currency {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Offer / Discount Pricing */
+.license-has-offer {
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+.license-price-old {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  position: relative;
+}
+
+.license-price-old-amount {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-decoration: line-through;
+  text-decoration-color: #ef4444;
+  text-decoration-thickness: 2px;
+  line-height: 1;
+}
+
+.license-price-old-currency {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #94a3b8;
+  text-decoration: line-through;
+  text-decoration-color: #ef4444;
+}
+
+.license-price-new {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.license-has-offer .license-price-amount {
+  color: #16a34a;
+}
+
+.license-has-offer .license-price-currency {
+  color: #16a34a;
+}
+
+.license-offer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 20px;
+  margin-top: 4px;
+  animation: offerPulse 2s ease-in-out infinite;
+}
+
+@keyframes offerPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Section Icon (shared for h2 icons) */
+.license-section-icon {
+  width: 42px;
+  height: 42px;
+  background: #ccfbf1;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #0d9488;
+  flex-shrink: 0;
+}
+
+.license-section-icon.delivery {
+  background: #d1fae5;
+  color: #059669;
+}
+
+/* Documents Section */
+.license-docs-section {
+  margin-bottom: 40px;
+}
+
+.license-docs-section h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.license-docs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.license-doc-card {
+  background: var(--bg-white);
+  border-radius: var(--radius-md);
+  padding: 24px 20px;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  transition: var(--transition-slow);
+}
+
+.license-doc-card:hover {
+  border-color: #0d9488;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.license-doc-icon {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0d9488;
+}
+
+.license-doc-card h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.license-doc-card p {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+/* Info Block */
+.license-block {
+  margin-bottom: 32px;
+}
+
+.license-block-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.license-block-icon {
+  width: 48px;
+  height: 48px;
+  background: #ccfbf1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0d9488;
+  flex-shrink: 0;
+}
+
+.license-block-header h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.license-info-card {
+  background: var(--bg-white);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.license-info-card p {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--bg-dark);
+}
+
+.license-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+}
+
+.license-checklist li {
+  position: relative;
+  padding-right: 28px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  line-height: 1.7;
+}
+
+.license-checklist li::before {
+  content: '\2713';
+  position: absolute;
+  right: 0;
+  top: 6px;
+  color: #0d9488;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+/* Steps */
+.license-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.license-step {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background: var(--bg-white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  transition: var(--transition-slow);
+}
+
+.license-step:hover {
+  border-color: #0d9488;
+  box-shadow: var(--shadow-md);
+}
+
+.license-step-num {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #0d9488, #14b8a6);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.license-step-body {
+  flex: 1;
+}
+
+.license-step-body h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.license-step-body p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* Privacy */
+.license-privacy-card {
+  background: linear-gradient(135deg, #0f172a 0%, #134e4a 100%);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  text-align: center;
+  color: white;
+  margin-bottom: 24px;
+}
+
+.license-privacy-icon {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5eead4;
+}
+
+.license-privacy-card h4 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.license-privacy-card p {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.8;
+}
+
+/* CTA */
+.license-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 0;
+}
+
+.license-cta-btn {
+  /* shared .btn .btn-lg .btn-primary handles base styling */
+  color: white !important;
+  padding: 16px 48px;
+}
+
+.license-cta-btn:hover {
+  color: white !important;
+}
+
+.license-consult-btn {
+  /* shared .btn .btn-lg .btn-whatsapp handles base styling */
+  color: white !important;
+}
+
+.license-consult-btn:hover {
+  color: white !important;
+}
+
+/* Footer */
+.license-footer {
+  background: #0f172a;
+  color: rgba(255,255,255,0.7);
+  padding: 48px 0 24px;
+}
+
+.license-footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.license-footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.license-footer-brand-ar {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: white;
+}
+
+.license-footer-brand-en {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 2px;
+}
+
+.license-footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.license-footer-links a {
+  color: rgba(255,255,255,0.6) !important;
+  font-size: 0.9rem;
+  transition: color 0.3s;
+}
+
+.license-footer-links a:hover { color: #5eead4 !important; }
+
+.license-footer-copy {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.4);
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+/* WhatsApp Float */
+.license-whatsapp-float {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 999;
+  width: 60px;
+  height: 60px;
+  background: #25D366;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+  transition: var(--transition-slow);
+  animation: license-pulse 2s infinite;
+}
+
+.license-whatsapp-float:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(37,211,102,0.5); }
+
+@keyframes license-pulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(37,211,102,0.4); }
+  50% { box-shadow: 0 4px 30px rgba(37,211,102,0.6); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .license-banner { padding: 110px 16px 36px; }
+  .license-banner h1 { font-size: 1.8rem; }
+  .license-docs-grid { grid-template-columns: 1fr; max-width: 360px; margin: 0 auto; }
+  .license-block-header h3 { font-size: 1.15rem; }
+  .license-privacy-card { padding: 24px 18px; }
+  .license-cta { flex-direction: column; align-items: center; }
+  .license-cta-btn, .license-consult-btn { width: 100%; max-width: 320px; justify-content: center; padding: 14px 32px; text-align: center; }
+  .license-step { flex-direction: column; gap: 12px; padding: 18px; }
+  .license-nav-links { display: none; }
+}
+
+@media (max-width: 480px) {
+  .license-banner h1 { font-size: 1.5rem; }
+  .license-content { padding: 24px 16px 40px; }
+}
+
+/* ===== Add-ons Section ===== */
+.license-addons-section {
+  background: var(--bg-white, #fff);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  margin-bottom: 28px;
+}
+
+.license-addons-section h2 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--bg-dark, #1e293b);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.license-addons-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.license-addon-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%);
+  border: 1.5px solid #99f6e4;
+  border-radius: 12px;
+  gap: 16px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.license-addon-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.1);
+}
+
+.license-addon-info h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--bg-dark, #1e293b);
+  margin-bottom: 2px;
+}
+
+.license-addon-info p {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.license-addon-price {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0d9488;
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: #fff;
+  padding: 6px 16px;
+  border-radius: 8px;
+  border: 1.5px solid #99f6e4;
+}
+
+.license-addons-note {
+  font-size: 0.85rem;
+  color: #64748b;
+  text-align: center;
+  margin-top: 14px;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .license-addons-section {
+    padding: 24px 18px;
+  }
+  .license-addon-item {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: 8px;
+    padding: 14px;
+  }
+  .license-addon-price {
+    text-align: center;
+  }
+}
+
+/* ===== Delivery Options Section ===== */
+.license-delivery-section {
+  margin-bottom: 40px;
+}
+
+.license-delivery-section h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.license-delivery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.license-delivery-card {
+  background: var(--bg-white, #fff);
+  border-radius: var(--radius-md, 12px);
+  padding: 24px 20px;
+  text-align: center;
+  border: 1.5px solid #d1fae5;
+  transition: all 0.3s;
+}
+
+.license-delivery-card:hover {
+  border-color: #059669;
+  box-shadow: 0 4px 16px rgba(5, 150, 105, 0.12);
+  transform: translateY(-2px);
+}
+
+.license-delivery-icon {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #059669;
+}
+
+.license-delivery-card h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--bg-dark, #1e293b);
+}
+
+.license-delivery-price {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #059669;
+  margin-bottom: 8px;
+}
+
+.license-delivery-desc {
+  font-size: 0.82rem;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .license-delivery-grid {
+    grid-template-columns: 1fr;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+}

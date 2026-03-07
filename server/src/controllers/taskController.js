@@ -117,9 +117,28 @@ exports.getTask = async (req, res, next) => {
       });
     }
 
+    // جلب بيانات الطلب المربوط (إن وجد)
+    let linkedApplication = null;
+    if (task.application && task.applicationType) {
+      const ModelMap = {
+        visa: require('../models/VisaApplication'),
+        license: require('../models/LicenseApplication'),
+        visa_service: require('../models/VisaServiceApplication')
+      };
+      const AppModel = ModelMap[task.applicationType];
+      if (AppModel) {
+        linkedApplication = await AppModel.findById(task.application)
+          .select('applicationNumber status personalInfo adminNotes updatedAt')
+          .lean();
+        if (linkedApplication) {
+          linkedApplication._type = task.applicationType;
+        }
+      }
+    }
+
     res.json({
       success: true,
-      data: task
+      data: { ...task.toObject(), linkedApplication }
     });
   } catch (error) {
     next(error);
@@ -999,19 +1018,75 @@ exports.getTaskActivityLog = async (req, res, next) => {
       return res.status(403).json({ success: false, message: 'غير مصرح لك بعرض سجل النشاط' });
     }
 
-    // جلب جميع السجلات المرتبطة بالموعد والمهمة
-    const logs = await AuditLog.find({
-      $or: [
-        { entityType: 'appointment', entityId: task.appointment },
-        { entityType: 'task', entityId: task._id }
-      ]
-    })
+    // جلب جميع السجلات المرتبطة بالموعد والمهمة والطلب المربوط
+    const queryOr = [
+      { entityType: 'appointment', entityId: task.appointment },
+      { entityType: 'task', entityId: task._id }
+    ];
+
+    // إضافة سجلات الطلب المربوط (إن وجد)
+    if (task.application && task.applicationType) {
+      const entityTypeMap = {
+        visa: 'visa_application',
+        license: 'license_application',
+        visa_service: 'visa_service_application'
+      };
+      const appEntityType = entityTypeMap[task.applicationType];
+      if (appEntityType) {
+        queryOr.push({ entityType: appEntityType, entityId: task.application });
+      }
+    }
+
+    const logs = await AuditLog.find({ $or: queryOr })
       .sort({ createdAt: 1 })
       .populate('userId', 'name');
 
     res.json({
       success: true,
       data: { logs }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    ربط/إلغاء ربط طلب بمهمة
+// @route   PUT /api/tasks/:id/link-application
+// @access  Private (tasks.edit)
+exports.linkApplication = async (req, res, next) => {
+  try {
+    const { applicationId, applicationType } = req.body;
+    const task = await Task.findById(req.params.id);
+
+    if (!task) {
+      return res.status(404).json({ success: false, message: 'المهمة غير موجودة' });
+    }
+
+    const validTypes = ['visa', 'license', 'visa_service'];
+    if (applicationId && (!applicationType || !validTypes.includes(applicationType))) {
+      return res.status(400).json({ success: false, message: 'نوع الطلب غير صالح' });
+    }
+
+    task.application = applicationId || null;
+    task.applicationType = applicationId ? applicationType : null;
+    await task.save();
+
+    await AuditLog.create({
+      action: 'link_application',
+      entityType: 'task',
+      entityId: task._id,
+      entityNumber: task.taskNumber,
+      userId: req.user._id || req.user.id,
+      userName: req.user.name,
+      userRole: req.user.role,
+      description: applicationId ? 'تم ربط طلب بالمهمة' : 'تم إلغاء ربط الطلب بالمهمة',
+      changes: { after: { application: applicationId, applicationType } }
+    });
+
+    res.json({
+      success: true,
+      message: applicationId ? 'تم ربط الطلب بالمهمة بنجاح' : 'تم إلغاء ربط الطلب',
+      data: task
     });
   } catch (error) {
     next(error);

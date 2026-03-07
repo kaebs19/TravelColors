@@ -43,7 +43,11 @@ const tasksApi = {
   getRecentActivities: (limit = 10) => api.get('/tasks/recent-activities', { params: { limit } }),
 
   // جلب سجل النشاط لمهمة معينة
-  getActivityLog: (id) => api.get(`/tasks/${id}/activity-log`)
+  getActivityLog: (id) => api.get(`/tasks/${id}/activity-log`),
+
+  // ربط طلب بمهمة
+  linkApplication: (id, applicationId, applicationType) =>
+    api.put(`/tasks/${id}/link-application`, { applicationId, applicationType })
 };
 
 export default tasksApi;

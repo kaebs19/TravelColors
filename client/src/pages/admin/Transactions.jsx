@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { transactionsApi, customersApi } from '../../api';
 import { Card, Button, Loader, Modal, NumberInput } from '../../components/common';
+import { useToast } from '../../context';
 import './Transactions.css';
 
 const Transactions = () => {
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
   const [stats, setStats] = useState({});
@@ -82,7 +84,7 @@ const Transactions = () => {
     e.preventDefault();
 
     if (!transactionForm.description || !transactionForm.amount || transactionForm.amount <= 0) {
-      alert('يرجى إدخال الوصف والمبلغ');
+      showToast('يرجى إدخال الوصف والمبلغ', 'warning');
       return;
     }
 
@@ -90,14 +92,14 @@ const Transactions = () => {
       setSubmitting(true);
       const res = await transactionsApi.createTransaction(transactionForm);
       if (res.data?.success) {
-        alert('تم إنشاء المعاملة بنجاح');
+        showToast('تم إنشاء المعاملة بنجاح', 'success');
         setShowCreateModal(false);
         resetForm();
         fetchData();
       }
     } catch (error) {
       console.error('Error creating transaction:', error);
-      alert(error.response?.data?.message || 'حدث خطأ أثناء إنشاء المعاملة');
+      showToast(error.response?.data?.message || 'حدث خطأ أثناء إنشاء المعاملة', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -112,12 +114,12 @@ const Transactions = () => {
 
       const res = await transactionsApi.cancelTransaction(transaction._id, { reason });
       if (res.data?.success) {
-        alert('تم إلغاء المعاملة بنجاح');
+        showToast('تم إلغاء المعاملة بنجاح', 'success');
         fetchData();
       }
     } catch (error) {
       console.error('Error cancelling transaction:', error);
-      alert(error.response?.data?.message || 'حدث خطأ أثناء الإلغاء');
+      showToast(error.response?.data?.message || 'حدث خطأ أثناء الإلغاء', 'error');
     }
   };
 

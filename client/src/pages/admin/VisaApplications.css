@@ -1,0 +1,469 @@
+/* ===== Visa Applications Page ===== */
+.va-page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header */
+.va-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.va-header-title h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.va-header-title p {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 4px 0 0;
+}
+
+/* Stats Cards */
+.va-stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.va-stat-card {
+  text-align: center;
+  padding: 18px 12px;
+  background: var(--stat-bg, #f8fafc);
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  border-top: 3px solid var(--stat-border, #64748b);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.va-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.va-stat-card.active {
+  border-color: var(--stat-border, #64748b);
+  box-shadow: 0 0 0 2px var(--stat-border, #64748b), 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.va-stat-count {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--stat-color, #1e293b);
+}
+
+.va-stat-label {
+  display: block;
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* Toolbar: Search + Filters */
+.va-toolbar {
+  background: white;
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.va-search-form {
+  display: flex;
+  gap: 8px;
+}
+
+.va-search-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: #1e293b;
+  background: #fafafa;
+  transition: 0.2s;
+}
+
+.va-search-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  background: white;
+}
+
+.va-search-btn {
+  padding: 10px 22px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: 0.2s;
+  white-space: nowrap;
+}
+
+.va-search-btn:hover {
+  background: #1d4ed8;
+}
+
+.va-filter-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.va-filter-btn {
+  padding: 7px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  background: white;
+  color: #475569;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+  white-space: nowrap;
+}
+
+.va-filter-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.va-filter-btn.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+/* Loading */
+.va-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #64748b;
+  font-size: 1rem;
+  gap: 16px;
+}
+
+.va-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: va-spin 0.8s linear infinite;
+}
+
+@keyframes va-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.va-empty {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.va-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+.va-empty p {
+  color: #94a3b8;
+  font-size: 1.1rem;
+  margin: 0 0 16px;
+}
+
+.va-empty-reset {
+  padding: 8px 20px;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.va-empty-reset:hover {
+  background: #e2e8f0;
+}
+
+/* Table */
+.va-table-wrap {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+  overflow-x: auto;
+  margin-bottom: 16px;
+}
+
+.va-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.va-table th {
+  background: #f8fafc;
+  padding: 12px 14px;
+  text-align: right;
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
+  font-size: 0.85rem;
+}
+
+.va-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.va-table-row {
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.va-table-row:hover td {
+  background: #f8fafc;
+}
+
+.va-table-row:active td {
+  background: #f1f5f9;
+}
+
+/* Applicant Info Cell */
+.va-applicant-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.va-applicant-name {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.9rem;
+}
+
+.va-applicant-meta {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+/* Passport Number */
+.va-passport-num {
+  font-family: 'Courier New', monospace;
+  font-weight: 500;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  color: #475569;
+}
+
+/* Date Cell */
+.va-date-cell {
+  white-space: nowrap;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+/* Status Badge */
+.va-status-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Actions */
+.va-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.va-action-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: 0.2s;
+  padding: 0;
+  line-height: 1;
+}
+
+.va-action-view:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.va-action-delete:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.va-action-export:hover {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+/* Pagination */
+.va-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.va-pagination-btn {
+  padding: 8px 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  color: #475569;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.va-pagination-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.va-pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.va-pagination-info {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1024px) {
+  .va-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .va-page {
+    padding: 16px;
+  }
+
+  .va-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .va-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .va-toolbar {
+    padding: 14px;
+  }
+
+  .va-search-form {
+    flex-direction: column;
+  }
+
+  .va-filter-buttons {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+  }
+
+  .va-table th,
+  .va-table td {
+    padding: 10px 10px;
+    font-size: 0.82rem;
+  }
+
+  .va-applicant-name {
+    font-size: 0.85rem;
+  }
+
+  .va-applicant-meta {
+    font-size: 0.75rem;
+  }
+
+  .va-pagination {
+    gap: 10px;
+  }
+
+  .va-pagination-btn {
+    padding: 6px 14px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .va-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .va-stat-card {
+    padding: 14px 8px;
+  }
+
+  .va-stat-count {
+    font-size: 1.3rem;
+  }
+
+  .va-stat-label {
+    font-size: 0.75rem;
+  }
+}

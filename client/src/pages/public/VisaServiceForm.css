@@ -1,0 +1,628 @@
+/* ========================================
+   Visa Service Form — Client Application
+   ======================================== */
+
+.vsf-page {
+  font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif;
+  background: #f0f2f5;
+  min-height: 100vh;
+  color: #1e293b;
+}
+
+.vsf-page *, .vsf-page *::before, .vsf-page *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.vsf-loading {
+  text-align: center;
+  padding: 120px 20px;
+  color: #94a3b8;
+  font-size: 1.1rem;
+}
+
+/* Header */
+.vsf-header {
+  background: linear-gradient(135deg, #1e3a5f 0%, var(--teal) 100%);
+  padding: 16px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
+}
+
+.vsf-header-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vsf-back {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.vsf-back:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.vsf-header-title {
+  text-align: center;
+}
+
+.vsf-header-title h2 {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.vsf-header-title span {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+}
+
+.vsf-save-indicator {
+  min-width: 80px;
+  text-align: left;
+}
+
+.vsf-saving {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+}
+
+/* Content */
+.vsf-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 24px 60px;
+}
+
+/* Messages */
+.vsf-message {
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.vsf-message.error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.vsf-message.success {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+/* Sections */
+.vsf-section {
+  background: white;
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.vsf-section h3 {
+  margin: 0 0 16px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* Upload */
+.vsf-upload-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.vsf-upload-box {
+  border: 2px dashed #e2e8f0;
+  border-radius: 12px;
+  padding: 30px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  min-height: 160px;
+  justify-content: center;
+}
+
+.vsf-upload-box:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.vsf-upload-box.dragging {
+  border-color: var(--teal);
+  background: var(--teal-bg);
+}
+
+.vsf-upload-box.error {
+  border-color: #fca5a5;
+}
+
+.vsf-upload-icon {
+  font-size: 2rem;
+}
+
+.vsf-upload-preview {
+  width: 100%;
+  max-height: 140px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.vsf-uploading {
+  color: var(--teal);
+  font-size: 0.9rem;
+}
+
+/* Section Title with Icon */
+.vsf-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.vsf-section-title svg {
+  flex-shrink: 0;
+}
+
+/* Upload Grid (dynamic documents) */
+.vsf-upload-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.vsf-upload-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vsf-upload-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.vsf-upload-box.has-file {
+  border-style: solid;
+  border-color: #e2e8f0;
+  background: #fafbfc;
+}
+
+.vsf-upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+}
+
+.vsf-uploading-spinner {
+  font-size: 1.5rem;
+  animation: vsf-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes vsf-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* PDF Preview */
+.vsf-pdf-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+}
+
+.vsf-pdf-name {
+  font-size: 0.8rem;
+  color: #475569;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Image Preview in dynamic upload */
+.vsf-image-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.vsf-image-preview img {
+  width: 100%;
+  max-height: 140px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.vsf-upload-change {
+  font-size: 0.75rem;
+  color: var(--teal, #0d9488);
+  font-weight: 500;
+}
+
+.vsf-upload-instructions {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.vsf-field-error {
+  color: #dc2626;
+  font-size: 0.78rem;
+}
+
+/* Client Notes Textarea */
+.vsf-notes-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif;
+  font-size: 0.9rem;
+  resize: vertical;
+  transition: border-color 0.2s;
+  min-height: 80px;
+  color: #1e293b;
+}
+
+.vsf-notes-textarea:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
+.vsf-notes-textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* Form Grid */
+.vsf-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.vsf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vsf-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.vsf-field input,
+.vsf-field select {
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+.vsf-field input:focus,
+.vsf-field select:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
+.vsf-field input.error {
+  border-color: #fca5a5;
+}
+
+.vsf-error {
+  color: #dc2626;
+  font-size: 0.78rem;
+}
+
+/* Addons */
+.vsf-addons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vsf-addon-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.vsf-addon-item:hover {
+  background: #f1f5f9;
+}
+
+.vsf-addon-item.selected {
+  background: var(--teal-bg);
+  border-color: var(--teal);
+}
+
+.vsf-addon-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--teal);
+  flex-shrink: 0;
+}
+
+.vsf-addon-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.vsf-addon-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.vsf-addon-desc {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.vsf-addon-price {
+  color: #16a34a;
+  font-weight: 700;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+/* Coupon */
+.vsf-coupon-input {
+  display: flex;
+  gap: 10px;
+}
+
+.vsf-coupon-input input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.vsf-coupon-input button {
+  padding: 10px 20px;
+  background: var(--teal, #0d9488);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.vsf-coupon-input button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vsf-coupon-applied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f0fdf4;
+  border-radius: 10px;
+  border: 1px solid #bbf7d0;
+}
+
+.vsf-coupon-applied span {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.vsf-coupon-remove {
+  background: none;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+
+.vsf-coupon-msg {
+  margin-top: 8px;
+  font-size: 0.85rem;
+}
+
+.vsf-coupon-msg.success {
+  color: #16a34a;
+}
+
+.vsf-coupon-msg.error {
+  color: #dc2626;
+}
+
+/* Pricing */
+.vsf-pricing {
+  background: #fafbfc;
+}
+
+.vsf-pricing-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vsf-pricing-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.vsf-pricing-row.discount {
+  color: #dc2626;
+}
+
+.vsf-pricing-row.total {
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+/* Buttons */
+.vsf-btn {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Tajawal', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.vsf-btn.primary {
+  background: var(--teal, #0d9488);
+  color: white;
+}
+
+.vsf-btn.primary:hover {
+  opacity: 0.9;
+}
+
+.vsf-btn.primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vsf-btn.secondary {
+  background: white;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.vsf-btn.large {
+  width: 100%;
+  padding: 16px;
+  font-size: 1.05rem;
+}
+
+/* Submit */
+.vsf-submit-section {
+  margin-top: 8px;
+}
+
+/* Success */
+.vsf-success {
+  text-align: center;
+  padding: 100px 24px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.vsf-success-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.vsf-success h2 {
+  font-size: 1.4rem;
+  margin-bottom: 12px;
+  color: #16a34a;
+}
+
+.vsf-success-number {
+  background: #f0fdf4;
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  color: #16a34a;
+  margin-bottom: 12px;
+  direction: ltr;
+}
+
+.vsf-success p {
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.vsf-success-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .vsf-upload-row {
+    grid-template-columns: 1fr;
+  }
+
+  .vsf-upload-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vsf-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vsf-header-title h2 {
+    font-size: 0.95rem;
+  }
+
+  .vsf-content {
+    padding: 16px 16px 40px;
+  }
+
+  .vsf-success-actions {
+    flex-direction: column;
+  }
+}

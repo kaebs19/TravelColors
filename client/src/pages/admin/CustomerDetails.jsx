@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { customersApi, appointmentsApi, bookingsApi } from '../../api';
+import { useToast } from '../../context';
 import { Card, Loader, Button, Modal } from '../../components/common';
 import { formatCurrency, formatDate } from '../../utils';
 import './CustomerDetails.css';
@@ -8,6 +9,7 @@ import './CustomerDetails.css';
 const CustomerDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [customer, setCustomer] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [bookings, setBookings] = useState([]);
@@ -16,6 +18,7 @@ const CustomerDetails = () => {
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [copiedPhone, setCopiedPhone] = useState(false);
+  const [applications, setApplications] = useState({ visaApplications: [], licenseApplications: [], visaServiceApplications: [] });
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -33,10 +36,11 @@ const CustomerDetails = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [customerRes, appointmentsRes, bookingsRes] = await Promise.all([
+      const [customerRes, appointmentsRes, bookingsRes, applicationsRes] = await Promise.all([
         customersApi.getCustomer(id),
         appointmentsApi.getAppointments({ customer: id }),
-        bookingsApi.getBookings({ customer: id }).catch(() => ({ data: { bookings: [] } }))
+        bookingsApi.getBookings({ customer: id }).catch(() => ({ data: { bookings: [] } })),
+        customersApi.getCustomerApplications(id).catch(() => ({ data: { visaApplications: [], licenseApplications: [], visaServiceApplications: [] } }))
       ]);
 
       const customerData = customerRes.data?.customer || customerRes.data?.data?.customer || customerRes.data;
@@ -56,6 +60,13 @@ const CustomerDetails = () => {
 
       const bks = bookingsRes.data?.data?.bookings || bookingsRes.data?.bookings || [];
       setBookings(bks);
+
+      const appsData = applicationsRes.data?.data || applicationsRes.data || {};
+      setApplications({
+        visaApplications: appsData.visaApplications || [],
+        licenseApplications: appsData.licenseApplications || [],
+        visaServiceApplications: appsData.visaServiceApplications || []
+      });
     } catch (error) {
       console.error('Error fetching customer data:', error);
     } finally {
@@ -80,7 +91,7 @@ const CustomerDetails = () => {
       fetchData();
     } catch (error) {
       console.error('Error updating customer:', error);
-      alert('حدث خطأ أثناء تحديث بيانات العميل');
+      showToast('حدث خطأ أثناء تحديث بيانات العميل', 'error');
     } finally {
       setSaving(false);
     }
@@ -93,7 +104,7 @@ const CustomerDetails = () => {
         navigate('/control/customers');
       } catch (error) {
         console.error('Error deleting customer:', error);
-        alert('حدث خطأ أثناء حذف العميل');
+        showToast('حدث خطأ أثناء حذف العميل', 'error');
       }
     }
   };
@@ -271,6 +282,26 @@ const CustomerDetails = () => {
                     bookings.reduce((sum, b) => sum + (b.paidAmount || 0), 0);
   const totalRemaining = totalAmount - totalPaid;
   const totalPersons = appointments.reduce((sum, a) => sum + (a.personsCount || 1), 0);
+
+  const statusLabels = {
+    draft: 'مسودة',
+    submitted: 'مقدّم',
+    under_review: 'قيد المراجعة',
+    approved: 'مقبول',
+    rejected: 'مرفوض',
+    completed: 'مكتمل',
+    received: 'مستلم'
+  };
+
+  const statusColors = {
+    draft: '#6b7280',
+    submitted: '#3b82f6',
+    under_review: '#f59e0b',
+    approved: '#10b981',
+    rejected: '#ef4444',
+    completed: '#059669',
+    received: '#8b5cf6'
+  };
 
   // ترتيب المواعيد حسب التاريخ (الأحدث أولاً)
   const sortedAppointments = [...appointments].sort((a, b) => {
@@ -495,6 +526,111 @@ const CustomerDetails = () => {
           </div>
         )}
       </Card>
+
+      {/* الطلبات المربوطة */}
+      {(applications.visaApplications.length > 0 || applications.licenseApplications.length > 0 || applications.visaServiceApplications.length > 0) && (
+        <div className="detail-card" style={{ marginTop: '20px' }}>
+          <h3 style={{ marginBottom: '15px', fontSize: '1.1rem' }}>📄 الطلبات المربوطة</h3>
+
+          {applications.visaApplications.length > 0 && (
+            <div style={{ marginBottom: '15px' }}>
+              <h4 style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>🇺🇸 تأشيرة أمريكية</h4>
+              {applications.visaApplications.map(app => (
+                <div key={app._id}
+                  onClick={() => navigate(`/control/visa-applications/${app._id}`)}
+                  style={{
+                    padding: '10px 14px', borderRadius: '8px', marginBottom: '6px',
+                    background: 'var(--hover-bg, #f9fafb)', cursor: 'pointer',
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    border: '1px solid var(--border-color, #e5e7eb)',
+                    transition: 'background 0.15s'
+                  }}
+                >
+                  <div>
+                    <span style={{ fontWeight: 600, marginLeft: '10px' }}>{app.applicationNumber}</span>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
+                      {app.personalInfo?.fullName || '-'}
+                    </span>
+                  </div>
+                  <span style={{
+                    padding: '3px 10px', borderRadius: '12px', fontSize: '0.8rem',
+                    background: statusColors[app.status] + '20', color: statusColors[app.status],
+                    fontWeight: 600
+                  }}>
+                    {statusLabels[app.status] || app.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {applications.licenseApplications.length > 0 && (
+            <div style={{ marginBottom: '15px' }}>
+              <h4 style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>🪪 رخصة دولية</h4>
+              {applications.licenseApplications.map(app => (
+                <div key={app._id}
+                  onClick={() => navigate(`/control/license-applications/${app._id}`)}
+                  style={{
+                    padding: '10px 14px', borderRadius: '8px', marginBottom: '6px',
+                    background: 'var(--hover-bg, #f9fafb)', cursor: 'pointer',
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    border: '1px solid var(--border-color, #e5e7eb)',
+                    transition: 'background 0.15s'
+                  }}
+                >
+                  <div>
+                    <span style={{ fontWeight: 600, marginLeft: '10px' }}>{app.applicationNumber}</span>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
+                      {app.personalInfo?.givenName && app.personalInfo?.familyName
+                        ? `${app.personalInfo.givenName} ${app.personalInfo.familyName}`
+                        : '-'}
+                    </span>
+                  </div>
+                  <span style={{
+                    padding: '3px 10px', borderRadius: '12px', fontSize: '0.8rem',
+                    background: statusColors[app.status] + '20', color: statusColors[app.status],
+                    fontWeight: 600
+                  }}>
+                    {statusLabels[app.status] || app.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {applications.visaServiceApplications.length > 0 && (
+            <div style={{ marginBottom: '15px' }}>
+              <h4 style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>🌍 تأشيرة إلكترونية</h4>
+              {applications.visaServiceApplications.map(app => (
+                <div key={app._id}
+                  onClick={() => navigate(`/control/visa-service-applications/${app._id}`)}
+                  style={{
+                    padding: '10px 14px', borderRadius: '8px', marginBottom: '6px',
+                    background: 'var(--hover-bg, #f9fafb)', cursor: 'pointer',
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    border: '1px solid var(--border-color, #e5e7eb)',
+                    transition: 'background 0.15s'
+                  }}
+                >
+                  <div>
+                    <span style={{ fontWeight: 600, marginLeft: '10px' }}>{app.applicationNumber}</span>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
+                      {app.personalInfo?.fullName || '-'}
+                    </span>
+                  </div>
+                  <span style={{
+                    padding: '3px 10px', borderRadius: '12px', fontSize: '0.8rem',
+                    background: statusColors[app.status] + '20', color: statusColors[app.status],
+                    fontWeight: 600
+                  }}>
+                    {statusLabels[app.status] || app.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Edit Modal */}
       <Modal

@@ -10,6 +10,7 @@ const Sidebar = () => {
   const [logoUrl, setLogoUrl] = useState('/favicon.svg');
   const [openMenus, setOpenMenus] = useState({
     appointments: false,
+    visas: false,
     invoices: false,
     finance: false
   });
@@ -33,6 +34,9 @@ const Sidebar = () => {
   const isAppointmentsActive = ['/control/appointments', '/control/tasks'].some(
     path => location.pathname.startsWith(path)
   );
+  const isVisasActive = ['/control/visa-applications', '/control/visa-service-applications', '/control/license-applications'].some(
+    path => location.pathname.startsWith(path)
+  );
   const isInvoicesActive = ['/control/invoices', '/control/receipts'].some(
     path => location.pathname.startsWith(path)
   );
@@ -50,6 +54,7 @@ const Sidebar = () => {
   // فتح القوائم تلقائياً إذا كان المسار الحالي بداخلها
   useState(() => {
     if (isAppointmentsActive) setOpenMenus(prev => ({ ...prev, appointments: true }));
+    if (isVisasActive) setOpenMenus(prev => ({ ...prev, visas: true }));
     if (isInvoicesActive) setOpenMenus(prev => ({ ...prev, invoices: true }));
     if (isFinanceActive) setOpenMenus(prev => ({ ...prev, finance: true }));
   }, [location.pathname]);
@@ -66,6 +71,12 @@ const Sidebar = () => {
   const appointmentsSubMenu = [
     { path: '/control/appointments', label: 'إدارة المواعيد', icon: '📅' },
     { path: '/control/tasks', label: 'المهام', icon: '✅' },
+  ];
+
+  const visasSubMenu = [
+    { path: '/control/visa-applications', label: 'التأشيرة الأمريكية', icon: '🛂' },
+    { path: '/control/visa-service-applications', label: 'التأشيرات الإلكترونية', icon: '🌍' },
+    { path: '/control/license-applications', label: 'الرخصة الدولية', icon: '🪪' },
   ];
 
   const invoicesSubMenu = [
@@ -148,6 +159,32 @@ const Sidebar = () => {
             <span className="sidebar-label">{item.label}</span>
           </NavLink>
         ))}
+
+        {/* التأشيرات - قائمة منسدلة */}
+        <div className={`sidebar-dropdown ${openMenus.visas || isVisasActive ? 'open' : ''}`}>
+          <button
+            className={`sidebar-dropdown-toggle ${isVisasActive ? 'active' : ''}`}
+            onClick={() => toggleMenu('visas')}
+          >
+            <span className="sidebar-icon">✈️</span>
+            <span className="sidebar-label">التأشيرات</span>
+            <span className="sidebar-arrow">{openMenus.visas || isVisasActive ? '▼' : '◀'}</span>
+          </button>
+          <div className="sidebar-dropdown-menu">
+            {visasSubMenu.map(item => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `sidebar-sublink ${isActive ? 'active' : ''}`
+                }
+              >
+                <span className="sidebar-icon">{item.icon}</span>
+                <span className="sidebar-label">{item.label}</span>
+              </NavLink>
+            ))}
+          </div>
+        </div>
 
         {/* الفواتير والإيصالات - قائمة منسدلة */}
         <div className={`sidebar-dropdown ${openMenus.invoices || isInvoicesActive ? 'open' : ''}`}>

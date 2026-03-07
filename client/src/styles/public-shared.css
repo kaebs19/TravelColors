@@ -1,0 +1,385 @@
+/* ===== Shared Styles for Public Pages ===== */
+/* Used by: Home, ContactUs, Privacy, Terms, UsVisa */
+/* Import: variables.css must be loaded before this file */
+
+/* ===== Page Wrapper ===== */
+.public-page {
+  font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif;
+  color: var(--text-color);
+  line-height: 1.7;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.public-page *,
+.public-page *::before,
+.public-page *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.public-page a { text-decoration: none; color: inherit; }
+
+/* ===== Shared Simple Navbar ===== */
+.public-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+  padding: 0 24px;
+}
+
+.public-nav-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+.public-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.public-nav-logo {
+  height: 40px;
+  width: auto;
+  border-radius: 6px;
+}
+
+.public-nav-name {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.public-nav-name-ar {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--bg-dark);
+}
+
+.public-nav-name-en {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.public-nav-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--teal);
+  color: white;
+  border: none;
+  padding: 8px 22px;
+  border-radius: 50px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.public-nav-back:hover {
+  background: var(--teal-dark);
+  transform: translateY(-1px);
+}
+
+/* ===== Shared Footer ===== */
+.public-footer {
+  background: var(--bg-dark);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 32px 24px 24px;
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: auto;
+}
+
+.public-footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 16px;
+}
+
+.public-footer-brand-ar {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.public-footer-brand-en {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.public-footer-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.public-footer-nav a,
+.public-footer-nav span {
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: color var(--transition);
+  text-decoration: none;
+}
+
+.public-footer-nav a:hover,
+.public-footer-nav span:hover {
+  color: var(--teal-light);
+}
+
+.public-footer p {
+  margin-bottom: 8px;
+  font-size: 0.82rem;
+}
+
+.public-footer-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.public-footer-links span,
+.public-footer-links a {
+  cursor: pointer;
+  transition: color var(--transition);
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+}
+
+.public-footer-links span:not(.public-footer-sep):hover,
+.public-footer-links a:hover {
+  color: var(--teal-light);
+}
+
+.public-footer-sep {
+  cursor: default !important;
+  opacity: 0.4;
+}
+
+/* ===== Shared Section Container ===== */
+.public-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+}
+
+/* ===== Shared Hero ===== */
+.public-hero {
+  padding: 120px 24px 60px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0f172a 0%, #134e4a 40%, var(--teal) 80%, var(--teal-light) 100%);
+}
+
+.public-hero-content {
+  max-width: 700px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.public-hero h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.public-hero p {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.8;
+}
+
+/* ===== WhatsApp Shared Button ===== */
+.wa-btn-round {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, var(--whatsapp-color), var(--whatsapp-bg));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+  box-shadow: 0 3px 12px rgba(37, 211, 102, 0.3);
+}
+
+.wa-btn-round:hover {
+  transform: scale(1.1);
+  box-shadow: 0 5px 20px rgba(37, 211, 102, 0.45);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .public-hero {
+    padding: 100px 16px 48px;
+  }
+
+  .public-hero h1 {
+    font-size: 1.8rem;
+  }
+
+  .public-hero p {
+    font-size: 0.95rem;
+  }
+
+  .public-nav-name-ar {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .public-hero h1 {
+    font-size: 1.5rem;
+  }
+}
+
+/* ===== Unified Button System (Public Pages) ===== */
+/* Prefixed with 'pbtn' to avoid conflict with admin Button.css */
+.pbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-decoration: none;
+  line-height: 1.4;
+}
+
+.pbtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.pbtn svg {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+/* Sizes — compound selector for specificity over .website * resets */
+.pbtn.pbtn-sm { padding: 8px 20px; font-size: 0.88rem; border-radius: 12px; }
+.pbtn.pbtn-md { padding: 12px 28px; font-size: 0.95rem; border-radius: 12px; }
+.pbtn.pbtn-lg { padding: 14px 36px; font-size: 1.05rem; border-radius: 50px; }
+.pbtn.pbtn-full { width: 100%; padding: 14px 16px; font-size: 0.95rem; border-radius: 12px; }
+
+/* Primary — Teal Gradient */
+.pbtn.pbtn-primary {
+  background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+  color: white;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.25);
+}
+.pbtn.pbtn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal-darker) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(13, 148, 136, 0.35);
+}
+
+/* Secondary — Outline Teal */
+.pbtn.pbtn-secondary {
+  background: white;
+  color: var(--teal);
+  border: 1.5px solid var(--teal);
+}
+.pbtn.pbtn-secondary:hover:not(:disabled) {
+  background: var(--teal-bg);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.12);
+}
+
+/* WhatsApp — Green Gradient */
+.pbtn.pbtn-whatsapp {
+  background: linear-gradient(135deg, var(--whatsapp-color) 0%, var(--whatsapp-bg) 100%);
+  color: white;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.25);
+}
+.pbtn.pbtn-whatsapp:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.35);
+}
+
+/* Ghost — Transparent (for dark backgrounds) */
+.pbtn.pbtn-ghost {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.pbtn.pbtn-ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Danger — Red */
+.pbtn.pbtn-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.25);
+}
+.pbtn.pbtn-danger:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.35);
+}
+
+/* RTL arrow animation */
+.pbtn:hover:not(:disabled) svg {
+  transform: translateX(-3px);
+}
+
+/* ===== Star Rating ===== */
+.star-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+}
+.star-rating svg {
+  width: 14px;
+  height: 14px;
+}
+.star-filled { color: #fbbf24; }
+.star-empty { color: #d1d5db; }
+
+/* ===== Responsive Buttons ===== */
+@media (max-width: 768px) {
+  .pbtn.pbtn-lg { padding: 12px 28px; font-size: 0.95rem; }
+  .pbtn.pbtn-md { padding: 10px 22px; font-size: 0.9rem; }
+}
+
+@media (max-width: 480px) {
+  .pbtn.pbtn-lg { padding: 12px 24px; font-size: 0.9rem; }
+}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useToast } from '../../../context';
 import './AppointmentForm.css';
 
 // دالة تحويل الأرقام العربية للإنجليزية
@@ -51,6 +52,7 @@ const hourSlots = generateHourSlots();
 const STORAGE_KEY = 'appointmentFormDraft';
 
 const AppointmentForm = ({ appointment, appointmentType, departments, customers, onSubmit, onCancel }) => {
+  const { showToast } = useToast();
   const fileInputRef = useRef(null);
 
   // استعادة البيانات المحفوظة
@@ -221,7 +223,7 @@ const AppointmentForm = ({ appointment, appointmentType, departments, customers,
     });
 
     if (validFiles.length !== files.length) {
-      alert('بعض الملفات غير مدعومة أو تتجاوز الحجم المسموح (5MB). المسموح: صور و PDF فقط');
+      showToast('بعض الملفات غير مدعومة أو تتجاوز الحجم المسموح (5MB). المسموح: صور و PDF فقط', 'warning');
     }
 
     const newAttachments = validFiles.map(file => ({
@@ -245,44 +247,44 @@ const AppointmentForm = ({ appointment, appointmentType, departments, customers,
 
     // التحقق من البيانات المطلوبة
     if (!formData.customerName.trim()) {
-      alert('اسم العميل مطلوب');
+      showToast('اسم العميل مطلوب', 'warning');
       return;
     }
 
     // التحقق حسب نوع الموعد
     if (formData.type === 'confirmed') {
       if (!formData.department) {
-        alert('القسم مطلوب');
+        showToast('القسم مطلوب', 'warning');
         return;
       }
       if (!formData.appointmentDate) {
-        alert('تاريخ الموعد مطلوب');
+        showToast('تاريخ الموعد مطلوب', 'warning');
         return;
       }
       if (isWeekend(formData.appointmentDate)) {
-        alert('لا يمكن اختيار يوم الجمعة أو السبت');
+        showToast('لا يمكن اختيار يوم الجمعة أو السبت', 'warning');
         return;
       }
       if (!formData.appointmentTime) {
-        alert('وقت الموعد مطلوب');
+        showToast('وقت الموعد مطلوب', 'warning');
         return;
       }
     } else if (formData.type === 'unconfirmed') {
       if (!formData.department) {
-        alert('القسم مطلوب');
+        showToast('القسم مطلوب', 'warning');
         return;
       }
       if (!formData.dateFrom || !formData.dateTo) {
-        alert('يجب تحديد تاريخ البداية والنهاية');
+        showToast('يجب تحديد تاريخ البداية والنهاية', 'warning');
         return;
       }
       if (new Date(formData.dateFrom) > new Date(formData.dateTo)) {
-        alert('تاريخ البداية يجب أن يكون قبل تاريخ النهاية');
+        showToast('تاريخ البداية يجب أن يكون قبل تاريخ النهاية', 'warning');
         return;
       }
     } else if (formData.type === 'draft') {
       if (!formData.reminderDate || !formData.reminderTime) {
-        alert('يجب تحديد تاريخ ووقت التذكير');
+        showToast('يجب تحديد تاريخ ووقت التذكير', 'warning');
         return;
       }
     }

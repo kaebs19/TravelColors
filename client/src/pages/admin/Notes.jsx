@@ -2,10 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { notesApi, departmentsApi, customersApi } from '../../api';
 import { Card, Loader, Modal } from '../../components/common';
+import { useToast } from '../../context';
 import './Notes.css';
 
 const Notes = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [notes, setNotes] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -147,7 +149,7 @@ const Notes = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.customerName.trim()) {
-      alert('اسم العميل مطلوب');
+      showToast('اسم العميل مطلوب', 'warning');
       return;
     }
 
@@ -162,7 +164,7 @@ const Notes = () => {
       fetchData();
     } catch (error) {
       console.error('Error saving note:', error);
-      alert('حدث خطأ أثناء الحفظ');
+      showToast('حدث خطأ أثناء الحفظ', 'error');
     } finally {
       setSaving(false);
     }
@@ -206,11 +208,11 @@ const Notes = () => {
 
   const handleConvertToAppointment = async () => {
     if (convertData.type === 'confirmed' && (!convertData.appointmentDate || !convertData.department)) {
-      alert('يرجى تحديد التاريخ والقسم');
+      showToast('يرجى تحديد التاريخ والقسم', 'warning');
       return;
     }
     if (convertData.type === 'unconfirmed' && (!convertData.dateFrom || !convertData.dateTo || !convertData.department)) {
-      alert('يرجى تحديد نطاق التاريخ والقسم');
+      showToast('يرجى تحديد نطاق التاريخ والقسم', 'warning');
       return;
     }
 
@@ -219,10 +221,10 @@ const Notes = () => {
       await notesApi.convertToAppointment(convertingNote._id, convertData);
       setShowConvertModal(false);
       fetchData();
-      alert('تم تحويل المسودة لموعد بنجاح');
+      showToast('تم تحويل المسودة لموعد بنجاح', 'success');
     } catch (error) {
       console.error('Error converting note:', error);
-      alert('حدث خطأ أثناء التحويل');
+      showToast('حدث خطأ أثناء التحويل', 'error');
     } finally {
       setSaving(false);
     }
@@ -313,7 +315,7 @@ const Notes = () => {
 
   const handleSaveQuickNote = () => {
     if (!quickNoteData.content.trim()) {
-      alert('محتوى الملاحظة مطلوب');
+      showToast('محتوى الملاحظة مطلوب', 'warning');
       return;
     }
 

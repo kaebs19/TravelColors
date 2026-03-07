@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useToast } from '../../../context';
 import './EmployeeForm.css';
 
 // تعريف وحدات الصلاحيات (نسخة من الباك)
@@ -121,6 +122,7 @@ const ROLE_DEFAULTS = {
 const getDefaultPermissions = (role) => ({ ...(ROLE_DEFAULTS[role] || {}) });
 
 const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -205,22 +207,22 @@ const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      alert('الاسم مطلوب');
+      showToast('الاسم مطلوب', 'warning');
       return;
     }
 
     if (!formData.email.trim()) {
-      alert('البريد الإلكتروني مطلوب');
+      showToast('البريد الإلكتروني مطلوب', 'warning');
       return;
     }
 
     if (!employee && !formData.password) {
-      alert('كلمة المرور مطلوبة');
+      showToast('كلمة المرور مطلوبة', 'warning');
       return;
     }
 
     if (formData.password && formData.password.length < 6) {
-      alert('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      showToast('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'warning');
       return;
     }
 

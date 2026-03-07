@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../context';
+import { useAuth, useToast } from '../../context';
 import settingsApi from '../../api/settingsApi';
 import { Card, Loader } from '../../components/common';
 import './Settings.css';
 
 const Settings = () => {
   const { user, hasPermission } = useAuth();
+  const { showToast } = useToast();
   const isAdmin = hasPermission('settings.edit');
 
   const [loading, setLoading] = useState(true);
@@ -77,7 +78,7 @@ const Settings = () => {
       setTimeout(() => setSaved(false), 3000);
     } catch (error) {
       console.error('Error saving settings:', error);
-      alert('فشل في حفظ الإعدادات');
+      showToast('فشل في حفظ الإعدادات', 'error');
     } finally {
       setSaving(false);
     }
@@ -129,7 +130,7 @@ const Settings = () => {
 
   const handleAddPaymentType = async () => {
     if (!newPayment.id || !newPayment.label) {
-      alert('يرجى إدخال المعرف والاسم');
+      showToast('يرجى إدخال المعرف والاسم', 'warning');
       return;
     }
 
@@ -143,7 +144,7 @@ const Settings = () => {
       setNewPayment({ id: '', label: '', icon: '💰' });
     } catch (error) {
       console.error('Error adding payment type:', error);
-      alert('فشل في إضافة طريقة الدفع');
+      showToast('فشل في إضافة طريقة الدفع', 'error');
     }
   };
 
@@ -158,13 +159,13 @@ const Settings = () => {
       }));
     } catch (error) {
       console.error('Error deleting payment type:', error);
-      alert('فشل في حذف طريقة الدفع');
+      showToast('فشل في حذف طريقة الدفع', 'error');
     }
   };
 
   const handleAddStatus = async () => {
     if (!newStatus.id || !newStatus.label) {
-      alert('يرجى إدخال المعرف والاسم');
+      showToast('يرجى إدخال المعرف والاسم', 'warning');
       return;
     }
 
@@ -178,13 +179,13 @@ const Settings = () => {
       setNewStatus({ id: '', label: '', icon: '📌', color: '#6b7280' });
     } catch (error) {
       console.error('Error adding status:', error);
-      alert('فشل في إضافة الحالة');
+      showToast('فشل في إضافة الحالة', 'error');
     }
   };
 
   const handleDeleteStatus = async (id) => {
     if (['new', 'completed', 'cancelled'].includes(id)) {
-      alert('لا يمكن حذف الحالات الأساسية');
+      showToast('لا يمكن حذف الحالات الأساسية', 'warning');
       return;
     }
 
@@ -198,7 +199,7 @@ const Settings = () => {
       }));
     } catch (error) {
       console.error('Error deleting status:', error);
-      alert('فشل في حذف الحالة');
+      showToast('فشل في حذف الحالة', 'error');
     }
   };
 
@@ -284,7 +285,7 @@ const Settings = () => {
 
   const handleAddCity = async () => {
     if (!newCity.id || !newCity.name) {
-      alert('يرجى إدخال المعرف والاسم');
+      showToast('يرجى إدخال المعرف والاسم', 'warning');
       return;
     }
 
@@ -298,7 +299,7 @@ const Settings = () => {
       setNewCity({ id: '', name: '' });
     } catch (error) {
       console.error('Error adding city:', error);
-      alert('فشل في إضافة المدينة');
+      showToast('فشل في إضافة المدينة', 'error');
     }
   };
 
@@ -313,7 +314,7 @@ const Settings = () => {
       }));
     } catch (error) {
       console.error('Error deleting city:', error);
-      alert('فشل في حذف المدينة');
+      showToast('فشل في حذف المدينة', 'error');
     }
   };
 
@@ -354,7 +355,7 @@ const Settings = () => {
 
   const handleAddProduct = () => {
     if (!newProduct.name) {
-      alert('يرجى إدخال اسم المنتج');
+      showToast('يرجى إدخال اسم المنتج', 'warning');
       return;
     }
 
@@ -405,10 +406,10 @@ const Settings = () => {
       setTestingConnection(true);
       const response = await settingsApi.testGoogleSheetsConnection();
       setSheetsStatus(response.data.data);
-      alert(`✅ ${response.data.message}\n\nاسم الورقة: ${response.data.data.spreadsheetTitle}`);
+      showToast('تم الاتصال بنجاح', 'success');
     } catch (error) {
       console.error('Error testing connection:', error);
-      alert(`❌ ${error.response?.data?.message || 'فشل في الاتصال'}`);
+      showToast(error.response?.data?.message || 'فشل في الاتصال', 'error');
     } finally {
       setTestingConnection(false);
     }
@@ -420,14 +421,14 @@ const Settings = () => {
     try {
       setSyncing(true);
       const response = await settingsApi.syncGoogleSheets();
-      alert(`✅ ${response.data.message}`);
+      showToast(response.data.message, 'success');
       // تحديث حالة المزامنة
       handleGoogleSheetsChange('lastSyncAt', response.data.data.lastSyncAt);
       handleGoogleSheetsChange('totalSynced', response.data.data.totalSynced);
       handleGoogleSheetsChange('syncStatus', 'success');
     } catch (error) {
       console.error('Error syncing:', error);
-      alert(`❌ ${error.response?.data?.message || 'فشل في المزامنة'}`);
+      showToast(error.response?.data?.message || 'فشل في المزامنة', 'error');
     } finally {
       setSyncing(false);
     }
@@ -565,7 +566,7 @@ const Settings = () => {
                               const file = e.target.files[0];
                               if (!file) return;
                               if (file.size > 5 * 1024 * 1024) {
-                                alert('حجم الصورة يجب أن يكون أقل من 5MB');
+                                showToast('حجم الصورة يجب أن يكون أقل من 5MB', 'warning');
                                 return;
                               }
                               const formData = new FormData();
@@ -574,11 +575,11 @@ const Settings = () => {
                                 const res = await settingsApi.uploadLogo(formData);
                                 if (res.data.success) {
                                   setSettings(prev => ({ ...prev, logo: res.data.data.logo }));
-                                  alert('تم رفع الشعار بنجاح ✅');
+                                  showToast('تم رفع الشعار بنجاح', 'success');
                                 }
                               } catch (err) {
                                 console.error('Error uploading logo:', err);
-                                alert('حدث خطأ في رفع الشعار');
+                                showToast('حدث خطأ في رفع الشعار', 'error');
                               }
                               e.target.value = '';
                             }}
@@ -591,7 +592,7 @@ const Settings = () => {
                               try {
                                 await settingsApi.deleteLogo();
                                 setSettings(prev => ({ ...prev, logo: '' }));
-                                alert('تم حذف الشعار');
+                                showToast('تم حذف الشعار', 'success');
                               } catch (err) {
                                 console.error('Error deleting logo:', err);
                               }

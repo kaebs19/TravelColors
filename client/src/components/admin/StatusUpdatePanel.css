@@ -1,0 +1,93 @@
+/* ─── Shared StatusUpdatePanel ──────────────────────────── */
+
+.admin-status-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-status-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-status-btn {
+  padding: 8px 18px;
+  border: 2px solid var(--btn-color, var(--secondary-color, #64748b));
+  border-radius: var(--radius-md, 10px);
+  background: var(--btn-bg, var(--status-draft-bg, #f1f5f9));
+  color: var(--btn-color, var(--secondary-color, #64748b));
+  font-family: inherit;
+  font-size: var(--font-sm, 0.85rem);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition, 200ms ease);
+}
+
+.admin-status-btn:hover {
+  filter: brightness(0.95);
+  transform: translateY(-1px);
+}
+
+.admin-status-btn.active {
+  background: var(--btn-color, var(--secondary-color, #64748b));
+  color: #fff;
+  box-shadow: var(--shadow-md);
+}
+
+.admin-notes-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-md, 10px);
+  font-size: 0.9rem;
+  font-family: inherit;
+  resize: vertical;
+  direction: rtl;
+  transition: border-color var(--transition, 200ms ease);
+  background: var(--bg-light, #fafbfc);
+  color: var(--text-color, #1e293b);
+  box-sizing: border-box;
+}
+
+.admin-notes-textarea:focus {
+  outline: none;
+  border-color: var(--primary-color, #2563eb);
+  background: var(--bg-white, #fff);
+}
+
+.admin-save-btn {
+  width: 100%;
+  padding: 10px 20px;
+  background: var(--primary-color, #2563eb);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md, 10px);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all var(--transition, 200ms ease);
+}
+
+.admin-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-save-btn:hover:not(:disabled) {
+  background: var(--primary-dark, #1d4ed8);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .admin-status-buttons {
+    flex-direction: column;
+  }
+
+  .admin-status-btn {
+    width: 100%;
+    text-align: center;
+  }
+}

@@ -1,0 +1,131 @@
+/* ─── Toast Container ─── */
+.toast-container {
+  position: fixed;
+  top: 1.25rem;
+  left: 1.25rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+  max-width: 420px;
+  width: calc(100vw - 2.5rem);
+}
+
+/* ─── Toast Item ─── */
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius, 8px);
+  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+  font-family: 'Tajawal', 'Cairo', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.5;
+  direction: rtl;
+  pointer-events: auto;
+  animation: toast-slide-in 0.3s ease-out;
+  border: 1px solid transparent;
+}
+
+/* ─── Types ─── */
+.toast-success {
+  background: var(--success-bg, #f0fdf4);
+  color: var(--success-dark, #047857);
+  border-color: var(--success-color, #10b981);
+}
+
+.toast-error {
+  background: var(--danger-light, #fee2e2);
+  color: #991b1b;
+  border-color: var(--danger-color, #ef4444);
+}
+
+.toast-warning {
+  background: var(--warning-light, #fef3c7);
+  color: #92400e;
+  border-color: var(--warning-color, #f59e0b);
+}
+
+/* ─── Icon ─── */
+.toast-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.toast-success .toast-icon {
+  background: var(--success-color, #10b981);
+  color: #fff;
+}
+
+.toast-error .toast-icon {
+  background: var(--danger-color, #ef4444);
+  color: #fff;
+}
+
+.toast-warning .toast-icon {
+  background: var(--warning-color, #f59e0b);
+  color: #fff;
+}
+
+/* ─── Text ─── */
+.toast-text {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+/* ─── Close Button ─── */
+.toast-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  opacity: 0.5;
+  padding: 0 0.25rem;
+  line-height: 1;
+  color: inherit;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.toast-close:hover {
+  opacity: 1;
+}
+
+/* ─── Animation ─── */
+@keyframes toast-slide-in {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ─── Mobile ─── */
+@media (max-width: 480px) {
+  .toast-container {
+    left: 0.75rem;
+    right: 0.75rem;
+    top: 0.75rem;
+    max-width: none;
+    width: auto;
+  }
+
+  .toast {
+    font-size: 0.85rem;
+    padding: 0.625rem 0.75rem;
+  }
+}

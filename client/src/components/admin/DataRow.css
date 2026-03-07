@@ -1,0 +1,74 @@
+/* ─── Shared DataRow ────────────────────────────────────── */
+
+.admin-data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--status-draft-bg, #f1f5f9);
+  transition: background var(--transition-fast, 150ms ease);
+}
+
+.admin-data-row:last-child {
+  border-bottom: none;
+}
+
+.admin-data-row:hover {
+  background: var(--bg-light, #f8fafc);
+  margin: 0 -10px;
+  padding-right: 10px;
+  padding-left: 10px;
+  border-radius: var(--radius-sm, 4px);
+}
+
+.admin-data-label {
+  color: var(--secondary-color, #64748b);
+  font-size: var(--font-sm, 0.875rem);
+  flex-shrink: 0;
+}
+
+.admin-data-value-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-data-value {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text-color, #1e293b);
+}
+
+/* Copy Button — appears on row hover */
+.admin-copy-btn {
+  opacity: 0;
+  background: none;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+  padding: 4px 6px;
+  color: var(--secondary-light, #94a3b8);
+  transition: all var(--transition-fast, 150ms ease);
+  flex-shrink: 0;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-data-row:hover .admin-copy-btn {
+  opacity: 1;
+}
+
+.admin-copy-btn:hover {
+  background: var(--primary-bg, #eff6ff);
+  border-color: var(--primary-bg-hover, #bfdbfe);
+  color: var(--primary-color, #2563eb);
+}
+
+.admin-copy-btn.copied {
+  opacity: 1;
+  background: var(--success-bg, #f0fdf4);
+  border-color: #86efac;
+  color: var(--status-approved, #16a34a);
+}

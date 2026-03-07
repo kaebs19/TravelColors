@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { employeesApi } from '../../api';
+import { useToast } from '../../context';
 import { Card, Loader, Modal } from '../../components/common';
 import { formatDate, formatCurrency } from '../../utils';
 import EmployeeForm from '../../components/features/employees/EmployeeForm';
@@ -8,6 +9,7 @@ import './Employees.css';
 
 const Employees = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -71,7 +73,7 @@ const Employees = () => {
         fetchEmployees();
       } catch (error) {
         console.error('Error deleting employee:', error);
-        alert(error.response?.data?.message || 'حدث خطأ أثناء الحذف');
+        showToast(error.response?.data?.message || 'حدث خطأ أثناء الحذف', 'error');
       }
     }
   };
@@ -82,7 +84,7 @@ const Employees = () => {
       fetchEmployees();
     } catch (error) {
       console.error('Error toggling employee:', error);
-      alert(error.response?.data?.message || 'حدث خطأ');
+      showToast(error.response?.data?.message || 'حدث خطأ', 'error');
     }
   };
 
@@ -97,7 +99,7 @@ const Employees = () => {
       fetchEmployees();
     } catch (error) {
       console.error('Error saving employee:', error);
-      alert(error.response?.data?.message || 'حدث خطأ أثناء الحفظ');
+      showToast(error.response?.data?.message || 'حدث خطأ أثناء الحفظ', 'error');
     }
   };
 

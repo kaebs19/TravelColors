@@ -25,4 +25,22 @@ router.use('/tasks', require('./taskRoutes'));
 // محتوى الموقع
 router.use('/website', require('./websiteRoutes'));
 
+// نظام التأشيرة الأمريكية
+router.use('/visa', require('./visaRoutes'));
+
+// بوابة العميل
+router.use('/client', require('./clientRoutes'));
+
+// الرخصة الدولية
+router.use('/license', require('./licenseRoutes'));
+
+// كتالوج التأشيرات
+router.use('/visa-catalog', require('./visaCatalogRoutes'));
+
+// خدمة التأشيرة الإلكترونية
+router.use('/visa-service', require('./visaServiceRoutes'));
+
+// بحث موحد في الطلبات
+router.use('/applications', require('./applicationRoutes'));
+
 module.exports = router;

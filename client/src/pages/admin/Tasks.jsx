@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { tasksApi, departmentsApi, employeesApi } from '../../api';
+import { tasksApi, departmentsApi, employeesApi, visaApi } from '../../api';
 import { Card, Loader, Modal } from '../../components/common';
-import { useAuth } from '../../context';
+import { useAuth, useToast } from '../../context';
 import './Tasks.css';
 
 const Tasks = () => {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [tasks, setTasks] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -34,6 +35,13 @@ const Tasks = () => {
   // سجل النشاط
   const [activityLogs, setActivityLogs] = useState([]);
   const [loadingActivityLogs, setLoadingActivityLogs] = useState(false);
+
+  // ربط طلب بمهمة
+  const [showAppSearch, setShowAppSearch] = useState(false);
+  const [appSearchQuery, setAppSearchQuery] = useState('');
+  const [appSearchResults, setAppSearchResults] = useState([]);
+  const [appSearchLoading, setAppSearchLoading] = useState(false);
+  const [appLinkLoading, setAppLinkLoading] = useState(false);
 
   // وضع العرض (شبكة أو قائمة أو كانبان أو تقويم أو تقارير)
   const [viewMode, setViewMode] = useState('list'); // 'list', 'grid', 'kanban', 'calendar', 'reports'
@@ -129,6 +137,77 @@ const Tasks = () => {
     }
   };
 
+  // بحث في الطلبات لربطها بالمهمة
+  const handleAppSearch = async (query) => {
+    setAppSearchQuery(query);
+    if (!query || query.length < 2) {
+      setAppSearchResults([]);
+      return;
+    }
+    setAppSearchLoading(true);
+    try {
+      const res = await visaApi.searchApplications(query);
+      setAppSearchResults(res.data?.applications || []);
+    } catch {
+      setAppSearchResults([]);
+    } finally {
+      setAppSearchLoading(false);
+    }
+  };
+
+  const handleLinkApplication = async (application) => {
+    if (!selectedTask) return;
+    setAppLinkLoading(true);
+    try {
+      await tasksApi.linkApplication(selectedTask._id, application._id, application._type);
+      // تحديث المهمة المحددة
+      const res = await tasksApi.getTask(selectedTask._id);
+      setSelectedTask(res.data?.data || res.data);
+      setShowAppSearch(false);
+      setAppSearchQuery('');
+      setAppSearchResults([]);
+      fetchActivityLogs(selectedTask._id);
+      showToast('تم ربط الطلب بالمهمة بنجاح', 'success');
+    } catch (err) {
+      showToast('فشل في ربط الطلب', 'error');
+    } finally {
+      setAppLinkLoading(false);
+    }
+  };
+
+  const handleUnlinkApplication = async () => {
+    if (!selectedTask) return;
+    setAppLinkLoading(true);
+    try {
+      await tasksApi.linkApplication(selectedTask._id, null, null);
+      const res = await tasksApi.getTask(selectedTask._id);
+      setSelectedTask(res.data?.data || res.data);
+      fetchActivityLogs(selectedTask._id);
+      showToast('تم إلغاء ربط الطلب', 'success');
+    } catch (err) {
+      showToast('فشل في إلغاء الربط', 'error');
+    } finally {
+      setAppLinkLoading(false);
+    }
+  };
+
+  const getAppTypeName = (type) => {
+    const names = { visa: 'تأشيرة أمريكية', license: 'رخصة دولية', visa_service: 'تأشيرة إلكترونية' };
+    return names[type] || type;
+  };
+
+  const getAppDetailPath = (type, id) => {
+    const paths = { visa: 'visa-applications', license: 'license-applications', visa_service: 'visa-service-applications' };
+    return `/control/${paths[type] || 'visa-applications'}/${id}`;
+  };
+
+  const getAppName = (app) => {
+    if (app._type === 'license') {
+      return [app.personalInfo?.givenName, app.personalInfo?.familyName].filter(Boolean).join(' ') || '-';
+    }
+    return app.personalInfo?.fullName || '-';
+  };
+
   // أيقونة سجل النشاط حسب نوع الإجراء
   const getActivityIcon = (log) => {
     const action = log.action;
@@ -147,6 +226,9 @@ const Tasks = () => {
     if (action === 'cancel_task') return '🗑️';
     if (action === 'transfer_task') return '🔄';
     if (action === 'update') return '✏️';
+    if (action === 'client_update') return '👤';
+    if (action === 'link_customer') return '🔗';
+    if (action === 'link_application') return '🔗';
     return '📋';
   };
 
@@ -175,7 +257,7 @@ const Tasks = () => {
       }
     } catch (error) {
       console.error('Error starting task:', error);
-      alert(error.response?.data?.message || 'حدث خطأ أثناء بدء المهمة');
+      showToast(error.response?.data?.message || 'حدث خطأ أثناء بدء المهمة', 'error');
     }
   };
 
@@ -187,7 +269,7 @@ const Tasks = () => {
       setShowTaskModal(false);
     } catch (error) {
       console.error('Error completing task:', error);
-      alert(error.response?.data?.message || 'حدث خطأ أثناء إكمال المهمة');
+      showToast(error.response?.data?.message || 'حدث خطأ أثناء إكمال المهمة', 'error');
     }
   };
 
@@ -200,7 +282,7 @@ const Tasks = () => {
       setShowTaskModal(false);
     } catch (error) {
       console.error('Error cancelling task:', error);
-      alert(error.response?.data?.message || 'حدث خطأ أثناء إلغاء المهمة');
+      showToast(error.response?.data?.message || 'حدث خطأ أثناء إلغاء المهمة', 'error');
     }
   };
 
@@ -211,7 +293,7 @@ const Tasks = () => {
 
   const handleTransferTask = async () => {
     if (!transferData.toUserId) {
-      alert('يرجى اختيار الموظف');
+      showToast('يرجى اختيار الموظف', 'warning');
       return;
     }
     try {
@@ -222,7 +304,7 @@ const Tasks = () => {
       setSelectedTask(res.data?.data?.task || res.data?.task);
     } catch (error) {
       console.error('Error transferring task:', error);
-      alert(error.response?.data?.message || 'حدث خطأ أثناء تحويل المهمة');
+      showToast(error.response?.data?.message || 'حدث خطأ أثناء تحويل المهمة', 'error');
     }
   };
 
@@ -236,7 +318,7 @@ const Tasks = () => {
       setSelectedTask(res.data?.data?.task || res.data?.task);
     } catch (error) {
       console.error('Error adding note:', error);
-      alert(error.response?.data?.message || 'حدث خطأ أثناء إضافة الملاحظة');
+      showToast(error.response?.data?.message || 'حدث خطأ أثناء إضافة الملاحظة', 'error');
     } finally {
       setAddingNote(false);
     }
@@ -1939,6 +2021,137 @@ const Tasks = () => {
                 </div>
               </div>
 
+              {/* الطلب المربوط */}
+              <div className="sidebar-section">
+                <h4>📄 الطلب المربوط</h4>
+                {selectedTask.linkedApplication ? (
+                  <div style={{ padding: '8px 0' }}>
+                    <div style={{
+                      background: 'var(--hover-bg, #f0f9f8)',
+                      border: '1px solid var(--border-color, #e5e7eb)',
+                      borderRadius: '8px',
+                      padding: '10px 12px'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <a
+                          href={getAppDetailPath(selectedTask.linkedApplication._type, selectedTask.linkedApplication._id)}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ fontWeight: 600, color: 'var(--primary-color, #0d9488)', textDecoration: 'none', fontSize: '0.9rem' }}
+                        >
+                          {selectedTask.linkedApplication.applicationNumber}
+                        </a>
+                        <button
+                          onClick={handleUnlinkApplication}
+                          disabled={appLinkLoading}
+                          style={{
+                            background: 'none', border: '1px solid var(--danger-color, #ef4444)',
+                            color: 'var(--danger-color, #ef4444)', width: '24px', height: '24px',
+                            borderRadius: '50%', cursor: 'pointer', fontSize: '0.75rem',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                          }}
+                          title="إلغاء الربط"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary, #6b7280)' }}>
+                        <div>{getAppName(selectedTask.linkedApplication)}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
+                          <span style={{
+                            padding: '2px 8px', borderRadius: '10px', fontSize: '0.75rem',
+                            background: 'var(--primary-color, #0d9488)', color: '#fff'
+                          }}>
+                            {getAppTypeName(selectedTask.linkedApplication._type)}
+                          </span>
+                          <span style={{
+                            padding: '2px 8px', borderRadius: '10px', fontSize: '0.75rem',
+                            background: selectedTask.linkedApplication.status === 'approved' ? '#10b981' :
+                              selectedTask.linkedApplication.status === 'submitted' ? '#3b82f6' :
+                              selectedTask.linkedApplication.status === 'rejected' ? '#ef4444' : '#6b7280',
+                            color: '#fff'
+                          }}>
+                            {selectedTask.linkedApplication.status}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : showAppSearch ? (
+                  <div style={{ padding: '8px 0' }}>
+                    <input
+                      type="text"
+                      placeholder="ابحث برقم الطلب أو الاسم..."
+                      value={appSearchQuery}
+                      onChange={(e) => handleAppSearch(e.target.value)}
+                      style={{
+                        width: '100%', padding: '8px 10px', border: '1px solid var(--border-color, #ddd)',
+                        borderRadius: '6px', fontFamily: "'Tajawal', sans-serif", fontSize: '0.85rem',
+                        direction: 'rtl', marginBottom: '6px', boxSizing: 'border-box'
+                      }}
+                      autoFocus
+                    />
+                    {appSearchLoading && <div style={{ textAlign: 'center', fontSize: '0.82rem', color: '#888' }}>جاري البحث...</div>}
+                    {appSearchResults.length > 0 && (
+                      <div style={{
+                        maxHeight: '200px', overflowY: 'auto',
+                        border: '1px solid var(--border-color, #ddd)', borderRadius: '6px'
+                      }}>
+                        {appSearchResults.map((app) => (
+                          <div
+                            key={app._id}
+                            onClick={() => handleLinkApplication(app)}
+                            style={{
+                              padding: '8px 10px', cursor: 'pointer', borderBottom: '1px solid var(--border-color, #eee)',
+                              fontSize: '0.82rem', transition: 'background 0.15s'
+                            }}
+                            onMouseEnter={(e) => e.target.style.background = 'var(--hover-bg, #f0f9f8)'}
+                            onMouseLeave={(e) => e.target.style.background = ''}
+                          >
+                            <div style={{ fontWeight: 600 }}>{app.applicationNumber}</div>
+                            <div style={{ color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
+                              <span>{getAppName(app)}</span>
+                              <span style={{
+                                padding: '1px 6px', borderRadius: '8px', fontSize: '0.72rem',
+                                background: 'var(--primary-color, #0d9488)', color: '#fff'
+                              }}>
+                                {getAppTypeName(app._type)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {appSearchQuery.length >= 2 && !appSearchLoading && appSearchResults.length === 0 && (
+                      <div style={{ textAlign: 'center', fontSize: '0.82rem', color: '#888', padding: '8px' }}>لا توجد نتائج</div>
+                    )}
+                    <button
+                      onClick={() => { setShowAppSearch(false); setAppSearchQuery(''); setAppSearchResults([]); }}
+                      style={{
+                        marginTop: '6px', width: '100%', padding: '6px', border: '1px solid var(--border-color, #ddd)',
+                        borderRadius: '6px', background: 'none', cursor: 'pointer', fontSize: '0.82rem',
+                        fontFamily: "'Tajawal', sans-serif", color: 'var(--text-secondary)'
+                      }}
+                    >
+                      إلغاء
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowAppSearch(true)}
+                    disabled={appLinkLoading}
+                    style={{
+                      width: '100%', padding: '8px 12px', border: '1px dashed var(--border-color, #ccc)',
+                      borderRadius: '6px', background: 'none', cursor: 'pointer', fontSize: '0.85rem',
+                      fontFamily: "'Tajawal', sans-serif", color: 'var(--primary-color, #0d9488)',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    + ربط بطلب
+                  </button>
+                )}
+              </div>
+
               {/* التواريخ */}
               <div className="sidebar-section">
                 <h4>التواريخ</h4>
@@ -2052,7 +2265,10 @@ const Tasks = () => {
                               create: 'تم إنشاء المهمة',
                               update: 'تم تحديث المهمة',
                               transfer: 'تم تحويل المهمة',
-                              add_note: 'تم إضافة ملاحظة'
+                              add_note: 'تم إضافة ملاحظة',
+                              client_update: 'تحديث من بوابة العميل',
+                              link_customer: 'تم ربط العميل بالطلب',
+                              link_application: 'تم ربط الطلب بالمهمة'
                             }[log.action] || log.action}
                           </div>
                         </div>

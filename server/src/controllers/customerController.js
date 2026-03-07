@@ -1,4 +1,4 @@
-const { Customer, Booking, Appointment } = require('../models');
+const { Customer, Booking, Appointment, VisaApplication, LicenseApplication, VisaServiceApplication } = require('../models');
 const { calculatePagination, formatPaginatedResponse } = require('../utils/paginationHelper');
 const { buildSearchQuery } = require('../utils/queryBuilder');
 const { checkExists } = require('../utils/responseHelper');
@@ -231,6 +231,36 @@ exports.deleteCustomer = async (req, res, next) => {
     res.json({
       success: true,
       message: 'تم حذف العميل بنجاح'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+// @desc    جلب طلبات عميل معين
+// @route   GET /api/customers/:id/applications
+// @access  Private (Employee/Admin)
+exports.getCustomerApplications = async (req, res, next) => {
+  try {
+    const customerId = req.params.id;
+
+    const [visaApplications, licenseApplications, visaServiceApplications] = await Promise.all([
+      VisaApplication.find({ customer: customerId })
+        .select('applicationNumber status personalInfo.fullName visaType createdAt submittedAt')
+        .sort({ createdAt: -1 }),
+      LicenseApplication.find({ customer: customerId })
+        .select('applicationNumber status personalInfo.familyName personalInfo.givenName createdAt')
+        .sort({ createdAt: -1 }),
+      VisaServiceApplication.find({ customer: customerId })
+        .select('applicationNumber status personalInfo.fullName visaId createdAt')
+        .populate('visaId', 'countryName visaType')
+        .sort({ createdAt: -1 })
+    ]);
+
+    res.json({
+      success: true,
+      data: { visaApplications, licenseApplications, visaServiceApplications }
     });
   } catch (error) {
     next(error);

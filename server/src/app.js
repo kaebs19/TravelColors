@@ -21,6 +21,9 @@ const routes = require('./routes');
 // Import error handler
 const { errorHandler } = require('./middlewares');
 
+// Rate limiting
+const { generalLimiter } = require('./middlewares/rateLimiter');
+
 // Initialize express
 const app = express();
 
@@ -45,16 +48,22 @@ app.use(cors({
   credentials: true
 }));
 
+// Static files — served BEFORE helmet to avoid CORP blocking
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  next();
+}, express.static(path.join(__dirname, '../uploads')));
+
 // Security headers
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' }
+}));
 
 // Logging in development
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
-
-// Static files
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Root route
 app.get('/', (req, res) => {
@@ -70,6 +79,9 @@ app.get('/', (req, res) => {
     }
   });
 });
+
+// Rate limiting — حماية عامة
+app.use('/api', generalLimiter);
 
 // API routes
 app.use('/api', routes);
