@@ -114,7 +114,8 @@ const Home = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Scroll animations
+  // Scroll animations — يجب إعادة الإنشاء عند تحميل التأشيرات أو المحتوى
+  // لأن قسم التأشيرات يُعرض شرطياً (visas.length > 0) بعد تحميل البيانات
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -128,7 +129,7 @@ const Home = () => {
     );
     document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
     return () => observer.disconnect();
-  }, [content]);
+  }, [content, visas]);
 
   // Stats counter animation
   useEffect(() => {
