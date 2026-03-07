@@ -1,11 +1,14 @@
 const rateLimit = require('express-rate-limit');
 
-// حماية عامة — 100 طلب لكل IP كل 15 دقيقة
+// حماية عامة — 300 طلب لكل IP كل 15 دقيقة (يتم تجاوزها للمستخدمين المسجلين)
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 300,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => {
+    return req.headers.authorization && req.headers.authorization.startsWith('Bearer');
+  },
   message: {
     success: false,
     message: 'تم تجاوز الحد المسموح من الطلبات. يرجى المحاولة بعد قليل.'

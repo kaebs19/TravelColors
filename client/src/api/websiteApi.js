@@ -6,6 +6,11 @@ export const websiteApi = {
   // جلب المحتوى العام (بدون auth)
   getPublicContent: async () => {
     const response = await fetch(`${API_URL}/website/public`);
+    if (!response.ok) {
+      const error = new Error(`HTTP ${response.status}`);
+      error.status = response.status;
+      throw error;
+    }
     const data = await response.json();
     return data;
   },

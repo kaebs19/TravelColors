@@ -12,6 +12,7 @@ const VisaCatalog = () => {
   const [visas, setVisas] = useState([]);
   const [contact, setContact] = useState({ whatsapp: '966559229597' });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ const VisaCatalog = () => {
 
   const loadData = async () => {
     try {
+      setError(null);
       const [visaRes, contentRes] = await Promise.all([
         getPublicVisas(),
         websiteApi.getPublicContent()
@@ -48,6 +50,11 @@ const VisaCatalog = () => {
       if (contentRes) setContact(contentRes.contact || {});
     } catch (err) {
       console.error('Error loading visas:', err);
+      if (err.response?.status === 429 || err.status === 429) {
+        setError('rate_limit');
+      } else {
+        setError('general');
+      }
     } finally {
       setLoading(false);
     }
@@ -149,6 +156,17 @@ const VisaCatalog = () => {
           <div className="vcat-loading">
             <div className="vcat-loading-spinner"></div>
             <p>جاري التحميل...</p>
+          </div>
+        ) : error ? (
+          <div className="vcat-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="48" height="48">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v4M12 16h.01" strokeLinecap="round"/>
+            </svg>
+            <p>{error === 'rate_limit' ? 'عذراً، تم تجاوز الحد المسموح من الطلبات' : 'حدث خطأ أثناء تحميل البيانات'}</p>
+            <button className="pbtn pbtn-primary" onClick={() => { setLoading(true); loadData(); }} style={{ marginTop: '1rem' }}>
+              إعادة المحاولة
+            </button>
           </div>
         ) : visas.length === 0 ? (
           <div className="vcat-empty">

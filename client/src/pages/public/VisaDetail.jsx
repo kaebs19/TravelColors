@@ -41,6 +41,7 @@ const VisaDetail = () => {
   const [visa, setVisa] = useState(null);
   const [contact, setContact] = useState({ whatsapp: '966559229597' });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [scrolled, setScrolled] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
 
@@ -69,6 +70,7 @@ const VisaDetail = () => {
     try {
       setLoading(true);
       setImgLoaded(false);
+      setError(null);
       const [visaRes, contentRes] = await Promise.all([
         getPublicVisa(slug),
         websiteApi.getPublicContent()
@@ -77,6 +79,11 @@ const VisaDetail = () => {
       if (contentRes) setContact(contentRes.contact || {});
     } catch (err) {
       console.error('Error loading visa:', err);
+      if (err.response?.status === 429 || err.status === 429) {
+        setError('rate_limit');
+      } else {
+        setError('general');
+      }
     } finally {
       setLoading(false);
     }
@@ -113,8 +120,19 @@ const VisaDetail = () => {
             <circle cx="12" cy="12" r="10"/>
             <path d="M12 8v4M12 16h.01" strokeLinecap="round"/>
           </svg>
-          <h2>التأشيرة غير موجودة</h2>
-          <Link to="/visas">العودة للتأشيرات</Link>
+          {error ? (
+            <>
+              <h2>{error === 'rate_limit' ? 'عذراً، تم تجاوز الحد المسموح من الطلبات' : 'حدث خطأ أثناء تحميل البيانات'}</h2>
+              <button className="pbtn pbtn-primary" onClick={() => { setLoading(true); loadData(); }} style={{ marginTop: '1rem' }}>
+                إعادة المحاولة
+              </button>
+            </>
+          ) : (
+            <>
+              <h2>التأشيرة غير موجودة</h2>
+              <Link to="/visas">العودة للتأشيرات</Link>
+            </>
+          )}
         </div>
       </div>
     );
