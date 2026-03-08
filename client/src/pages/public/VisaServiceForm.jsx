@@ -61,7 +61,7 @@ const VisaServiceForm = () => {
         ...prev,
         personalInfo: {
           ...prev.personalInfo,
-          fullName: prev.personalInfo.fullName || client.fullName || '',
+          fullName: prev.personalInfo.fullName || client.fullName || client.name || '',
           email: prev.personalInfo.email || client.email || '',
           phone: prev.personalInfo.phone || client.phone || '',
           nationalId: prev.personalInfo.nationalId || client.nationalId || '',

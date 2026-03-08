@@ -400,7 +400,7 @@ exports.getApplications = async (req, res, next) => {
 exports.getApplication = async (req, res, next) => {
   try {
     const application = await VisaServiceApplication.findById(req.params.id)
-      .populate('visaId', 'countryName countryNameEn flagImage visaType price currency')
+      .populate('visaId', 'countryName countryNameEn flagImage visaType price currency requiredDocuments')
       .populate('clientId', 'fullName email phone');
 
     if (!application) {

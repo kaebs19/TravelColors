@@ -75,7 +75,7 @@ const ClientLogin = () => {
     const result = await login(loginForm);
     setLoading(false);
     if (result.success) {
-      navigate('/portal/dashboard');
+      navigate('/');
     } else {
       setError(result.message);
     }
@@ -104,7 +104,7 @@ const ClientLogin = () => {
     });
     setLoading(false);
     if (result.success) {
-      navigate('/portal/dashboard');
+      navigate('/');
     } else {
       setError(result.message);
     }
