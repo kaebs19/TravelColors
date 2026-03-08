@@ -40,8 +40,8 @@ const buildLicenseReceiptHTML = (appData) => {
   // الخدمات الإضافية
   const addonsHTML = (appData.selectedAddons || []).map(addon =>
     `<tr>
-      <td style="padding: 3px 0; font-size: 10px; color: #374151; font-family: 'Cairo', sans-serif;">✓ ${addon.name}</td>
-      <td style="padding: 3px 0; font-size: 10px; color: #374151; text-align: left; font-family: 'Cairo', sans-serif;">${addon.price} ر.س</td>
+      <td style="padding: 3px 0; font-size: 10px; color: #374151; font-family: 'Tajawal', sans-serif;">✓ ${addon.name}</td>
+      <td style="padding: 3px 0; font-size: 10px; color: #374151; text-align: left; font-family: 'Tajawal', sans-serif;">${addon.price} ر.س</td>
     </tr>`
   ).join('');
 
@@ -61,7 +61,7 @@ const buildLicenseReceiptHTML = (appData) => {
   }
 
   return `
-    <div style="border: 1.5px solid #047857; border-radius: 10px; overflow: hidden; font-family: 'Cairo', sans-serif;">
+    <div style="border: 1.5px solid #047857; border-radius: 10px; overflow: hidden; font-family: 'Tajawal', sans-serif;">
 
       <!-- رأس الإيصال -->
       <div style="background: linear-gradient(135deg, #064e3b 0%, #047857 50%, #059669 100%); padding: 14px 16px 12px; color: white; position: relative;">
@@ -69,12 +69,12 @@ const buildLicenseReceiptHTML = (appData) => {
 
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
           <div>
-            <div style="margin: 0; font-size: 17px; font-weight: 800; font-family: 'Cairo', sans-serif;">ألوان المسافر</div>
+            <div style="margin: 0; font-size: 17px; font-weight: 800; font-family: 'Tajawal', sans-serif;">ألوان المسافر</div>
             <div style="margin: 2px 0; font-size: 10px; opacity: 0.85; font-weight: 400;">Travel Colors</div>
             <div style="margin: 1px 0; font-size: 9px; opacity: 0.6;">للسفر والسياحة</div>
           </div>
           <div style="text-align: center; background: rgba(255,255,255,0.92); padding: 7px 10px; border-radius: 6px; min-width: 110px;">
-            <div style="margin: 0; font-size: 10px; color: #047857; font-weight: 700; font-family: 'Cairo', sans-serif;">رقم الطلب</div>
+            <div style="margin: 0; font-size: 10px; color: #047857; font-weight: 700; font-family: 'Tajawal', sans-serif;">رقم الطلب</div>
             <div style="margin: 3px 0 0 0; font-size: 11px; color: #047857; font-weight: 800; font-family: monospace;">${receiptNumber}</div>
           </div>
         </div>
@@ -91,11 +91,11 @@ const buildLicenseReceiptHTML = (appData) => {
         <div style="display: flex; align-items: center; gap: 6px;">
           <div style="width: 3px; height: 20px; background: #047857; border-radius: 2px;"></div>
           <div>
-            <div style="margin: 0; font-size: 13px; color: #065f46; font-weight: 700; font-family: 'Cairo', sans-serif;">إيصال طلب رخصة دولية</div>
-            <div style="margin: 0; font-size: 8px; color: #6ee7b7; font-family: 'Cairo', sans-serif;">International License Receipt</div>
+            <div style="margin: 0; font-size: 13px; color: #065f46; font-weight: 700; font-family: 'Tajawal', sans-serif;">إيصال طلب رخصة دولية</div>
+            <div style="margin: 0; font-size: 8px; color: #6ee7b7; font-family: 'Tajawal', sans-serif;">International License Receipt</div>
           </div>
         </div>
-        <div style="text-align: left; font-size: 9px; color: #6b7280; font-family: 'Cairo', sans-serif;">
+        <div style="text-align: left; font-size: 9px; color: #6b7280; font-family: 'Tajawal', sans-serif;">
           <div>التاريخ: <strong>${receiptDate}</strong></div>
           <div style="margin-top: 1px;">الوقت: <strong>${receiptTime}</strong></div>
         </div>
@@ -108,9 +108,9 @@ const buildLicenseReceiptHTML = (appData) => {
         <div style="background: #f0fdf4; padding: 10px 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #bbf7d0;">
           <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 7px; padding-bottom: 6px; border-bottom: 1px solid #bbf7d0;">
             <div style="width: 20px; height: 20px; background: #047857; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white;">👤</div>
-            <div style="margin: 0; font-size: 11px; color: #047857; font-weight: 700; font-family: 'Cairo', sans-serif;">بيانات مقدم الطلب</div>
+            <div style="margin: 0; font-size: 11px; color: #047857; font-weight: 700; font-family: 'Tajawal', sans-serif;">بيانات مقدم الطلب</div>
           </div>
-          <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'Cairo', sans-serif;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'Tajawal', sans-serif;">
             <tr>
               <td style="padding: 3px 0; color: #6b7280; width: 90px; font-weight: 600;">الاسم:</td>
               <td style="padding: 3px 0; font-weight: 700; color: #1e293b;">${fullName}</td>
@@ -142,9 +142,9 @@ const buildLicenseReceiptHTML = (appData) => {
         <div style="background: white; padding: 10px 12px; border: 1px solid #d0d7e0; border-radius: 8px; margin-bottom: 10px;">
           <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 7px; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0;">
             <div style="width: 20px; height: 20px; background: #0369a1; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white;">🪪</div>
-            <div style="margin: 0; font-size: 11px; color: #0369a1; font-weight: 700; font-family: 'Cairo', sans-serif;">تفاصيل الطلب</div>
+            <div style="margin: 0; font-size: 11px; color: #0369a1; font-weight: 700; font-family: 'Tajawal', sans-serif;">تفاصيل الطلب</div>
           </div>
-          <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'Cairo', sans-serif;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'Tajawal', sans-serif;">
             <tr>
               <td style="padding: 3px 0; color: #6b7280; width: 90px; font-weight: 600;">الخدمة:</td>
               <td style="padding: 3px 0; font-weight: 700; color: #1e293b;">الرخصة الدولية</td>
@@ -152,7 +152,7 @@ const buildLicenseReceiptHTML = (appData) => {
             <tr>
               <td style="padding: 3px 0; color: #6b7280; font-weight: 600;">الحالة:</td>
               <td style="padding: 3px 0;">
-                <span style="background: ${status.bg}; color: ${status.color}; padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; font-family: 'Cairo', sans-serif;">${status.text}</span>
+                <span style="background: ${status.bg}; color: ${status.color}; padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; font-family: 'Tajawal', sans-serif;">${status.text}</span>
               </td>
             </tr>
             <tr>
@@ -168,9 +168,9 @@ const buildLicenseReceiptHTML = (appData) => {
         <div style="background: #f0faf5; padding: 10px 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #a7e8c5;">
           <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 7px; padding-bottom: 6px; border-bottom: 1px solid #a7e8c5;">
             <div style="width: 20px; height: 20px; background: #047857; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white;">💰</div>
-            <div style="margin: 0; font-size: 11px; color: #047857; font-weight: 700; font-family: 'Cairo', sans-serif;">ملخص التسعير</div>
+            <div style="margin: 0; font-size: 11px; color: #047857; font-weight: 700; font-family: 'Tajawal', sans-serif;">ملخص التسعير</div>
           </div>
-          <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'Cairo', sans-serif;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'Tajawal', sans-serif;">
             <tr>
               <td style="padding: 3px 0; color: #374151; font-weight: 600;">السعر الأساسي:</td>
               <td style="padding: 3px 0; font-weight: 600; color: #374151; text-align: left;">${basePrice} ر.س</td>
@@ -193,7 +193,7 @@ const buildLicenseReceiptHTML = (appData) => {
             </tr>` : ''}
           </table>
           <div style="margin-top: 7px; padding-top: 7px; border-top: 2px dashed #a7e8c5;">
-            <div style="display: flex; justify-content: space-between; padding: 5px 8px; background: rgba(4, 120, 87, 0.08); border-radius: 5px; font-family: 'Cairo', sans-serif;">
+            <div style="display: flex; justify-content: space-between; padding: 5px 8px; background: rgba(4, 120, 87, 0.08); border-radius: 5px; font-family: 'Tajawal', sans-serif;">
               <span style="color: #047857; font-weight: 700; font-size: 12px;">الإجمالي:</span>
               <span style="font-weight: 800; color: #047857; font-size: 14px;">${totalPrice} ر.س</span>
             </div>
@@ -207,8 +207,8 @@ const buildLicenseReceiptHTML = (appData) => {
         <div style="position: relative;">
           <div style="position: absolute; top: -10px; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #c8a44e, transparent);"></div>
         </div>
-        <div style="margin: 0 0 4px 0; font-size: 10px; font-weight: 600; font-family: 'Cairo', sans-serif; line-height: 1.5;">شكراً لاختياركم ألوان المسافر</div>
-        <div style="margin: 0; font-size: 8px; opacity: 0.5; font-family: 'Cairo', sans-serif;">www.trcolors.com</div>
+        <div style="margin: 0 0 4px 0; font-size: 10px; font-weight: 600; font-family: 'Tajawal', sans-serif; line-height: 1.5;">شكراً لاختياركم ألوان المسافر</div>
+        <div style="margin: 0; font-size: 8px; opacity: 0.5; font-family: 'Tajawal', sans-serif;">www.trcolors.com</div>
       </div>
     </div>
   `;
@@ -265,7 +265,7 @@ export const generateLicenseReceipt = async (appData) => {
     width: 480px;
     padding: 20px;
     background: #f5f3ef;
-    font-family: 'Cairo', sans-serif;
+    font-family: 'Tajawal', sans-serif;
     direction: rtl;
   `;
 

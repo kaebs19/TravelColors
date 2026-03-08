@@ -13,7 +13,7 @@ const NotFound = () => {
       minHeight: '70vh',
       padding: '2rem',
       textAlign: 'center',
-      fontFamily: "'Tajawal', 'Cairo', sans-serif"
+      fontFamily: "'Tajawal', 'Segoe UI', sans-serif"
     }}>
       <span style={{ fontSize: '5rem', lineHeight: 1, marginBottom: '1rem' }}>404</span>
       <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1f2937', margin: '0 0 0.5rem' }}>

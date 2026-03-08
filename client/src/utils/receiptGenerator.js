@@ -84,7 +84,7 @@ const buildReceiptHTML = (appointmentData, options = {}) => {
   const footerTerms = receiptTerms || `شكراً لاختياركم ${companyName}\nنتمنى لكم رحلة سعيدة`;
 
   return `
-    <div style="border: 1.5px solid #1e3a5f; border-radius: 10px; overflow: hidden; font-family: 'Cairo', sans-serif;">
+    <div style="border: 1.5px solid #1e3a5f; border-radius: 10px; overflow: hidden; font-family: 'Tajawal', sans-serif;">
 
       <!-- رأس الإيصال -->
       <div style="background: linear-gradient(135deg, #0c1f3f 0%, #1e3a5f 50%, #2d5a8e 100%); padding: 14px 16px 12px; color: white; position: relative;">
@@ -94,19 +94,19 @@ const buildReceiptHTML = (appointmentData, options = {}) => {
           <div style="display: flex; align-items: center; gap: 10px;">
             <img src="${logoUrl}" alt="Logo" style="width: 50px; height: 50px; border-radius: 8px; object-fit: contain;" crossorigin="anonymous" />
             <div>
-              <div style="margin: 0; font-size: 17px; font-weight: 800; font-family: 'Cairo', sans-serif;">${companyName}</div>
-              <div style="margin: 2px 0; font-size: 10px; opacity: 0.85; font-weight: 400; font-family: 'Cairo', sans-serif;">${companyNameEn}</div>
-              <div style="margin: 1px 0; font-size: 9px; opacity: 0.6; font-family: 'Cairo', sans-serif;">للسفر والسياحة</div>
+              <div style="margin: 0; font-size: 17px; font-weight: 800; font-family: 'Tajawal', sans-serif;">${companyName}</div>
+              <div style="margin: 2px 0; font-size: 10px; opacity: 0.85; font-weight: 400; font-family: 'Tajawal', sans-serif;">${companyNameEn}</div>
+              <div style="margin: 1px 0; font-size: 9px; opacity: 0.6; font-family: 'Tajawal', sans-serif;">للسفر والسياحة</div>
             </div>
           </div>
           <div style="text-align: center; background: rgba(255,255,255,0.92); padding: 7px 10px; border-radius: 6px; min-width: 90px;">
-            <div style="margin: 0; font-size: 11px; color: #1e3a5f; font-weight: 700; font-family: 'Cairo', sans-serif;">رقم الإيصال</div>
-            <div style="margin: 3px 0 0 0; font-size: 12px; color: #1e3a5f; font-weight: 800; font-family: 'Cairo', sans-serif;">${receiptNumber}</div>
+            <div style="margin: 0; font-size: 11px; color: #1e3a5f; font-weight: 700; font-family: 'Tajawal', sans-serif;">رقم الإيصال</div>
+            <div style="margin: 3px 0 0 0; font-size: 12px; color: #1e3a5f; font-weight: 800; font-family: 'Tajawal', sans-serif;">${receiptNumber}</div>
           </div>
         </div>
 
         ${showCompanyInfo ? `
-        <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.12); display: flex; justify-content: center; gap: 18px; font-size: 9px; opacity: 0.8; font-family: 'Cairo', sans-serif;">
+        <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.12); display: flex; justify-content: center; gap: 18px; font-size: 9px; opacity: 0.8; font-family: 'Tajawal', sans-serif;">
           <span>${companyAddress}</span>
           <span>${companyPhone}</span>
           <span>${companyEmail}</span>
@@ -119,11 +119,11 @@ const buildReceiptHTML = (appointmentData, options = {}) => {
         <div style="display: flex; align-items: center; gap: 6px;">
           <div style="width: 3px; height: 20px; background: #1e3a5f; border-radius: 2px;"></div>
           <div>
-            <div style="margin: 0; font-size: 13px; color: #1e293b; font-weight: 700; font-family: 'Cairo', sans-serif;">إيصال موعد</div>
-            <div style="margin: 0; font-size: 8px; color: #94a3b8; font-family: 'Cairo', sans-serif;">Appointment Receipt</div>
+            <div style="margin: 0; font-size: 13px; color: #1e293b; font-weight: 700; font-family: 'Tajawal', sans-serif;">إيصال موعد</div>
+            <div style="margin: 0; font-size: 8px; color: #94a3b8; font-family: 'Tajawal', sans-serif;">Appointment Receipt</div>
           </div>
         </div>
-        <div style="text-align: left; font-size: 9px; color: #64748b; font-family: 'Cairo', sans-serif;">
+        <div style="text-align: left; font-size: 9px; color: #64748b; font-family: 'Tajawal', sans-serif;">
           <div style="margin: 0;">التاريخ: <strong>${receiptDate}</strong></div>
           <div style="margin: 1px 0 0 0;">الوقت: <strong>${receiptTime}</strong></div>
         </div>
@@ -136,9 +136,9 @@ const buildReceiptHTML = (appointmentData, options = {}) => {
         <div style="background: #f0f4f8; padding: 10px 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #d0d7e0;">
           <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 7px; padding-bottom: 6px; border-bottom: 1px solid #d0d7e0;">
             <div style="width: 20px; height: 20px; background: #1e3a5f; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white;">👤</div>
-            <div style="margin: 0; font-size: 11px; color: #1e3a5f; font-weight: 700; font-family: 'Cairo', sans-serif;">بيانات العميل</div>
+            <div style="margin: 0; font-size: 11px; color: #1e3a5f; font-weight: 700; font-family: 'Tajawal', sans-serif;">بيانات العميل</div>
           </div>
-          <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'Cairo', sans-serif;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'Tajawal', sans-serif;">
             <tr>
               <td style="padding: 3px 0; color: #6b7280; width: 80px; font-weight: 600;">الاسم:</td>
               <td style="padding: 3px 0; font-weight: 700; color: #1e293b; font-size: 11px;">${appointmentData.customerName || '-'}</td>
@@ -158,9 +158,9 @@ const buildReceiptHTML = (appointmentData, options = {}) => {
         <div style="background: white; padding: 10px 12px; border: 1px solid #d0d7e0; border-radius: 8px; margin-bottom: 10px;">
           <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 7px; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0;">
             <div style="width: 20px; height: 20px; background: #047857; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white;">📅</div>
-            <div style="margin: 0; font-size: 11px; color: #047857; font-weight: 700; font-family: 'Cairo', sans-serif;">تفاصيل الموعد</div>
+            <div style="margin: 0; font-size: 11px; color: #047857; font-weight: 700; font-family: 'Tajawal', sans-serif;">تفاصيل الموعد</div>
           </div>
-          <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'Cairo', sans-serif;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'Tajawal', sans-serif;">
             <tr>
               <td style="padding: 3px 0; color: #6b7280; width: 80px; font-weight: 600;">الجهة:</td>
               <td style="padding: 3px 0; font-weight: 700; color: #1e293b;">${departmentTitle}</td>
@@ -182,13 +182,13 @@ const buildReceiptHTML = (appointmentData, options = {}) => {
             <tr>
               <td style="padding: 3px 0; color: #6b7280; font-weight: 600;">النوع:</td>
               <td style="padding: 3px 0;">
-                <span style="background: ${typeStatus.bg}; color: ${typeStatus.color}; padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; font-family: 'Cairo', sans-serif;">${typeStatus.text}</span>
+                <span style="background: ${typeStatus.bg}; color: ${typeStatus.color}; padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; font-family: 'Tajawal', sans-serif;">${typeStatus.text}</span>
               </td>
             </tr>
             <tr>
               <td style="padding: 3px 0; color: #6b7280; font-weight: 600;">الحالة:</td>
               <td style="padding: 3px 0;">
-                <span style="background: ${appointmentStatus.bg}; color: ${appointmentStatus.color}; padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; font-family: 'Cairo', sans-serif;">${appointmentStatus.text}</span>
+                <span style="background: ${appointmentStatus.bg}; color: ${appointmentStatus.color}; padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; font-family: 'Tajawal', sans-serif;">${appointmentStatus.text}</span>
               </td>
             </tr>
           </table>
@@ -199,31 +199,31 @@ const buildReceiptHTML = (appointmentData, options = {}) => {
         <div style="background: #f0faf5; padding: 10px 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #a7e8c5;">
           <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 7px; padding-bottom: 6px; border-bottom: 1px solid #a7e8c5;">
             <div style="width: 20px; height: 20px; background: #047857; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white;">💰</div>
-            <div style="margin: 0; font-size: 11px; color: #047857; font-weight: 700; font-family: 'Cairo', sans-serif;">بيانات الدفع</div>
+            <div style="margin: 0; font-size: 11px; color: #047857; font-weight: 700; font-family: 'Tajawal', sans-serif;">بيانات الدفع</div>
           </div>
-          <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'Cairo', sans-serif;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'Tajawal', sans-serif;">
             <tr>
               <td style="padding: 3px 0; color: #047857; font-weight: 600;">طريقة الدفع:</td>
               <td style="padding: 3px 0; font-weight: 600; color: #047857; text-align: left;">${paymentLabel}</td>
             </tr>
           </table>
           <div style="margin-top: 7px; padding-top: 7px; border-top: 2px dashed #a7e8c5;">
-            <div style="display: flex; justify-content: space-between; padding: 3px 0; font-size: 11px; font-family: 'Cairo', sans-serif;">
+            <div style="display: flex; justify-content: space-between; padding: 3px 0; font-size: 11px; font-family: 'Tajawal', sans-serif;">
               <span style="color: #047857;">المبلغ الإجمالي:</span>
               <span style="font-weight: 700; color: #047857; font-size: 12px;">${totalAmount.toFixed(2)} ر.س</span>
             </div>
-            <div style="display: flex; justify-content: space-between; padding: 3px 0; font-size: 11px; font-family: 'Cairo', sans-serif;">
+            <div style="display: flex; justify-content: space-between; padding: 3px 0; font-size: 11px; font-family: 'Tajawal', sans-serif;">
               <span style="color: #059669;">المبلغ المدفوع:</span>
               <span style="font-weight: 700; color: #059669;">${paidAmount.toFixed(2)} ر.س</span>
             </div>
             ${remaining > 0 ? `
-            <div style="display: flex; justify-content: space-between; padding: 5px 8px; margin-top: 4px; background: rgba(220, 38, 38, 0.06); border-radius: 5px; font-size: 12px; font-family: 'Cairo', sans-serif;">
+            <div style="display: flex; justify-content: space-between; padding: 5px 8px; margin-top: 4px; background: rgba(220, 38, 38, 0.06); border-radius: 5px; font-size: 12px; font-family: 'Tajawal', sans-serif;">
               <span style="color: #dc2626; font-weight: 700;">المتبقي:</span>
               <span style="font-weight: 800; color: #dc2626;">${remaining.toFixed(2)} ر.س</span>
             </div>
             ` : `
             <div style="display: flex; justify-content: center; padding: 5px 0; margin-top: 4px;">
-              <span style="background: #059669; color: white; padding: 3px 12px; border-radius: 12px; font-size: 10px; font-weight: 700; font-family: 'Cairo', sans-serif;">✓ تم السداد بالكامل</span>
+              <span style="background: #059669; color: white; padding: 3px 12px; border-radius: 12px; font-size: 10px; font-weight: 700; font-family: 'Tajawal', sans-serif;">✓ تم السداد بالكامل</span>
             </div>
             `}
           </div>
@@ -232,7 +232,7 @@ const buildReceiptHTML = (appointmentData, options = {}) => {
 
         ${showEmployeeName ? `
         <!-- معلومات الموظف -->
-        <div style="background: #f8f9fb; padding: 6px 10px; border-radius: 5px; display: flex; justify-content: space-between; font-size: 9px; color: #64748b; border: 1px solid #e2e8f0; font-family: 'Cairo', sans-serif;">
+        <div style="background: #f8f9fb; padding: 6px 10px; border-radius: 5px; display: flex; justify-content: space-between; font-size: 9px; color: #64748b; border: 1px solid #e2e8f0; font-family: 'Tajawal', sans-serif;">
           <span>المستخدم: <strong>${employeeName}</strong></span>
           <span>تاريخ الطباعة: ${receiptDate} - ${receiptTime}</span>
         </div>
@@ -245,8 +245,8 @@ const buildReceiptHTML = (appointmentData, options = {}) => {
         <div style="position: relative;">
           <div style="position: absolute; top: -10px; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #c8a44e, transparent);"></div>
         </div>
-        <div style="margin: 0 0 4px 0; font-size: 10px; font-weight: 600; font-family: 'Cairo', sans-serif; white-space: pre-line; line-height: 1.5;">${footerTerms}</div>
-        <div style="margin: 0; font-size: 8px; opacity: 0.5; font-family: 'Cairo', sans-serif;">www.trcolors.com</div>
+        <div style="margin: 0 0 4px 0; font-size: 10px; font-weight: 600; font-family: 'Tajawal', sans-serif; white-space: pre-line; line-height: 1.5;">${footerTerms}</div>
+        <div style="margin: 0; font-size: 8px; opacity: 0.5; font-family: 'Tajawal', sans-serif;">www.trcolors.com</div>
       </div>
       ` : ''}
     </div>
@@ -313,7 +313,7 @@ export const generateAppointmentReceipt = async (appointmentData, options = {}) 
     width: 480px;
     padding: 20px;
     background: #f5f3ef;
-    font-family: 'Cairo', sans-serif;
+    font-family: 'Tajawal', sans-serif;
     direction: rtl;
   `;
 
@@ -346,7 +346,7 @@ export const shareReceiptToWhatsApp = async (appointmentData, options = {}) => {
     width: 480px;
     padding: 20px;
     background: #f5f3ef;
-    font-family: 'Cairo', sans-serif;
+    font-family: 'Tajawal', sans-serif;
     direction: rtl;
   `;
 
