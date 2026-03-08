@@ -2,7 +2,7 @@
  * Shared admin utilities — used across VisaServiceAppDetails, VisaApplicationDetails, LicenseApplicationDetails
  */
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5002';
+const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost:5002/api').replace(/\/api\/?$/, '');
 
 /* ─── Arabic/Persian digits → English ─── */
 export const toEnDigits = (str) => {
