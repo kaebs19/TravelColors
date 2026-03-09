@@ -1166,6 +1166,17 @@ const WebsiteManagement = ({ initialTab = 'hero' }) => {
             </div>
           )}
         </div>
+        <div className="wm-form-group">
+          <label>رقم واتساب الرخصة الدولية</label>
+          <input
+            type="text"
+            value={content.internationalLicense?.contactWhatsapp ?? ''}
+            onChange={e => updateField('internationalLicense.contactWhatsapp', e.target.value)}
+            dir="ltr"
+            placeholder="966XXXXXXXXX"
+          />
+          <small style={{ color: '#888', fontSize: '12px' }}>رقم واتساب خاص بصفحة الرخصة الدولية — إذا فارغ سيتم استخدام رقم التواصل العام</small>
+        </div>
       </div>
 
       {/* إدارة الخدمات الإضافية (Add-ons) */}

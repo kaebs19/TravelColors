@@ -5,11 +5,15 @@ import { useClientAuth } from '../../context/ClientAuthContext';
 import '../../styles/public-shared.css';
 import './InternationalLicense.css';
 
+const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5002/api';
+const baseUrl = apiUrl.replace('/api', '');
+
 const InternationalLicense = () => {
   const [contact, setContact] = useState({ whatsapp: '966559229597' });
   const [licenseData, setLicenseData] = useState({
     price: '200', currency: 'ريال', offerEnabled: false, offerPrice: '', description: ''
   });
+  const [logo, setLogo] = useState(null);
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
   const { isAuthenticated } = useClientAuth();
@@ -23,6 +27,7 @@ const InternationalLicense = () => {
           if (res.data?.internationalLicense) {
             setLicenseData(prev => ({ ...prev, ...res.data.internationalLicense }));
           }
+          if (res.data?.general?.logo) setLogo(res.data.general.logo);
         }
       } catch (err) { /* use default */ }
     };
@@ -39,16 +44,27 @@ const InternationalLicense = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach(entry => {
-          if (entry.isIntersecting) entry.target.classList.add('visible');
+          if (entry.isIntersecting) {
+            entry.target.setAttribute('data-visible', '');
+            observer.unobserve(entry.target);
+          }
         });
       },
       { threshold: 0.1 }
     );
-    document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+    document.querySelectorAll('.animate-on-scroll:not([data-visible])').forEach(el => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  }, [licenseData]);
 
-  const whatsappLink = contact?.whatsapp ? `https://wa.me/${contact.whatsapp}` : '#';
+  const getImageUrl = (path) => {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    return `${baseUrl}${path}`;
+  };
+
+  // رقم واتساب خاص بالرخصة (يأخذ الافتراضي من جهة الاتصال إذا ما كان محدد)
+  const licenseWhatsapp = licenseData.contactWhatsapp || contact?.whatsapp;
+  const whatsappLink = licenseWhatsapp ? `https://wa.me/${licenseWhatsapp}` : '#';
 
   const handleApply = () => {
     navigate(isAuthenticated ? '/portal/license/apply' : '/portal/login');
@@ -59,7 +75,7 @@ const InternationalLicense = () => {
       {/* Top Bar */}
       <div className="license-topbar">
         <div className="license-topbar-inner">
-          {contact.whatsapp && (
+          {licenseWhatsapp && (
             <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="license-topbar-link">
               <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
               واتساب
@@ -73,21 +89,24 @@ const InternationalLicense = () => {
       <nav className={`license-nav ${scrolled ? 'scrolled' : ''}`}>
         <div className="license-nav-container">
           <div className="license-nav-brand" onClick={() => navigate('/')}>
-            <span className="license-nav-ar">ألوان المسافر</span>
-            <span className="license-nav-en">TRAVEL COLORS</span>
+            {logo ? (
+              <img src={getImageUrl(logo)} alt="ألوان المسافر" className="license-nav-logo" />
+            ) : (
+              <>
+                <span className="license-nav-ar">ألوان المسافر</span>
+                <span className="license-nav-en">TRAVEL COLORS</span>
+              </>
+            )}
           </div>
           <div className="license-nav-links">
+            <Link to="/" className="license-nav-link">الرئيسية</Link>
             <Link to="/visas" className="license-nav-link">التأشيرات</Link>
             <Link to="/ContactUs" className="license-nav-link">تواصل معنا</Link>
-            <button className="pbtn pbtn-sm pbtn-ghost license-back-btn" onClick={() => navigate('/')}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              العودة للرئيسية
-            </button>
           </div>
         </div>
       </nav>
 
-      {/* Banner */}
+      {/* Banner + CTA */}
       <div className="license-banner">
         <div className="license-banner-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="36" height="36">
@@ -97,6 +116,16 @@ const InternationalLicense = () => {
         </div>
         <h1>الرخصة الدولية</h1>
         <p>استخراج رخصة القيادة الدولية بسرعة واحترافية</p>
+        <div className="license-banner-cta">
+          <button className="license-banner-btn license-banner-btn-primary" onClick={handleApply}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round"/><path d="M14 2v6h6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            قدّم الآن
+          </button>
+          <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="license-banner-btn license-banner-btn-whatsapp">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+            تواصل معنا واتساب
+          </a>
+        </div>
       </div>
 
       {/* Content */}
@@ -299,7 +328,7 @@ const InternationalLicense = () => {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="32" height="32"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
           <h4>حماية البيانات والخصوصية</h4>
-          <p>نستخدم تقنية التشفير المتقدمة AES-256 لحماية جميع معلوماتك الشخصية والمستندات المرفقة، مما يضمن أعلى مستويات الأمان والخصوصية</p>
+          <p>نستخدم تقنية التشفير المتقدمة AES-256 لحماية جميع معلوماتك الشخصية والمستندات المرفقة</p>
         </div>
 
         {/* CTA */}
@@ -310,7 +339,7 @@ const InternationalLicense = () => {
           </button>
           <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="pbtn pbtn-lg pbtn-whatsapp license-consult-btn">
             <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
-            استشارة مجانية
+            تواصل معنا واتساب
           </a>
         </div>
       </div>

@@ -534,14 +534,14 @@ const LicenseForm = () => {
           <div className="lf-personal">
             <div className="lf-row">
               <div className="lf-field">
-                <label>اسم العائلة <span className="lf-required">*</span></label>
-                <input type="text" value={form.familyName} onChange={(e) => handleChange('familyName', e.target.value)} placeholder="مثال: الأحمدي" className={errors.familyName ? 'lf-error' : ''} />
-                {errors.familyName && <span className="lf-error-text">{errors.familyName}</span>}
-              </div>
-              <div className="lf-field">
                 <label>الاسم الأول <span className="lf-required">*</span></label>
                 <input type="text" value={form.givenName} onChange={(e) => handleChange('givenName', e.target.value)} placeholder="مثال: محمد" className={errors.givenName ? 'lf-error' : ''} />
                 {errors.givenName && <span className="lf-error-text">{errors.givenName}</span>}
+              </div>
+              <div className="lf-field">
+                <label>اسم العائلة <span className="lf-required">*</span></label>
+                <input type="text" value={form.familyName} onChange={(e) => handleChange('familyName', e.target.value)} placeholder="مثال: الأحمدي" className={errors.familyName ? 'lf-error' : ''} />
+                {errors.familyName && <span className="lf-error-text">{errors.familyName}</span>}
               </div>
             </div>
             <div className="lf-row">
