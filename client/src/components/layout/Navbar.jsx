@@ -142,9 +142,11 @@ const Navbar = ({ notificationProps, taskNotifications = [], onClearTaskNotifica
             title="التنبيهات"
           >
             <span className="icon">📋</span>
-            {(notifications.length + recentTaskActivities.length + overdueElectronic.length) > 0 && (
-              <span className="badge">{notifications.length + recentTaskActivities.length + overdueElectronic.length}</span>
-            )}
+            {(() => {
+              const unreadActivities = recentTaskActivities.filter(a => !a.isRead).length;
+              const totalCount = notifications.length + unreadActivities + overdueElectronic.length;
+              return totalCount > 0 && <span className="badge">{totalCount}</span>;
+            })()}
           </button>
 
           {showNotifications && (
@@ -154,13 +156,29 @@ const Navbar = ({ notificationProps, taskNotifications = [], onClearTaskNotifica
                 <>
                   <div className="notifications-header">
                     <h4>نشاطات المهام</h4>
-                    <span className="count">{recentTaskActivities.length}</span>
+                    <span className="count">{recentTaskActivities.filter(a => !a.isRead).length || recentTaskActivities.length}</span>
+                    {recentTaskActivities.some(a => !a.isRead) && (
+                      <button
+                        className="mark-read-btn"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          try {
+                            await tasksApi.markActivitiesRead();
+                            setRecentTaskActivities(prev => prev.map(a => ({ ...a, isRead: true })));
+                          } catch (err) {
+                            console.error('Error marking activities as read:', err);
+                          }
+                        }}
+                      >
+                        ✓ تم القراءة
+                      </button>
+                    )}
                   </div>
                   <div className="notifications-list task-activities">
                     {recentTaskActivities.map((activity, index) => (
                       <div
                         key={activity.id || index}
-                        className={`notification-item task-activity ${activity.type}`}
+                        className={`notification-item task-activity ${activity.type} ${activity.isRead ? 'read' : 'unread'}`}
                         onClick={() => {
                           if (activity.taskId) {
                             navigate(`/control/tasks`);

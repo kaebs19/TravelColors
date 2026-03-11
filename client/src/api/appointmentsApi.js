@@ -63,6 +63,8 @@ export const addAttachments = (id, formData) =>
 export const deleteAttachment = (id, attachmentId) =>
   axios.delete(`/appointments/${id}/attachments/${attachmentId}`);
 
+export const addPayment = (id, data) => axios.post(`/appointments/${id}/payment`, data);
+
 export default {
   getAppointments,
   getAppointment,
@@ -75,5 +77,6 @@ export default {
   getDashboardStats,
   logQuickUpdate,
   addAttachments,
-  deleteAttachment
+  deleteAttachment,
+  addPayment
 };

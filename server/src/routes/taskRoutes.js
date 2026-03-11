@@ -22,6 +22,12 @@ router.get('/by-appointment/:appointmentId', taskController.getTaskByAppointment
 // النشاطات الأخيرة
 router.get('/recent-activities', taskController.getRecentActivities);
 
+// استعادة المهام المعطّلة
+router.put('/restore-inactive', requirePermission('tasks.edit'), taskController.restoreInactiveTasks);
+
+// تحديد النشاطات كمقروءة
+router.put('/activities/mark-read', taskController.markActivitiesRead);
+
 // CRUD المهام
 router.get('/', taskController.getTasks);
 router.get('/:id', taskController.getTask);

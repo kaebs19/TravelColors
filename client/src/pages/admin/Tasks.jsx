@@ -797,6 +797,9 @@ const Tasks = () => {
 
     // فلترة حسب النطاق الزمني
     if (dateRangeFilter.type) {
+      // المهام غير المكتملة تظهر دائماً حتى لو مر موعدها
+      const isIncomplete = task.status === 'new' || task.status === 'in_progress';
+
       const appointmentDate = new Date(task.appointment?.appointmentDate);
       appointmentDate.setHours(0, 0, 0, 0);
       const today = new Date();
@@ -805,31 +808,33 @@ const Tasks = () => {
       if (dateRangeFilter.type === 'tomorrow') {
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
-        if (appointmentDate.getTime() !== tomorrow.getTime()) return false;
+        if (appointmentDate.getTime() !== tomorrow.getTime() && !isIncomplete) return false;
       }
 
       if (dateRangeFilter.type === 'week') {
         const weekEnd = new Date(today);
         weekEnd.setDate(weekEnd.getDate() + 7);
-        if (appointmentDate < today || appointmentDate > weekEnd) return false;
+        if ((appointmentDate < today || appointmentDate > weekEnd) && !isIncomplete) return false;
       }
 
       if (dateRangeFilter.type === 'month') {
         const monthEnd = new Date(today);
         monthEnd.setMonth(monthEnd.getMonth() + 1);
-        if (appointmentDate < today || appointmentDate > monthEnd) return false;
+        if ((appointmentDate < today || appointmentDate > monthEnd) && !isIncomplete) return false;
       }
 
       if (dateRangeFilter.type === 'custom') {
-        if (dateRangeFilter.startDate) {
-          const start = new Date(dateRangeFilter.startDate);
-          start.setHours(0, 0, 0, 0);
-          if (appointmentDate < start) return false;
-        }
-        if (dateRangeFilter.endDate) {
-          const end = new Date(dateRangeFilter.endDate);
-          end.setHours(23, 59, 59, 999);
-          if (appointmentDate > end) return false;
+        if (!isIncomplete) {
+          if (dateRangeFilter.startDate) {
+            const start = new Date(dateRangeFilter.startDate);
+            start.setHours(0, 0, 0, 0);
+            if (appointmentDate < start) return false;
+          }
+          if (dateRangeFilter.endDate) {
+            const end = new Date(dateRangeFilter.endDate);
+            end.setHours(23, 59, 59, 999);
+            if (appointmentDate > end) return false;
+          }
         }
       }
     }

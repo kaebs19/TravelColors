@@ -37,12 +37,12 @@ const getMapLink = (department, cityName) => {
  * @returns {string} الرسالة المولّدة
  */
 export const generateConfirmedMessageFromTemplate = (template, data, department) => {
+  const mapLink = getMapLink(department, data.city);
+
   if (!template) {
     // fallback إذا لم يوجد قالب
-    return generateConfirmedFallback(data, department?.title || '');
+    return generateConfirmedFallback({ ...data, _mapLink: mapLink }, department?.title || '');
   }
-
-  const mapLink = getMapLink(department, data.city);
 
   return template
     .replace(/\{اسم_العميل\}/g, data.customerName || '')
@@ -140,27 +140,41 @@ export const generateQuickUpdateMessage = (template, data, department) => {
 
 // Fallback messages إذا لم يوجد قالب في الإعدادات
 const generateConfirmedFallback = (data, deptTitle) => {
-  return `السلام عليكم ورحمة الله وبركاته
-عميلنا العزيز / ${data.customerName}
-تم تأكيد موعدكم في ${deptTitle}
+  const mapLink = data._mapLink || '';
+  return `عزيزي العميل: ${data.customerName} 🤝
 
-📅 يوم ${formatDate(data.appointmentDate)}
-⏰ الساعة ${formatTime(data.appointmentTime)}
+نؤكد لك حجز موعدك لدى: ${deptTitle}
 
-نتمنى لكم تجربة سعيدة
-ألوان المسافر للخدمات`;
+📅 تفاصيل الموعد:
+- التاريخ: ${formatDate(data.appointmentDate)}
+- الوقت: ${formatTime(data.appointmentTime)}
+- عدد الأشخاص: ${data.personsCount || 1}
+- المدينة: ${data.city || ''}
+${mapLink ? `- الموقع: ${mapLink}` : ''}
+⏰ الرجاء الحضور قبل الموعد بـ 15 دقيقة.
+📞 سوف نتواصل معك قريباً لاستكمال الإجراءات.
+
+مع أطيب التحيات،
+ألوان المسافر للسفر والسياحة 🌍`;
 };
 
 const generateUnconfirmedFallback = (data, deptTitle) => {
-  return `السلام عليكم ورحمة الله وبركاته
-عميلنا العزيز / ${data.customerName}
-تم حجز موعدكم في ${deptTitle}
+  return `عزيزي العميل: ${data.customerName} 🤝
 
-📅 الموعد متوقع بين ${formatDate(data.dateFrom)} و ${formatDate(data.dateTo)}
-سيتم إبلاغكم بالتاريخ المحدد قريباً
+تم تسجيل طلب موعدك لدى: ${deptTitle}
 
-نتمنى لكم تجربة سعيدة
-ألوان المسافر للخدمات`;
+📅 الفترة المتوقعة للموعد:
+- من: ${formatDate(data.dateFrom)}
+- إلى: ${formatDate(data.dateTo)}
+- عدد الأشخاص: ${data.personsCount || 1}
+- المدينة: ${data.city || ''}
+
+📌 ملاحظة مهمة:
+هذا الموعد قيد التأكيد، وسنوافيك بالتاريخ والوقت المحدد فور تأكيده.
+📞 سوف نتواصل معك قريباً لاستكمال الإجراءات.
+
+مع أطيب التحيات،
+ألوان المسافر للسفر والسياحة 🌍`;
 };
 
 const generateElectronicSubmissionFallback = (data, deptTitle, processingDays) => {

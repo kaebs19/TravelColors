@@ -106,7 +106,13 @@ const auditLogSchema = new mongoose.Schema({
   // بيانات إضافية
   metadata: {
     type: mongoose.Schema.Types.Mixed
-  }
+  },
+
+  // قائمة المستخدمين الذين قرأوا النشاط
+  readBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }]
 }, {
   timestamps: true
 });

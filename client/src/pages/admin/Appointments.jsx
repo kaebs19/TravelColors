@@ -58,6 +58,11 @@ const Appointments = () => {
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const viewAttachmentInputRef = useRef(null);
 
+  // حالة إضافة دفعة
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentData, setPaymentData] = useState({ amount: '', paymentType: 'cash' });
+  const [addingPayment, setAddingPayment] = useState(false);
+
   // استخراج قائمة المدن الفريدة
   const uniqueCities = [...new Set(appointments.map(a => a.city).filter(Boolean))];
 
@@ -631,6 +636,36 @@ const Appointments = () => {
     } catch (error) {
       console.error('Error sharing receipt:', error);
       showToast('حدث خطأ أثناء مشاركة الإيصال', 'error');
+    }
+  };
+
+  // إضافة دفعة جديدة
+  const handleAddPayment = async () => {
+    if (!viewAppointment || !paymentData.amount) return;
+    setAddingPayment(true);
+    try {
+      const res = await appointmentsApi.addPayment(viewAppointment._id, {
+        amount: parseFloat(paymentData.amount),
+        paymentType: paymentData.paymentType
+      });
+      if (res.data?.success) {
+        showToast('تم إضافة الدفعة بنجاح', 'success');
+        setShowPaymentModal(false);
+        setPaymentData({ amount: '', paymentType: 'cash' });
+        // تحديث بيانات الموعد المعروض
+        const updatedAppt = res.data.data.appointment;
+        setViewAppointment(prev => ({
+          ...prev,
+          paidAmount: updatedAppt.paidAmount,
+          remainingAmount: updatedAppt.remainingAmount
+        }));
+        // تحديث القائمة
+        fetchData();
+      }
+    } catch (error) {
+      showToast(error.response?.data?.message || 'حدث خطأ أثناء إضافة الدفعة', 'error');
+    } finally {
+      setAddingPayment(false);
     }
   };
 
@@ -1573,9 +1608,65 @@ const Appointments = () => {
                         {viewAppointment.remainingAmount || 0} ريال
                       </span>
                     </div>
+                    {viewAppointment.remainingAmount > 0 && (
+                      <button
+                        className="add-payment-btn"
+                        onClick={() => {
+                          setPaymentData({ amount: '', paymentType: viewAppointment.paymentType || 'cash' });
+                          setShowPaymentModal(true);
+                        }}
+                      >
+                        💰 إضافة دفعة
+                      </button>
+                    )}
                   </>
                 )}
               </>
+            )}
+
+            {/* مودال إضافة دفعة */}
+            {showPaymentModal && (
+              <div className="payment-modal-overlay" onClick={() => setShowPaymentModal(false)}>
+                <div className="payment-modal" onClick={e => e.stopPropagation()}>
+                  <h4>إضافة دفعة جديدة</h4>
+                  <p className="payment-remaining">المتبقي: {viewAppointment.remainingAmount} ريال</p>
+                  <div className="payment-field">
+                    <label>المبلغ</label>
+                    <input
+                      type="number"
+                      value={paymentData.amount}
+                      onChange={e => setPaymentData(prev => ({ ...prev, amount: e.target.value }))}
+                      placeholder="أدخل المبلغ"
+                      max={viewAppointment.remainingAmount}
+                      dir="ltr"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="payment-field">
+                    <label>طريقة الدفع</label>
+                    <select
+                      value={paymentData.paymentType}
+                      onChange={e => setPaymentData(prev => ({ ...prev, paymentType: e.target.value }))}
+                    >
+                      <option value="cash">نقدي</option>
+                      <option value="card">شبكة</option>
+                      <option value="transfer">تحويل</option>
+                    </select>
+                  </div>
+                  <div className="payment-actions">
+                    <button
+                      className="payment-confirm-btn"
+                      onClick={handleAddPayment}
+                      disabled={addingPayment || !paymentData.amount || parseFloat(paymentData.amount) <= 0}
+                    >
+                      {addingPayment ? 'جاري الإضافة...' : 'تأكيد الدفعة'}
+                    </button>
+                    <button className="payment-cancel-btn" onClick={() => setShowPaymentModal(false)}>
+                      إلغاء
+                    </button>
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* أزرار الإجراءات */}

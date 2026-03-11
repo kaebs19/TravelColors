@@ -167,6 +167,33 @@
   font-size: var(--font-xs);
 }
 
+.mark-read-btn {
+  background: none;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  cursor: pointer;
+  font-family: 'Tajawal', sans-serif;
+  font-weight: 600;
+  transition: all 0.2s;
+  margin-right: auto;
+  margin-left: 8px;
+}
+.mark-read-btn:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+.notification-item.read {
+  opacity: 0.6;
+}
+.notification-item.unread {
+  background: rgba(59, 130, 246, 0.04);
+  border-right: 3px solid var(--primary-color);
+}
+
 .notifications-list {
   max-height: 300px;
   overflow-y: auto;

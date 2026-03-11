@@ -47,7 +47,13 @@ const tasksApi = {
 
   // ربط طلب بمهمة
   linkApplication: (id, applicationId, applicationType) =>
-    api.put(`/tasks/${id}/link-application`, { applicationId, applicationType })
+    api.put(`/tasks/${id}/link-application`, { applicationId, applicationType }),
+
+  // تحديد النشاطات كمقروءة
+  markActivitiesRead: () => api.put('/tasks/activities/mark-read'),
+
+  // استعادة المهام المعطّلة
+  restoreInactiveTasks: () => api.put('/tasks/restore-inactive')
 };
 
 export default tasksApi;

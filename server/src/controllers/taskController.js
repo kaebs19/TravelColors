@@ -982,7 +982,8 @@ exports.getRecentActivities = async (req, res, next) => {
           employeeName: activity.userName || activity.userId?.name || 'موظف',
           customerName: task?.appointment?.customerName || 'عميل',
           timeAgo,
-          createdAt: activity.createdAt
+          createdAt: activity.createdAt,
+          isRead: activity.readBy?.some(id => id.toString() === (req.user._id || req.user.id).toString()) || false
         };
       })
     );
@@ -992,6 +993,32 @@ exports.getRecentActivities = async (req, res, next) => {
       data: {
         activities: formattedActivities
       }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    تحديد نشاطات المهام كمقروءة
+// @route   PUT /api/tasks/activities/mark-read
+// @access  Private
+exports.markActivitiesRead = async (req, res, next) => {
+  try {
+    const userId = req.user._id || req.user.id;
+
+    const result = await AuditLog.updateMany(
+      {
+        entityType: 'task',
+        action: { $in: ['start_task', 'complete_task'] },
+        readBy: { $ne: userId }
+      },
+      { $addToSet: { readBy: userId } }
+    );
+
+    res.json({
+      success: true,
+      message: `تم تحديد ${result.modifiedCount} نشاط كمقروء`,
+      data: { markedCount: result.modifiedCount }
     });
   } catch (error) {
     next(error);
@@ -1087,6 +1114,26 @@ exports.linkApplication = async (req, res, next) => {
       success: true,
       message: applicationId ? 'تم ربط الطلب بالمهمة بنجاح' : 'تم إلغاء ربط الطلب',
       data: task
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    استعادة المهام المعطّلة (المحذوفة سابقاً)
+// @route   PUT /api/tasks/restore-inactive
+// @access  Private (Admin)
+exports.restoreInactiveTasks = async (req, res, next) => {
+  try {
+    const result = await Task.updateMany(
+      { isActive: false },
+      { isActive: true }
+    );
+
+    res.json({
+      success: true,
+      message: `تم استعادة ${result.modifiedCount} مهمة`,
+      data: { restoredCount: result.modifiedCount }
     });
   } catch (error) {
     next(error);

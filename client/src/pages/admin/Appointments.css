@@ -2078,3 +2078,108 @@
   transform: none;
 }
 
+/* إضافة دفعة */
+.add-payment-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Tajawal', sans-serif;
+  transition: all 0.2s;
+}
+.add-payment-btn:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  transform: translateY(-1px);
+}
+
+.payment-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+}
+.payment-modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  width: 340px;
+  max-width: 90vw;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.payment-modal h4 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: #1e293b;
+}
+.payment-remaining {
+  margin: 0 0 16px;
+  color: #f59e0b;
+  font-weight: 600;
+  font-size: 14px;
+}
+.payment-field {
+  margin-bottom: 12px;
+}
+.payment-field label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 600;
+}
+.payment-field input,
+.payment-field select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Tajawal', sans-serif;
+  box-sizing: border-box;
+}
+.payment-field input:focus,
+.payment-field select:focus {
+  border-color: #f59e0b;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(245,158,11,0.1);
+}
+.payment-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+.payment-confirm-btn {
+  flex: 1;
+  padding: 10px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Tajawal', sans-serif;
+}
+.payment-confirm-btn:hover:not(:disabled) { background: linear-gradient(135deg, #059669, #047857); }
+.payment-confirm-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.payment-cancel-btn {
+  padding: 10px 16px;
+  background: #f1f5f9;
+  color: #64748b;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: 'Tajawal', sans-serif;
+}
+.payment-cancel-btn:hover { background: #e2e8f0; }
+

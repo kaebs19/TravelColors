@@ -19,6 +19,7 @@ router.get('/:id', appointmentController.getAppointment);
 router.post('/', requirePermission('appointments.add'), upload.array('attachments', 5), appointmentController.createAppointment);
 router.put('/:id', requirePermission('appointments.edit'), appointmentController.updateAppointment);
 router.put('/:id/status', requirePermission('appointments.edit'), appointmentController.changeStatus);
+router.post('/:id/payment', requirePermission('appointments.edit'), appointmentController.addPayment);
 router.post('/:id/log-quick-update', appointmentController.logQuickUpdate);
 
 // مرفقات الموعد

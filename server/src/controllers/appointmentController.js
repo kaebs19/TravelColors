@@ -583,11 +583,11 @@ exports.deleteAppointment = async (req, res, next) => {
 
     if (!checkExists(res, appointment, 'الموعد')) return;
 
-    // حذف المهمة المرتبطة بالموعد
+    // تعطيل المهمة المرتبطة بالموعد (soft delete بدلاً من الحذف النهائي)
     try {
-      await Task.findOneAndDelete({ appointment: req.params.id });
+      await Task.findOneAndUpdate({ appointment: req.params.id }, { isActive: false });
     } catch (taskError) {
-      console.error('Error deleting task for appointment:', taskError);
+      console.error('Error deactivating task for appointment:', taskError);
     }
 
     // حذف من Google Sheets
@@ -1185,6 +1185,149 @@ exports.getStats = async (req, res, next) => {
         }
       }
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    إضافة دفعة جديدة لموعد
+// @route   POST /api/appointments/:id/payment
+// @access  Private
+exports.addPayment = async (req, res, next) => {
+  try {
+    const { amount, paymentType } = req.body;
+    const appointment = await Appointment.findById(req.params.id)
+      .populate('department', 'title');
+
+    if (!checkExists(res, appointment, 'الموعد')) return;
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ success: false, message: 'يرجى إدخال مبلغ صحيح' });
+    }
+
+    if (amount > appointment.remainingAmount) {
+      return res.status(400).json({ success: false, message: 'المبلغ أكبر من المبلغ المتبقي' });
+    }
+
+    const paymentMethod = paymentType || 'cash';
+
+    try {
+      const settings = await Settings.findOne();
+      const companyInfo = settings ? {
+        name: settings.companyName,
+        nameEn: settings.companyNameEn,
+        address: settings.address,
+        phone: settings.phone,
+        email: settings.email,
+        logo: settings.logo,
+        taxNumber: settings.taxNumber
+      } : {};
+
+      const receiptNumber = await Receipt.generateReceiptNumber();
+
+      const receipt = await Receipt.create({
+        receiptNumber,
+        appointment: appointment._id,
+        customer: appointment.customer,
+        customerName: appointment.customerName,
+        customerPhone: appointment.phone || '',
+        amount,
+        paymentMethod,
+        description: `دفعة إضافية - موعد ${appointment.department?.title || ''}`,
+        companyInfo,
+        createdBy: req.user.id,
+        status: 'active'
+      });
+
+      const cashRegister = await CashRegister.getOrCreate();
+      const balanceBefore = paymentMethod === 'cash' ? cashRegister.cashBalance :
+                           paymentMethod === 'card' ? cashRegister.cardBalance :
+                           cashRegister.transferBalance;
+
+      const transactionNumber = await Transaction.generateTransactionNumber();
+
+      const transaction = await Transaction.create({
+        transactionNumber,
+        type: 'income',
+        amount,
+        description: `إيصال ${receiptNumber} - دفعة إضافية - ${appointment.customerName}`,
+        category: 'appointment_payment',
+        paymentMethod,
+        source: 'automatic',
+        sourceType: 'receipt',
+        receipt: receipt._id,
+        appointment: appointment._id,
+        customer: appointment.customer,
+        balanceBefore,
+        balanceAfter: balanceBefore + amount,
+        createdBy: req.user.id
+      });
+
+      receipt.transaction = transaction._id;
+      await receipt.save();
+
+      if (paymentMethod === 'cash') {
+        cashRegister.cashBalance += amount;
+      } else if (paymentMethod === 'card') {
+        cashRegister.cardBalance += amount;
+      } else {
+        cashRegister.transferBalance += amount;
+      }
+      cashRegister.totalBalance += amount;
+      await cashRegister.save();
+
+      if (appointment.customer) {
+        await Customer.findByIdAndUpdate(appointment.customer, {
+          $inc: { totalSpent: amount }
+        });
+      }
+
+      // تحديث المبلغ المدفوع في الموعد
+      appointment.paidAmount = (appointment.paidAmount || 0) + amount;
+      appointment.paymentType = paymentMethod;
+      await appointment.save();
+
+      await AuditLog.log({
+        action: 'create',
+        entityType: 'receipt',
+        entityId: receipt._id,
+        entityNumber: receiptNumber,
+        user: req.user,
+        changes: { after: receipt.toObject() },
+        req,
+        description: `إنشاء إيصال ${receiptNumber} - دفعة إضافية لموعد`
+      });
+
+      res.json({
+        success: true,
+        message: 'تم إضافة الدفعة بنجاح',
+        data: {
+          receipt,
+          appointment: {
+            paidAmount: appointment.paidAmount,
+            remainingAmount: appointment.remainingAmount,
+            totalAmount: appointment.totalAmount
+          }
+        }
+      });
+    } catch (receiptError) {
+      console.error('Error creating receipt for additional payment:', receiptError);
+      appointment.paidAmount = (appointment.paidAmount || 0) + amount;
+      appointment.paymentType = paymentMethod;
+      await appointment.save();
+
+      res.json({
+        success: true,
+        message: 'تم إضافة الدفعة (بدون إيصال)',
+        data: {
+          appointment: {
+            paidAmount: appointment.paidAmount,
+            remainingAmount: appointment.remainingAmount,
+            totalAmount: appointment.totalAmount
+          }
+        }
+      });
+    }
   } catch (error) {
     next(error);
   }
