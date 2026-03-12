@@ -797,7 +797,19 @@ exports.getDashboardStats = async (req, res, next) => {
                 { $eq: ['$deptInfo.submissionType', 'إلكتروني'] },
                 { $gt: ['$deptInfo.processingDays', ''] }
               ]},
-              then: { $toInt: { $ifNull: ['$deptInfo.processingDays', '0'] } },
+              then: {
+                $convert: {
+                  input: {
+                    $getField: {
+                      field: 'match',
+                      input: { $regexFind: { input: { $ifNull: ['$deptInfo.processingDays', '0'] }, regex: /\d+/ } }
+                    }
+                  },
+                  to: 'int',
+                  onError: 0,
+                  onNull: 0
+                }
+              },
               else: 0
             }
           }
