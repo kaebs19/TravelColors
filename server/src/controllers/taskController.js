@@ -756,7 +756,7 @@ exports.getDashboardStats = async (req, res, next) => {
 
     const todayTasks = todayTasksData[0] || { total: 0, completed: 0, pending: 0 };
 
-    // 2. مهام متأخرة (الموعد فات ولم تكتمل) - مع مراعاة أيام المعالجة للتقديم الإلكتروني
+    // 2. مهام متأخرة (الموعد فات ولم تكتمل) - استبعاد التقديم الإلكتروني من حساب التأخير
     const overdueTasksData = await Task.aggregate([
       {
         $match: {
@@ -783,58 +783,15 @@ exports.getDashboardStats = async (req, res, next) => {
       },
       { $unwind: { path: '$deptInfo', preserveNullAndEmptyArrays: true } },
       {
-        $addFields: {
-          isElectronic: {
-            $and: [
-              { $eq: ['$appointmentInfo.isSubmission', true] },
-              { $eq: ['$deptInfo.submissionType', 'إلكتروني'] }
-            ]
-          },
-          processingDays: {
-            $cond: {
-              if: { $and: [
-                { $eq: ['$appointmentInfo.isSubmission', true] },
-                { $eq: ['$deptInfo.submissionType', 'إلكتروني'] },
-                { $gt: ['$deptInfo.processingDays', ''] }
-              ]},
-              then: {
-                $convert: {
-                  input: {
-                    $getField: {
-                      field: 'match',
-                      input: { $regexFind: { input: { $ifNull: ['$deptInfo.processingDays', '0'] }, regex: /\d+/ } }
-                    }
-                  },
-                  to: 'int',
-                  onError: 0,
-                  onNull: 0
-                }
-              },
-              else: 0
-            }
-          }
-        }
-      },
-      {
-        $addFields: {
-          effectiveDeadline: {
-            $cond: {
-              if: { $gt: ['$processingDays', 0] },
-              then: {
-                $dateAdd: {
-                  startDate: '$appointmentInfo.appointmentDate',
-                  unit: 'day',
-                  amount: '$processingDays'
-                }
-              },
-              else: '$appointmentInfo.appointmentDate'
-            }
-          }
-        }
-      },
-      {
         $match: {
-          effectiveDeadline: { $lt: today }
+          $and: [
+            { 'appointmentInfo.appointmentDate': { $lt: today } },
+            // استبعاد التقديم الإلكتروني (يُحسب تأخيره في الفرونتند حسب processingDays)
+            { $or: [
+              { 'appointmentInfo.isSubmission': { $ne: true } },
+              { 'deptInfo.submissionType': { $ne: 'إلكتروني' } }
+            ]}
+          ]
         }
       },
       { $count: 'count' }
