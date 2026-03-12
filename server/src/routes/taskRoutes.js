@@ -39,6 +39,7 @@ router.get('/:id/activity-log', taskController.getTaskActivityLog);
 router.put('/:id/start', requirePermission('tasks.edit'), taskController.startTask);
 router.put('/:id/complete', requirePermission('tasks.edit'), taskController.completeTask);
 router.put('/:id/cancel', requirePermission('tasks.edit'), taskController.cancelTask);
+router.put('/:id/reopen', requirePermission('tasks.edit'), taskController.reopenTask);
 router.put('/:id/transfer', requirePermission('tasks.edit'), taskController.transferTask);
 router.put('/:id/link-application', requirePermission('tasks.edit'), taskController.linkApplication);
 

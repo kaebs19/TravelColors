@@ -272,6 +272,54 @@ exports.completeTask = async (req, res, next) => {
   }
 };
 
+// @desc    إعادة فتح مهمة مكتملة
+// @route   PUT /api/tasks/:id/reopen
+// @access  Private (admin only)
+exports.reopenTask = async (req, res, next) => {
+  try {
+    const task = await Task.findById(req.params.id);
+
+    if (!task) {
+      return res.status(404).json({ success: false, message: 'المهمة غير موجودة' });
+    }
+
+    if (task.status !== 'completed' && task.status !== 'cancelled') {
+      return res.status(400).json({ success: false, message: 'المهمة ليست مكتملة أو ملغاة' });
+    }
+
+    const previousStatus = task.status;
+    task.status = 'in_progress';
+    task.completedAt = undefined;
+    task.cancelledAt = undefined;
+    if (!task.startedAt) task.startedAt = new Date();
+    await task.save();
+
+    await AuditLog.create({
+      action: 'reopen_task',
+      entityType: 'task',
+      entityId: task._id,
+      entityNumber: task.taskNumber,
+      userId: req.user.id,
+      userName: req.user.name,
+      userRole: req.user.role,
+      description: `أعاد فتح المهمة - ${req.user.name}`,
+      changes: {
+        before: { status: previousStatus },
+        after: { status: 'in_progress' }
+      }
+    });
+
+    const updatedTask = await Task.findById(task._id)
+      .populate({ path: 'appointment', populate: [{ path: 'department', select: 'title submissionType processingDays' }, { path: 'customer', select: 'name phone' }] })
+      .populate('assignedTo', 'name email')
+      .populate('createdBy', 'name');
+
+    res.json({ success: true, message: 'تم إعادة فتح المهمة بنجاح', data: updatedTask });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    إلغاء المهمة
 // @route   PUT /api/tasks/:id/cancel
 // @access  Private
@@ -350,10 +398,10 @@ exports.transferTask = async (req, res, next) => {
       });
     }
 
-    if (task.status === 'completed' || task.status === 'cancelled') {
+    if (task.status === 'cancelled') {
       return res.status(400).json({
         success: false,
-        message: 'لا يمكن تحويل مهمة مكتملة أو ملغاة'
+        message: 'لا يمكن تحويل مهمة ملغاة'
       });
     }
 
@@ -708,8 +756,8 @@ exports.getDashboardStats = async (req, res, next) => {
 
     const todayTasks = todayTasksData[0] || { total: 0, completed: 0, pending: 0 };
 
-    // 2. مهام متأخرة (الموعد فات ولم تكتمل)
-    const overdueTasksCount = await Task.aggregate([
+    // 2. مهام متأخرة (الموعد فات ولم تكتمل) - مع مراعاة أيام المعالجة للتقديم الإلكتروني
+    const overdueTasksData = await Task.aggregate([
       {
         $match: {
           isActive: true,
@@ -726,14 +774,61 @@ exports.getDashboardStats = async (req, res, next) => {
       },
       { $unwind: { path: '$appointmentInfo', preserveNullAndEmptyArrays: true } },
       {
+        $lookup: {
+          from: 'departments',
+          localField: 'appointmentInfo.department',
+          foreignField: '_id',
+          as: 'deptInfo'
+        }
+      },
+      { $unwind: { path: '$deptInfo', preserveNullAndEmptyArrays: true } },
+      {
+        $addFields: {
+          isElectronic: {
+            $and: [
+              { $eq: ['$appointmentInfo.isSubmission', true] },
+              { $eq: ['$deptInfo.submissionType', 'إلكتروني'] }
+            ]
+          },
+          processingDays: {
+            $cond: {
+              if: { $and: [
+                { $eq: ['$appointmentInfo.isSubmission', true] },
+                { $eq: ['$deptInfo.submissionType', 'إلكتروني'] },
+                { $gt: ['$deptInfo.processingDays', ''] }
+              ]},
+              then: { $toInt: { $ifNull: ['$deptInfo.processingDays', '0'] } },
+              else: 0
+            }
+          }
+        }
+      },
+      {
+        $addFields: {
+          effectiveDeadline: {
+            $cond: {
+              if: { $gt: ['$processingDays', 0] },
+              then: {
+                $dateAdd: {
+                  startDate: '$appointmentInfo.appointmentDate',
+                  unit: 'day',
+                  amount: '$processingDays'
+                }
+              },
+              else: '$appointmentInfo.appointmentDate'
+            }
+          }
+        }
+      },
+      {
         $match: {
-          'appointmentInfo.appointmentDate': { $lt: today }
+          effectiveDeadline: { $lt: today }
         }
       },
       { $count: 'count' }
     ]);
 
-    const overdueTasks = overdueTasksCount[0]?.count || 0;
+    const overdueTasks = overdueTasksData[0]?.count || 0;
 
     // 3. مهام تنتهي خلال 24 ساعة
     const dueSoonCount = await Task.aggregate([

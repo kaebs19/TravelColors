@@ -28,6 +28,9 @@ const tasksApi = {
   // إلغاء مهمة
   cancelTask: (id, reason) => api.put(`/tasks/${id}/cancel`, { reason }),
 
+  // إعادة فتح مهمة مكتملة
+  reopenTask: (id) => api.put(`/tasks/${id}/reopen`),
+
   // تحويل مهمة لموظف آخر
   transferTask: (id, data) => api.put(`/tasks/${id}/transfer`, data),
 

@@ -273,6 +273,19 @@ const Tasks = () => {
     }
   };
 
+  const handleReopenTask = async (taskId) => {
+    if (!window.confirm('هل أنت متأكد من إعادة فتح هذه المهمة؟')) return;
+    try {
+      await tasksApi.reopenTask(taskId);
+      fetchData();
+      setShowTaskModal(false);
+      showToast('تم إعادة فتح المهمة بنجاح', 'success');
+    } catch (error) {
+      console.error('Error reopening task:', error);
+      showToast(error.response?.data?.message || 'حدث خطأ أثناء إعادة فتح المهمة', 'error');
+    }
+  };
+
   const handleCancelTask = async (taskId) => {
     const reason = window.prompt('سبب الإلغاء:');
     if (!reason) return;
@@ -477,12 +490,36 @@ const Tasks = () => {
 
   const performanceStats = getQuickPerformanceStats();
 
+  // حساب الموعد النهائي الفعلي (يأخذ بالاعتبار أيام المعالجة للتقديم الإلكتروني)
+  const getEffectiveDeadline = (task) => {
+    const appt = task?.appointment;
+    if (!appt?.appointmentDate) return null;
+
+    const apptDate = new Date(appt.appointmentDate);
+    const dept = appt.department;
+    const isElectronic = appt.isSubmission && dept?.submissionType === 'إلكتروني';
+
+    if (isElectronic && dept?.processingDays) {
+      const days = parseInt(dept.processingDays) || 0;
+      if (days > 0) {
+        const deadline = new Date(apptDate);
+        deadline.setDate(deadline.getDate() + days);
+        return deadline;
+      }
+    }
+
+    return apptDate;
+  };
+
   // حساب الوقت المتبقي للمهمة
-  const getTimeRemaining = (appointmentDate) => {
-    if (!appointmentDate) return null;
+  const getTimeRemaining = (task) => {
+    const deadline = typeof task === 'string' || task instanceof Date
+      ? new Date(task) // backwards compat: raw date passed
+      : getEffectiveDeadline(task);
+    if (!deadline) return null;
+
     const now = new Date();
-    const apptDate = new Date(appointmentDate);
-    const diff = apptDate - now;
+    const diff = deadline - now;
 
     if (diff < 0) return { text: 'متأخر', isOverdue: true, hours: Math.abs(Math.floor(diff / (1000 * 60 * 60))) };
 
@@ -499,7 +536,7 @@ const Tasks = () => {
   // التحقق إذا كانت المهمة متأخرة
   const isTaskOverdue = (task) => {
     if (task.status === 'completed' || task.status === 'cancelled') return false;
-    const timeInfo = getTimeRemaining(task.appointment?.appointmentDate);
+    const timeInfo = getTimeRemaining(task);
     return timeInfo?.isOverdue;
   };
 
@@ -693,7 +730,7 @@ const Tasks = () => {
     return tasks
       .filter(task => isTaskOverdue(task))
       .map(task => {
-        const timeInfo = getTimeRemaining(task.appointment?.appointmentDate);
+        const timeInfo = getTimeRemaining(task);
         return {
           ...task,
           delayHours: timeInfo?.hours || 0
@@ -1148,7 +1185,7 @@ const Tasks = () => {
                 </tr>
               ) : (
                 sortedTasks.map(task => {
-                  const timeInfo = getTimeRemaining(task.appointment?.appointmentDate);
+                  const timeInfo = getTimeRemaining(task);
                   const overdue = isTaskOverdue(task);
                   return (
                   <tr key={task._id} className={`task-row task-${task.status} ${overdue ? 'task-overdue' : ''}`}>
@@ -1267,7 +1304,7 @@ const Tasks = () => {
             </div>
             <div className="kanban-tasks">
               {filteredTasks.filter(t => t.status === 'new').map(task => {
-                const timeInfo = getTimeRemaining(task.appointment?.appointmentDate);
+                const timeInfo = getTimeRemaining(task);
                 const overdue = isTaskOverdue(task);
                 return (
                   <div
@@ -1316,7 +1353,7 @@ const Tasks = () => {
             </div>
             <div className="kanban-tasks">
               {filteredTasks.filter(t => t.status === 'in_progress').map(task => {
-                const timeInfo = getTimeRemaining(task.appointment?.appointmentDate);
+                const timeInfo = getTimeRemaining(task);
                 const overdue = isTaskOverdue(task);
                 return (
                   <div
@@ -2008,7 +2045,7 @@ const Tasks = () => {
                     {selectedTask.assignedTo?.name ? selectedTask.assignedTo.name[0] : '؟'}
                   </div>
                   <span className="user-name">{selectedTask.assignedTo?.name || 'غير مسند'}</span>
-                  {(selectedTask.status === 'new' || selectedTask.status === 'in_progress') && (
+                  {(selectedTask.status !== 'cancelled') && (
                     <button className="btn-change-user" onClick={handleOpenTransferModal}>+</button>
                   )}
                 </div>
@@ -2241,6 +2278,12 @@ const Tasks = () => {
                     <button className="action-btn action-cancel" onClick={() => handleCancelTask(selectedTask._id)}>
                       <span className="action-icon">🗑️</span>
                       <span>إلغاء</span>
+                    </button>
+                  )}
+                  {(selectedTask.status === 'completed' || selectedTask.status === 'cancelled') && (
+                    <button className="action-btn action-start" onClick={() => handleReopenTask(selectedTask._id)}>
+                      <span className="action-icon">🔄</span>
+                      <span>إعادة فتح</span>
                     </button>
                   )}
                 </div>
