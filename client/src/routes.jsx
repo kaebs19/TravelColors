@@ -129,7 +129,7 @@ const ClientPublicRoute = ({ children }) => {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/portal/dashboard" replace />;
   }
 
   return children;

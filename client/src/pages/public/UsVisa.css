@@ -146,7 +146,7 @@
 /* Banner */
 .usvisa-banner {
   background: linear-gradient(135deg, #0f172a 0%, #134e4a 40%, #0d9488 80%, #14b8a6 100%);
-  padding: 130px 24px 50px;
+  padding: 130px 24px 60px;
   text-align: center;
   position: relative;
 }
@@ -185,6 +185,48 @@
 .usvisa-banner p {
   font-size: 1.1rem;
   color: rgba(255,255,255,0.85);
+}
+
+/* Banner CTA Buttons */
+.usvisa-banner-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+
+.usvisa-banner-cta-btn {
+  color: white !important;
+  padding: 14px 40px !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.usvisa-banner-cta-btn:hover {
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(0,0,0,0.3);
+}
+
+.usvisa-banner-consult-btn {
+  color: white !important;
+  padding: 14px 40px !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(37,211,102,0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.usvisa-banner-consult-btn:hover {
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(37,211,102,0.4);
 }
 
 /* Content */
@@ -630,8 +672,10 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .usvisa-banner { padding: 110px 16px 36px; }
+  .usvisa-banner { padding: 110px 16px 44px; }
   .usvisa-banner h1 { font-size: 1.8rem; }
+  .usvisa-banner-cta { flex-direction: column; align-items: center; gap: 12px; }
+  .usvisa-banner-cta-btn, .usvisa-banner-consult-btn { width: 100%; max-width: 320px; justify-content: center; padding: 12px 28px !important; font-size: 0.95rem !important; }
   .usvisa-types-grid { grid-template-columns: 1fr; max-width: 360px; margin: 0 auto; }
   .usvisa-doc { flex-direction: column; gap: 12px; padding: 18px; }
   .usvisa-block-header h3 { font-size: 1.15rem; }

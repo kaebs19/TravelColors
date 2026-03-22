@@ -223,6 +223,24 @@ const settingsSchema = new mongoose.Schema({
     enabled: { type: Boolean, default: true }
   }],
 
+  // إعدادات التأشيرة الأمريكية
+  usVisa: {
+    whatsappNumber: { type: String, default: '' },
+    bannerTitle: { type: String, default: 'التأشيرة الأمريكية' },
+    bannerSubtitle: { type: String, default: 'جميع المتطلبات والمستندات المطلوبة للحصول على تأشيرتك' },
+    touristPrice: { type: Number, default: 950 },
+    touristLabel: { type: String, default: 'تأشيرة سياحية' },
+    touristDesc: { type: String, default: 'للسياحة والزيارات العائلية' },
+    medicalPrice: { type: Number, default: 950 },
+    medicalLabel: { type: String, default: 'تأشيرة علاج' },
+    medicalDesc: { type: String, default: 'للعلاج والاستشفاء في أمريكا' },
+    studentPrice: { type: Number, default: 1200 },
+    studentLabel: { type: String, default: 'تأشيرة دراسة' },
+    studentDesc: { type: String, default: 'للدراسة في الجامعات الأمريكية' },
+    processingDays: { type: String, default: 'من 2 إلى 5 أيام عمل بعد إجراء المقابلة الشخصية' },
+    currency: { type: String, default: 'ريال' }
+  },
+
   // إعدادات النظام
   allowRegistration: {
     type: Boolean,

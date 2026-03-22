@@ -93,6 +93,7 @@ const Settings = () => {
     { id: 'payments', label: 'طرق الدفع', icon: '💳' },
     { id: 'statuses', label: 'حالات المواعيد', icon: '📊' },
     { id: 'notifications', label: 'الإشعارات', icon: '🔔' },
+    { id: 'usVisa', label: 'التأشيرة الأمريكية', icon: '🇺🇸' },
     ...(isAdmin ? [{ id: 'googleSheets', label: 'Google Sheets', icon: '📊' }] : []),
     ...(isAdmin ? [{ id: 'system', label: 'النظام', icon: '🔧' }] : []),
     { id: 'profile', label: 'الملف الشخصي', icon: '👤' },
@@ -1848,6 +1849,170 @@ const Settings = () => {
           )}
 
           {/* System Settings (Admin Only) */}
+          {activeTab === 'usVisa' && (
+            <Card className="settings-card">
+              <div className="card-header">
+                <h2>🇺🇸 إعدادات التأشيرة الأمريكية</h2>
+                <p>إدارة محتوى وأسعار صفحة التأشيرة الأمريكية</p>
+              </div>
+              <div className="settings-form">
+                <h3>إعدادات التواصل</h3>
+                <div className="form-group">
+                  <label>رقم واتساب التأشيرة الأمريكية</label>
+                  <input
+                    className="form-input"
+                    value={settings.usVisa?.whatsappNumber || ''}
+                    onChange={(e) => handleChange('usVisa', { ...settings.usVisa, whatsappNumber: e.target.value })}
+                    placeholder="966559229597"
+                    disabled={!isAdmin}
+                    dir="ltr"
+                  />
+                  <span className="form-hint">اتركه فارغاً لاستخدام رقم الواتساب الافتراضي من إعدادات الموقع</span>
+                </div>
+
+                <div className="form-divider"></div>
+                <h3>نصوص الصفحة</h3>
+                <div className="form-group">
+                  <label>عنوان البانر</label>
+                  <input
+                    className="form-input"
+                    value={settings.usVisa?.bannerTitle || 'التأشيرة الأمريكية'}
+                    onChange={(e) => handleChange('usVisa', { ...settings.usVisa, bannerTitle: e.target.value })}
+                    disabled={!isAdmin}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>وصف البانر</label>
+                  <input
+                    className="form-input"
+                    value={settings.usVisa?.bannerSubtitle || ''}
+                    onChange={(e) => handleChange('usVisa', { ...settings.usVisa, bannerSubtitle: e.target.value })}
+                    disabled={!isAdmin}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>مدة المعالجة المتوقعة</label>
+                  <input
+                    className="form-input"
+                    value={settings.usVisa?.processingDays || ''}
+                    onChange={(e) => handleChange('usVisa', { ...settings.usVisa, processingDays: e.target.value })}
+                    disabled={!isAdmin}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>العملة</label>
+                  <input
+                    className="form-input"
+                    value={settings.usVisa?.currency || 'ريال'}
+                    onChange={(e) => handleChange('usVisa', { ...settings.usVisa, currency: e.target.value })}
+                    disabled={!isAdmin}
+                  />
+                </div>
+
+                <div className="form-divider"></div>
+                <h3>أسعار التأشيرات</h3>
+
+                <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+                  <div>
+                    <h4 style={{ marginBottom: '12px', color: '#0d9488' }}>تأشيرة سياحية</h4>
+                    <div className="form-group">
+                      <label>الاسم</label>
+                      <input
+                        className="form-input"
+                        value={settings.usVisa?.touristLabel || 'تأشيرة سياحية'}
+                        onChange={(e) => handleChange('usVisa', { ...settings.usVisa, touristLabel: e.target.value })}
+                        disabled={!isAdmin}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>الوصف</label>
+                      <input
+                        className="form-input"
+                        value={settings.usVisa?.touristDesc || ''}
+                        onChange={(e) => handleChange('usVisa', { ...settings.usVisa, touristDesc: e.target.value })}
+                        disabled={!isAdmin}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>السعر</label>
+                      <input
+                        className="form-input"
+                        type="number"
+                        value={settings.usVisa?.touristPrice || 950}
+                        onChange={(e) => handleChange('usVisa', { ...settings.usVisa, touristPrice: Number(e.target.value) })}
+                        disabled={!isAdmin}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 style={{ marginBottom: '12px', color: '#0d9488' }}>تأشيرة علاج</h4>
+                    <div className="form-group">
+                      <label>الاسم</label>
+                      <input
+                        className="form-input"
+                        value={settings.usVisa?.medicalLabel || 'تأشيرة علاج'}
+                        onChange={(e) => handleChange('usVisa', { ...settings.usVisa, medicalLabel: e.target.value })}
+                        disabled={!isAdmin}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>الوصف</label>
+                      <input
+                        className="form-input"
+                        value={settings.usVisa?.medicalDesc || ''}
+                        onChange={(e) => handleChange('usVisa', { ...settings.usVisa, medicalDesc: e.target.value })}
+                        disabled={!isAdmin}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>السعر</label>
+                      <input
+                        className="form-input"
+                        type="number"
+                        value={settings.usVisa?.medicalPrice || 950}
+                        onChange={(e) => handleChange('usVisa', { ...settings.usVisa, medicalPrice: Number(e.target.value) })}
+                        disabled={!isAdmin}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 style={{ marginBottom: '12px', color: '#0d9488' }}>تأشيرة دراسة</h4>
+                    <div className="form-group">
+                      <label>الاسم</label>
+                      <input
+                        className="form-input"
+                        value={settings.usVisa?.studentLabel || 'تأشيرة دراسة'}
+                        onChange={(e) => handleChange('usVisa', { ...settings.usVisa, studentLabel: e.target.value })}
+                        disabled={!isAdmin}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>الوصف</label>
+                      <input
+                        className="form-input"
+                        value={settings.usVisa?.studentDesc || ''}
+                        onChange={(e) => handleChange('usVisa', { ...settings.usVisa, studentDesc: e.target.value })}
+                        disabled={!isAdmin}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>السعر</label>
+                      <input
+                        className="form-input"
+                        type="number"
+                        value={settings.usVisa?.studentPrice || 1200}
+                        onChange={(e) => handleChange('usVisa', { ...settings.usVisa, studentPrice: Number(e.target.value) })}
+                        disabled={!isAdmin}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
+
           {activeTab === 'system' && isAdmin && (
             <Card className="settings-card">
               <div className="card-header">

@@ -2,6 +2,20 @@ const { Settings, Appointment } = require('../models');
 const googleSheetsService = require('../services/googleSheetsService');
 const { isGoogleSheetsEnabled, getSheetsApi } = require('../config/google');
 
+// إعدادات التأشيرة الأمريكية - عام بدون auth
+exports.getUsVisaPublicSettings = async (req, res) => {
+  try {
+    const settings = await Settings.getSettings();
+    res.json({
+      success: true,
+      data: settings.usVisa || {}
+    });
+  } catch (error) {
+    console.error('Error fetching US visa settings:', error);
+    res.status(500).json({ success: false, message: 'حدث خطأ' });
+  }
+};
+
 // الحصول على الإعدادات
 exports.getSettings = async (req, res) => {
   try {

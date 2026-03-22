@@ -4,6 +4,9 @@ const settingsController = require('../controllers/settingsController');
 const { protect, requirePermission } = require('../middlewares/auth');
 const upload = require('../middlewares/upload');
 
+// إعدادات التأشيرة الأمريكية - عام بدون auth
+router.get('/us-visa-public', settingsController.getUsVisaPublicSettings);
+
 // جلب الإعدادات - متاح لجميع المستخدمين المسجلين مع صلاحية العرض
 router.get('/', protect, requirePermission('settings.view'), settingsController.getSettings);
 
