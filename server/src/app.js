@@ -28,6 +28,9 @@ const { generalLimiter } = require('./middlewares/rateLimiter');
 // Initialize express
 const app = express();
 
+// Trust proxy — مطلوب خلف Nginx لكي يعمل rate-limit بشكل صحيح
+app.set('trust proxy', 1);
+
 // Gzip compression — يقلل حجم الاستجابات ~60-70%
 app.use(compression());
 
