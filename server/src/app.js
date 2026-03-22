@@ -73,26 +73,22 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Root route
-app.get('/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Travel Colors API',
-    version: '1.0.0',
-    endpoints: {
-      auth: '/api/auth',
-      trips: '/api/trips',
-      bookings: '/api/bookings',
-      customers: '/api/customers'
-    }
-  });
-});
-
 // Rate limiting — حماية عامة
 app.use('/api', generalLimiter);
 
 // API routes
 app.use('/api', routes);
+
+// Meta tags — خدمة صفحات SPA مع meta tags ديناميكية
+const { serveWithMeta } = require('./middlewares/metaTags');
+app.get('/', serveWithMeta);
+app.get('/us-visa', serveWithMeta);
+app.get('/visas', serveWithMeta);
+app.get('/visas/:slug', serveWithMeta);
+app.get('/international-license', serveWithMeta);
+app.get('/ContactUs', serveWithMeta);
+app.get('/privacy', serveWithMeta);
+app.get('/terms', serveWithMeta);
 
 // 404 handler
 app.use((req, res) => {
