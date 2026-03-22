@@ -27,7 +27,7 @@ const getBaseHtml = () => {
 const DEFAULTS = {
   title: 'ألوان المسافر للسفر والسياحة',
   description: 'ألوان المسافر - شركة سياحية مرخصة متخصصة في استخراج التأشيرات وحجوزات الطيران والفنادق والبرامج السياحية',
-  image: '',
+  image: '/logo512.png',
   siteName: 'ألوان المسافر'
 };
 
@@ -82,16 +82,20 @@ const getVisaMeta = async (slug) => {
 };
 
 // حقن meta tags في HTML
-const injectMeta = (html, meta, url) => {
+const injectMeta = (html, meta, fullUrl) => {
   const title = meta.title || DEFAULTS.title;
   const description = meta.description || DEFAULTS.description;
-  const image = meta.image || DEFAULTS.image;
+  const rawImage = meta.image || DEFAULTS.image;
+
+  // تحويل المسار النسبي لرابط كامل
+  const baseUrl = fullUrl.split('/').slice(0, 3).join('/'); // https://www.trcolors.com
+  const image = rawImage.startsWith('http') ? rawImage : `${baseUrl}${rawImage}`;
 
   return html
     .replace(/__OG_TITLE__/g, title)
     .replace(/__OG_DESCRIPTION__/g, description)
     .replace(/__OG_IMAGE__/g, image)
-    .replace(/__OG_URL__/g, url);
+    .replace(/__OG_URL__/g, fullUrl);
 };
 
 // Middleware الرئيسي
