@@ -91,11 +91,12 @@ const injectMeta = (html, meta, fullUrl) => {
   const baseUrl = fullUrl.split('/').slice(0, 3).join('/'); // https://www.trcolors.com
   const image = rawImage.startsWith('http') ? rawImage : `${baseUrl}${rawImage}`;
 
+  // استبدال القيم الافتراضية بالقيم الديناميكية
   return html
-    .replace(/__OG_TITLE__/g, title)
-    .replace(/__OG_DESCRIPTION__/g, description)
-    .replace(/__OG_IMAGE__/g, image)
-    .replace(/__OG_URL__/g, fullUrl);
+    .replace(/ألوان المسافر للسفر والسياحة/g, title)
+    .replace(/شركة سياحية مرخصة متخصصة في استخراج التأشيرات وحجوزات الطيران والفنادق والبرامج السياحية/g, description)
+    .replace(/content="\/logo512\.png"/g, `content="${image}"`)
+    .replace(/content=""/g, `content="${fullUrl}"`);
 };
 
 // Middleware الرئيسي
