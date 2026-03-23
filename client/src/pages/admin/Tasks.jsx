@@ -88,7 +88,7 @@ const Tasks = () => {
     try {
       setLoading(true);
       const [tasksRes, statsRes, deptsRes, empsRes] = await Promise.all([
-        tasksApi.getTasks(),
+        tasksApi.getTasks({ limit: 1000 }),
         tasksApi.getStats(),
         departmentsApi.getDepartments(),
         employeesApi.getEmployees().catch(() => ({ data: { data: { employees: [] } } }))
