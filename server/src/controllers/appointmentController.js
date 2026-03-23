@@ -583,11 +583,14 @@ exports.deleteAppointment = async (req, res, next) => {
 
     if (!checkExists(res, appointment, 'الموعد')) return;
 
-    // تعطيل المهمة المرتبطة بالموعد (soft delete بدلاً من الحذف النهائي)
+    // إلغاء المهمة المرتبطة بالموعد (تبقى مرئية في قسم الملغية)
     try {
-      await Task.findOneAndUpdate({ appointment: req.params.id }, { isActive: false });
+      await Task.findOneAndUpdate(
+        { appointment: req.params.id, status: { $ne: 'completed' } },
+        { status: 'cancelled', cancelledAt: new Date() }
+      );
     } catch (taskError) {
-      console.error('Error deactivating task for appointment:', taskError);
+      console.error('Error cancelling task for appointment:', taskError);
     }
 
     // حذف من Google Sheets

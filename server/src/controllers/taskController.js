@@ -964,7 +964,7 @@ exports.getDashboardStats = async (req, res, next) => {
         $project: {
           _id: 0,
           employeeId: '$_id',
-          name: { $ifNull: ['$employeeInfo.name', 'غير معروف'] },
+          name: { $ifNull: ['$employeeInfo.name', 'غير مسند'] },
           completedTasks: 1,
           totalPersons: 1
         }
