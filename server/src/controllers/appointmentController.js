@@ -335,10 +335,12 @@ exports.createAppointment = async (req, res, next) => {
           createdBy: req.user.id
         };
 
+        // إسناد المهمة دائماً لمنشئ الموعد
+        taskData.assignedTo = req.user.id;
+
         if (isElectronicSubmission) {
           // التقديم الإلكتروني: بدء العمل تلقائياً
           taskData.status = 'in_progress';
-          taskData.assignedTo = req.user.id;
           taskData.startedAt = new Date();
         } else {
           taskData.status = 'new';
@@ -540,9 +542,11 @@ exports.updateAppointment = async (req, res, next) => {
             createdBy: req.user.id
           };
 
+          // إسناد المهمة دائماً لمنشئ الموعد
+          taskData.assignedTo = req.user.id;
+
           if (isElectronicSubmission) {
             taskData.status = 'in_progress';
-            taskData.assignedTo = req.user.id;
             taskData.startedAt = new Date();
           } else {
             taskData.status = 'new';
@@ -717,6 +721,8 @@ exports.changeStatus = async (req, res, next) => {
         } else if (status === 'completed' && task.status !== 'completed') {
           task.status = 'completed';
           task.completedAt = new Date();
+          task.assignedTo = task.assignedTo || req.user.id;
+          if (!task.startedAt) task.startedAt = task.completedAt;
           await task.save();
         } else if (status === 'cancelled' && task.status !== 'cancelled') {
           task.status = 'cancelled';
@@ -746,6 +752,56 @@ exports.changeStatus = async (req, res, next) => {
       message: 'تم تغيير حالة الموعد',
       data: { appointment }
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    جلب التقديمات الإلكترونية المتأخرة
+// @route   GET /api/appointments/overdue-electronic
+// @access  Private
+exports.getOverdueElectronic = async (req, res, next) => {
+  try {
+    // جلب الأقسام الإلكترونية
+    const electronicDepts = await Department.find({ submissionType: 'إلكتروني' });
+    const deptMap = {};
+    electronicDepts.forEach(d => { deptMap[d._id.toString()] = d; });
+    const deptIds = electronicDepts.map(d => d._id);
+
+    // جلب المواعيد الإلكترونية الغير مكتملة/ملغية
+    const appointments = await Appointment.find({
+      isSubmission: true,
+      department: { $in: deptIds },
+      status: { $nin: ['completed', 'cancelled'] }
+    });
+
+    const now = new Date();
+    const overdue = [];
+
+    for (const appt of appointments) {
+      // التحقق من حالة المهمة
+      const task = await Task.findOne({ appointment: appt._id, isActive: true });
+      if (task && (task.status === 'completed' || task.status === 'cancelled')) continue;
+
+      const dept = deptMap[appt.department.toString()];
+      const processingDays = parseInt(dept?.processingDays) || 0;
+      if (processingDays <= 0) continue;
+
+      const apptDate = new Date(appt.appointmentDate || appt.dateFrom || appt.createdAt);
+      const diffDays = Math.floor((now - apptDate) / (1000 * 60 * 60 * 24));
+
+      if (diffDays > processingDays) {
+        overdue.push({
+          id: appt._id,
+          customerName: appt.customerName,
+          departmentTitle: dept?.title || 'غير محدد',
+          daysPassed: diffDays,
+          processingDays
+        });
+      }
+    }
+
+    res.json({ success: true, data: overdue });
   } catch (error) {
     next(error);
   }

@@ -12,6 +12,7 @@ router.use(requirePermission('appointments.view'));
 router.get('/stats', appointmentController.getStats);
 router.get('/dashboard-stats', appointmentController.getDashboardStats);
 router.get('/today', appointmentController.getTodayAppointments);
+router.get('/overdue-electronic', appointmentController.getOverdueElectronic);
 
 // CRUD
 router.get('/', appointmentController.getAppointments);

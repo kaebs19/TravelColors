@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context';
-import { appointmentsApi, tasksApi, departmentsApi } from '../../api';
+import { appointmentsApi, tasksApi } from '../../api';
 import { NotificationBell } from '../common';
 import './Navbar.css';
 
@@ -60,54 +60,8 @@ const Navbar = ({ notificationProps, taskNotifications = [], onClearTaskNotifica
 
   const fetchOverdueElectronic = async () => {
     try {
-      const [apptRes, deptRes, tasksRes] = await Promise.all([
-        appointmentsApi.getAppointments(),
-        departmentsApi.getDepartments(),
-        tasksApi.getTasks().catch(() => ({ data: { data: { tasks: [] } } }))
-      ]);
-      const appointments = apptRes.data?.data?.appointments || apptRes.data?.appointments || [];
-      const departments = deptRes.data?.data?.departments || deptRes.data?.departments || [];
-      const tasksList = tasksRes.data?.data?.tasks || tasksRes.data?.tasks || [];
-
-      const deptMap = {};
-      departments.forEach(d => { deptMap[d._id] = d; });
-
-      // ربط المهام بالمواعيد
-      const taskByAppt = {};
-      tasksList.forEach(t => {
-        const apptId = t.appointment?._id || t.appointment;
-        if (apptId) taskByAppt[apptId] = t;
-      });
-
-      const now = new Date();
-      const overdue = [];
-
-      appointments.forEach(appt => {
-        if (!appt.isSubmission) return;
-        const dept = deptMap[appt.department?._id] || appt.department;
-        if (dept?.submissionType !== 'إلكتروني') return;
-
-        // التحقق من حالة المهمة أولاً، ثم حالة الموعد
-        const task = taskByAppt[appt._id];
-        if (task?.status === 'completed' || task?.status === 'cancelled') return;
-        if (appt.status === 'completed' || appt.status === 'cancelled') return;
-
-        const processingDays = parseInt(dept?.processingDays) || 0;
-        if (processingDays <= 0) return;
-
-        const apptDate = new Date(appt.appointmentDate || appt.dateFrom || appt.createdAt);
-        const diffDays = Math.floor((now - apptDate) / (1000 * 60 * 60 * 24));
-
-        if (diffDays > processingDays) {
-          overdue.push({
-            id: appt._id,
-            customerName: appt.customerName,
-            departmentTitle: dept?.title || 'غير محدد',
-            daysPassed: diffDays,
-            processingDays
-          });
-        }
-      });
+      const res = await appointmentsApi.getOverdueElectronic();
+      const overdue = res.data?.data || [];
 
       setOverdueElectronic(overdue);
 

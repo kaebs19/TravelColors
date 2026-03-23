@@ -55,6 +55,8 @@ export const getDashboardStats = () => axios.get('/appointments/dashboard-stats'
 
 export const logQuickUpdate = (id, data) => axios.post(`/appointments/${id}/log-quick-update`, data);
 
+export const getOverdueElectronic = () => axios.get('/appointments/overdue-electronic');
+
 export const addAttachments = (id, formData) =>
   axios.post(`/appointments/${id}/attachments`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
