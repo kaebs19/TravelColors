@@ -149,8 +149,8 @@ const Invoices = () => {
         customer: '',
         customerName: '',
         customerPhone: '',
-        customerAddress: '',
-        customerCity: ''
+        customerAddress: settings?.address || '',
+        customerCity: 'الرياض'
       });
       return;
     }
@@ -169,8 +169,8 @@ const Invoices = () => {
         customer: customerId,
         customerName: customer.name || '',
         customerPhone: customer.phone || '',
-        customerAddress: addressStr,
-        customerCity: cityStr
+        customerAddress: addressStr || settings?.address || '',
+        customerCity: cityStr || 'الرياض'
       });
     }
   };
@@ -261,8 +261,8 @@ const Invoices = () => {
       customer: '',
       customerName: '',
       customerPhone: '',
-      customerAddress: '',
-      customerCity: '',
+      customerAddress: settings?.address || '',
+      customerCity: 'الرياض',
       items: [{ product: '', description: '', quantity: 1, persons: 1, unitPrice: 0 }],
       discount: 0,
       discountType: 'fixed',

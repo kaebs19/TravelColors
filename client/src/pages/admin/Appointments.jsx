@@ -63,6 +63,9 @@ const Appointments = () => {
   const [paymentData, setPaymentData] = useState({ amount: '', paymentType: 'cash' });
   const [addingPayment, setAddingPayment] = useState(false);
 
+  // حالة نسخ رقم الجوال
+  const [phoneCopySuccess, setPhoneCopySuccess] = useState(null);
+
   // استخراج قائمة المدن الفريدة
   const uniqueCities = [...new Set(appointments.map(a => a.city).filter(Boolean))];
 
@@ -468,6 +471,53 @@ const Appointments = () => {
       : `https://wa.me/?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
     setOpenActionsMenu(null);
+  };
+
+  // نسخ رسالة تأكيد الموعد
+  const handleCopyConfirmationMessage = async (appointment) => {
+    const dept = departments.find(d => d._id === appointment.department?._id) || appointment.department;
+    const message = generateAppointmentMessage(appointment.type, companySettings, appointment, dept);
+    try {
+      await navigator.clipboard.writeText(message);
+      showToast('تم نسخ رسالة التأكيد', 'success');
+    } catch {
+      showToast('فشل نسخ الرسالة', 'error');
+    }
+    setOpenActionsMenu(null);
+  };
+
+  // عرض مهمة العميل المرتبطة بالموعد
+  const handleViewTask = async (appointment) => {
+    try {
+      const taskRes = await tasksApi.getTaskByAppointment(appointment._id);
+      const task = taskRes.data?.data?.task || taskRes.data?.task;
+      if (task?._id) {
+        navigate(`/control/tasks?taskId=${task._id}`);
+      } else {
+        showToast('لا توجد مهمة مرتبطة بهذا الموعد', 'info');
+      }
+    } catch {
+      showToast('لا توجد مهمة مرتبطة بهذا الموعد', 'info');
+    }
+    setOpenActionsMenu(null);
+  };
+
+  // نسخ رقم الجوال
+  const handleCopyPhone = async (phone, appointmentId) => {
+    try {
+      await navigator.clipboard.writeText(phone);
+      setPhoneCopySuccess(appointmentId);
+      setTimeout(() => setPhoneCopySuccess(null), 1500);
+    } catch {
+      showToast('فشل نسخ الرقم', 'error');
+    }
+  };
+
+  // فتح محادثة واتساب
+  const handlePhoneWhatsApp = (phone) => {
+    const cleaned = phone?.replace(/[^0-9]/g, '');
+    const phoneNumber = cleaned?.startsWith('0') ? '966' + cleaned.slice(1) : cleaned;
+    if (phoneNumber) window.open(`https://wa.me/${phoneNumber}`, '_blank');
   };
 
   // دالة فتح مودال التحديث السريع (عرض الرسالة قبل الإرسال)
@@ -1235,7 +1285,23 @@ const Appointments = () => {
                         </div>
                       </td>
                     )}
-                    {tableColumns.phone !== false && <td dir="ltr">{appointment.phone || '-'}</td>}
+                    {tableColumns.phone !== false && (
+                      <td dir="ltr">
+                        {appointment.phone ? (
+                          <div className="phone-cell-wrapper">
+                            <span>{appointment.phone}</span>
+                            <div className="phone-hover-actions">
+                              {phoneCopySuccess === appointment._id ? (
+                                <span className="copy-success">تم النسخ</span>
+                              ) : (
+                                <button title="نسخ الرقم" onClick={() => handleCopyPhone(appointment.phone, appointment._id)}>📋</button>
+                              )}
+                              <button title="واتساب" onClick={() => handlePhoneWhatsApp(appointment.phone)}>💬</button>
+                            </div>
+                          </div>
+                        ) : '-'}
+                      </td>
+                    )}
                     {tableColumns.personsCount !== false && (
                       <td>
                         <span className="persons-count-badge">
@@ -1359,6 +1425,14 @@ const Appointments = () => {
                             <button className="action-menu-item" onClick={() => handleSendWhatsApp(appointment)}>
                               <span>📱</span>
                               رسالة تأكيد موعد
+                            </button>
+                            <button className="action-menu-item" onClick={() => handleCopyConfirmationMessage(appointment)}>
+                              <span>📋</span>
+                              نسخ رسالة التأكيد
+                            </button>
+                            <button className="action-menu-item" onClick={() => handleViewTask(appointment)}>
+                              <span>📌</span>
+                              عرض مهمة العميل
                             </button>
                             <button className="action-menu-item" onClick={() => handlePrintReceipt(appointment)}>
                               <span>🧾</span>

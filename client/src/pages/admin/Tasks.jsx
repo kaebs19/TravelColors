@@ -4,6 +4,8 @@ import { Card, Loader, Modal } from '../../components/common';
 import { useAuth, useToast } from '../../context';
 import './Tasks.css';
 
+const UPLOADS_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:5002/api').replace(/\/api\/?$/, '');
+
 const Tasks = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
@@ -937,128 +939,6 @@ const Tasks = () => {
         </div>
       )}
 
-      {/* بطاقات الإحصائيات - الحالة */}
-      <div className="stats-section">
-        <button
-          className="section-toggle"
-          onClick={() => toggleSection('status')}
-        >
-          <span>{collapsedSections.status ? '◀' : '▼'}</span>
-          <span>إحصائيات الحالة</span>
-        </button>
-      </div>
-      {!collapsedSections.status && (
-      <div className="stats-cards">
-        <Card
-          className={`stat-card stat-new ${filterStatus === 'new' ? 'active' : ''}`}
-          onClick={() => handleStatusFilter('new')}
-        >
-          <div className="stat-icon">📋</div>
-          <div className="stat-info">
-            <h3>{stats.new || 0}</h3>
-            <p>جديدة</p>
-          </div>
-        </Card>
-        <Card
-          className={`stat-card stat-progress ${filterStatus === 'in_progress' ? 'active' : ''}`}
-          onClick={() => handleStatusFilter('in_progress')}
-        >
-          <div className="stat-icon">⏳</div>
-          <div className="stat-info">
-            <h3>{stats.inProgress || 0}</h3>
-            <p>قيد التنفيذ</p>
-          </div>
-        </Card>
-        <Card
-          className={`stat-card stat-completed ${filterStatus === 'completed' ? 'active' : ''}`}
-          onClick={() => handleStatusFilter('completed')}
-        >
-          <div className="stat-icon">✅</div>
-          <div className="stat-info">
-            <h3>{stats.completed || 0}</h3>
-            <p>مكتملة</p>
-          </div>
-        </Card>
-        <Card
-          className={`stat-card stat-total ${filterStatus === '' && !dateRangeFilter.type ? 'active' : ''}`}
-          onClick={() => { setFilterStatus(''); setDateRangeFilter({ type: '', startDate: '', endDate: '' }); }}
-        >
-          <div className="progress-circle" style={{ '--progress': progressPercentage }}>
-            <svg viewBox="0 0 36 36">
-              <path
-                className="circle-bg"
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-              />
-              <path
-                className="circle-progress"
-                strokeDasharray={`${progressPercentage}, 100`}
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-              />
-            </svg>
-            <span className="progress-text">{progressPercentage}%</span>
-          </div>
-          <div className="stat-info">
-            <h3>{stats.total || 0}</h3>
-            <p>الإجمالي</p>
-          </div>
-        </Card>
-      </div>
-      )}
-
-      {/* بطاقات الإحصائيات - الفترة الزمنية */}
-      <div className="stats-section">
-        <button
-          className="section-toggle"
-          onClick={() => toggleSection('time')}
-        >
-          <span>{collapsedSections.time ? '◀' : '▼'}</span>
-          <span>الفترة الزمنية</span>
-        </button>
-      </div>
-      {!collapsedSections.time && (
-      <div className="stats-cards-time">
-        <Card
-          className={`time-card time-tomorrow ${dateRangeFilter.type === 'tomorrow' ? 'active' : ''}`}
-          onClick={() => handleDateFilter('tomorrow')}
-        >
-          <h3>{dateStats.tomorrow}</h3>
-          <p>مهام غداً</p>
-        </Card>
-        <Card
-          className={`time-card time-week ${dateRangeFilter.type === 'week' ? 'active' : ''}`}
-          onClick={() => handleDateFilter('week')}
-        >
-          <h3>{dateStats.week}</h3>
-          <p>مهام الأسبوع</p>
-        </Card>
-        <Card
-          className={`time-card time-month ${dateRangeFilter.type === 'month' ? 'active' : ''}`}
-          onClick={() => handleDateFilter('month')}
-        >
-          <h3>{dateStats.month}</h3>
-          <p>مهام الشهر</p>
-        </Card>
-        {/* فلتر بين تاريخين */}
-        <Card
-          className={`time-card time-custom ${dateRangeFilter.type === 'custom' ? 'active' : ''}`}
-        >
-          <p className="custom-label">من</p>
-          <input
-            type="date"
-            value={dateRangeFilter.startDate}
-            onChange={(e) => setDateRangeFilter({ ...dateRangeFilter, type: 'custom', startDate: e.target.value })}
-          />
-          {dateRangeFilter.type === 'custom' && (
-            <button
-              className="btn-clear-date"
-              onClick={(e) => { e.stopPropagation(); setDateRangeFilter({ type: '', startDate: '', endDate: '' }); }}
-            >
-              ✕
-            </button>
-          )}
-        </Card>
-      </div>
-      )}
 
 
       {/* الفلاتر */}
@@ -1964,24 +1844,54 @@ const Tasks = () => {
                   <span>المرفقات</span>
                 </div>
                 <div className="task-attachments-grid">
-                  {selectedTask.appointment?.attachments?.map((att, index) => (
-                    <a key={`appt-${index}`} href={att.url} target="_blank" rel="noopener noreferrer" className="attachment-card">
-                      <div className="attachment-icon-new">📄</div>
-                      <div className="attachment-info-new">
-                        <span className="attachment-name">{att.originalName || att.filename}</span>
-                        <span className="attachment-meta">مرفق موعد</span>
+                  {selectedTask.appointment?.attachments?.map((att, index) => {
+                    const fileUrl = att.url || `${UPLOADS_BASE}/uploads/${att.filename}`;
+                    const isImage = att.mimetype?.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp)$/i.test(att.filename || att.originalName || '');
+                    return (
+                      <div key={`appt-${index}`} className="attachment-card-new">
+                        {isImage ? (
+                          <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="attachment-preview-link">
+                            <img src={fileUrl} alt={att.originalName || att.filename} className="attachment-preview-img" />
+                          </a>
+                        ) : (
+                          <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="attachment-preview-link attachment-file-icon">
+                            📄
+                          </a>
+                        )}
+                        <div className="attachment-bottom">
+                          <span className="attachment-name-new">{att.originalName || att.filename}</span>
+                          <div className="attachment-actions-row">
+                            <span className="attachment-meta">مرفق موعد</span>
+                            <a href={fileUrl} download={att.originalName || att.filename} className="attachment-download-btn" title="تحميل">⬇️</a>
+                          </div>
+                        </div>
                       </div>
-                    </a>
-                  ))}
-                  {selectedTask.taskAttachments?.map((att, index) => (
-                    <a key={`task-${index}`} href={att.url} target="_blank" rel="noopener noreferrer" className="attachment-card">
-                      <div className="attachment-icon-new">📄</div>
-                      <div className="attachment-info-new">
-                        <span className="attachment-name">{att.originalName || att.filename}</span>
-                        <span className="attachment-meta">مرفق مهمة</span>
+                    );
+                  })}
+                  {selectedTask.taskAttachments?.map((att, index) => {
+                    const fileUrl = att.url || `${UPLOADS_BASE}/uploads/${att.filename}`;
+                    const isImage = att.mimetype?.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp)$/i.test(att.filename || att.originalName || '');
+                    return (
+                      <div key={`task-${index}`} className="attachment-card-new">
+                        {isImage ? (
+                          <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="attachment-preview-link">
+                            <img src={fileUrl} alt={att.originalName || att.filename} className="attachment-preview-img" />
+                          </a>
+                        ) : (
+                          <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="attachment-preview-link attachment-file-icon">
+                            📄
+                          </a>
+                        )}
+                        <div className="attachment-bottom">
+                          <span className="attachment-name-new">{att.originalName || att.filename}</span>
+                          <div className="attachment-actions-row">
+                            <span className="attachment-meta">مرفق مهمة</span>
+                            <a href={fileUrl} download={att.originalName || att.filename} className="attachment-download-btn" title="تحميل">⬇️</a>
+                          </div>
+                        </div>
                       </div>
-                    </a>
-                  ))}
+                    );
+                  })}
                   {!selectedTask.appointment?.attachments?.length && !selectedTask.taskAttachments?.length && (
                     <p className="no-items">لا توجد مرفقات</p>
                   )}

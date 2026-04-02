@@ -293,101 +293,103 @@ const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
         </div>
       </div>
 
-      {/* الاسم الكامل */}
-      <div className="form-group">
-        <label>الاسم الكامل <span className="required">*</span></label>
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="أدخل الاسم الكامل"
-          className="form-input"
-        />
-      </div>
-
-      {/* البريد الإلكتروني */}
-      <div className="form-group">
-        <label>البريد الإلكتروني <span className="required">*</span></label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="example@email.com"
-          className="form-input"
-          dir="ltr"
-        />
-      </div>
-
-      {/* رقم الهاتف */}
-      <div className="form-group">
-        <label>رقم الهاتف</label>
-        <input
-          type="tel"
-          name="phone"
-          value={formData.phone}
-          onChange={handleChange}
-          placeholder="05xxxxxxxx"
-          className="form-input"
-          dir="ltr"
-        />
-      </div>
-
-      {/* الوظيفة */}
-      <div className="form-group">
-        <label>الوظيفة</label>
-        <input
-          type="text"
-          name="jobTitle"
-          value={formData.jobTitle}
-          onChange={handleChange}
-          placeholder="مثال: مدير المبيعات"
-          className="form-input"
-        />
-      </div>
-
-      {/* نوع الحساب (الصلاحية) */}
-      <div className="form-group">
-        <label>نوع الحساب <span className="required">*</span></label>
-        <select
-          name="role"
-          value={formData.role}
-          onChange={handleChange}
-          className="form-select"
-        >
-          <option value="employee">موظف</option>
-          <option value="accountant">محاسب</option>
-          <option value="admin">مدير</option>
-        </select>
-        <span className="field-hint">
-          {getRoleHint(formData.role)}
-        </span>
-      </div>
-
-      {/* كلمة المرور */}
-      <div className="form-group">
-        <label>
-          كلمة المرور {!employee && <span className="required">*</span>}
-          {employee && <span className="optional">(اتركها فارغة إذا لم ترد التغيير)</span>}
-        </label>
-        <div className="password-input">
+      <div className="form-grid">
+        {/* الاسم الكامل */}
+        <div className="form-group">
+          <label>الاسم الكامل <span className="required">*</span></label>
           <input
-            type={showPassword ? 'text' : 'password'}
-            name="password"
-            value={formData.password}
+            type="text"
+            name="name"
+            value={formData.name}
             onChange={handleChange}
-            placeholder={employee ? '••••••••' : 'أدخل كلمة المرور'}
+            placeholder="أدخل الاسم الكامل"
+            className="form-input"
+          />
+        </div>
+
+        {/* البريد الإلكتروني */}
+        <div className="form-group">
+          <label>البريد الإلكتروني <span className="required">*</span></label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="example@email.com"
             className="form-input"
             dir="ltr"
           />
-          <button
-            type="button"
-            className="toggle-password"
-            onClick={() => setShowPassword(!showPassword)}
+        </div>
+
+        {/* رقم الهاتف */}
+        <div className="form-group">
+          <label>رقم الهاتف</label>
+          <input
+            type="tel"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            placeholder="05xxxxxxxx"
+            className="form-input"
+            dir="ltr"
+          />
+        </div>
+
+        {/* الوظيفة */}
+        <div className="form-group">
+          <label>الوظيفة</label>
+          <input
+            type="text"
+            name="jobTitle"
+            value={formData.jobTitle}
+            onChange={handleChange}
+            placeholder="مثال: مدير المبيعات"
+            className="form-input"
+          />
+        </div>
+
+        {/* نوع الحساب */}
+        <div className="form-group">
+          <label>نوع الحساب <span className="required">*</span></label>
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            className="form-select"
           >
-            {showPassword ? '🙈' : '👁️'}
-          </button>
+            <option value="employee">موظف</option>
+            <option value="accountant">محاسب</option>
+            <option value="admin">مدير</option>
+          </select>
+          <span className="field-hint">
+            {getRoleHint(formData.role)}
+          </span>
+        </div>
+
+        {/* كلمة المرور */}
+        <div className="form-group">
+          <label>
+            كلمة المرور {!employee && <span className="required">*</span>}
+            {employee && <span className="optional">(اتركها فارغة للإبقاء)</span>}
+          </label>
+          <div className="password-input">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder={employee ? '••••••••' : 'أدخل كلمة المرور'}
+              className="form-input"
+              dir="ltr"
+            />
+            <button
+              type="button"
+              className="toggle-password"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? '🙈' : '👁️'}
+            </button>
+          </div>
         </div>
       </div>
 

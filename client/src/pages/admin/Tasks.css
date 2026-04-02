@@ -1314,10 +1314,94 @@
 /* المرفقات */
 .task-attachments-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
 }
 
+/* البطاقة الجديدة بمعاينة صورة */
+.attachment-card-new {
+  background: var(--bg-color, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.attachment-card-new:hover {
+  border-color: var(--primary-color, #3b82f6);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.attachment-preview-link {
+  display: block;
+  width: 100%;
+  height: 120px;
+  overflow: hidden;
+  background: #f1f5f9;
+}
+
+.attachment-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s;
+}
+
+.attachment-card-new:hover .attachment-preview-img {
+  transform: scale(1.05);
+}
+
+.attachment-file-icon {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  text-decoration: none;
+  background: #fef3c7;
+}
+
+.attachment-bottom {
+  padding: 6px 8px;
+}
+
+.attachment-name-new {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-color, #334155);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.attachment-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.attachment-meta {
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.65rem;
+}
+
+.attachment-download-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.attachment-download-btn:hover {
+  background: var(--border-color, #e2e8f0);
+}
+
+/* البطاقة القديمة - للتوافق */
 .attachment-card {
   display: flex;
   align-items: center;
@@ -1360,11 +1444,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.attachment-meta {
-  color: var(--text-muted);
-  font-size: 0.75rem;
 }
 
 .no-items {

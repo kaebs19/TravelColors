@@ -6,8 +6,8 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -25,20 +25,21 @@
 .avatar-section {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 1rem;
   background: var(--bg-color);
   border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
 }
 
 .avatar-preview {
-  width: 80px;
-  height: 80px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   overflow: hidden;
-  border: 3px solid white;
-  box-shadow: var(--shadow-md);
+  border: 2px solid white;
+  box-shadow: var(--shadow-sm);
   flex-shrink: 0;
 }
 
@@ -51,20 +52,21 @@
 .avatar-upload {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .upload-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.75rem;
   background: white;
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
-  font-size: var(--font-sm);
+  font-size: var(--font-xs);
   cursor: pointer;
   transition: all var(--transition);
+  width: fit-content;
 }
 
 .upload-btn:hover {
@@ -73,21 +75,37 @@
 }
 
 .avatar-hint {
-  font-size: var(--font-xs);
+  font-size: 0.7rem;
   color: var(--text-secondary);
+}
+
+/* Form Grid - 2 columns */
+.employee-form .form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.employee-form .form-grid .full-width {
+  grid-column: 1 / -1;
 }
 
 /* Form Groups */
 .employee-form .form-group {
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.employee-form .form-grid .form-group {
+  margin-bottom: 0;
 }
 
 .employee-form label {
   display: block;
-  margin-bottom: 0.5rem;
-  font-size: var(--font-sm);
-  font-weight: 500;
-  color: var(--text-color);
+  margin-bottom: 0.35rem;
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
 }
 
 .employee-form .required {
@@ -96,15 +114,15 @@
 
 .employee-form .optional {
   font-weight: 400;
-  font-size: var(--font-xs);
+  font-size: 0.7rem;
   color: var(--text-secondary);
-  margin-right: 0.5rem;
+  margin-right: 0.25rem;
 }
 
 .employee-form .form-input,
 .employee-form .form-select {
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.6rem 0.75rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
   font-size: var(--font-sm);
@@ -125,8 +143,8 @@
 
 .employee-form .field-hint {
   display: block;
-  margin-top: 0.25rem;
-  font-size: var(--font-xs);
+  margin-top: 0.2rem;
+  font-size: 0.7rem;
   color: var(--text-secondary);
 }
 
@@ -136,18 +154,18 @@
 }
 
 .password-input .form-input {
-  padding-left: 3rem;
+  padding-left: 2.5rem;
 }
 
 .toggle-password {
   position: absolute;
-  left: 0.75rem;
+  left: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.9rem;
   padding: 0.25rem;
 }
 
@@ -156,13 +174,13 @@
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
   border-top: 1px solid var(--border-color);
 }
 
 .employee-form .cancel-btn {
-  padding: 0.75rem 1.5rem;
+  padding: 0.6rem 1.25rem;
   background: var(--bg-color);
   color: var(--text-color);
   border: 1px solid var(--border-color);
@@ -177,7 +195,7 @@
 }
 
 .employee-form .submit-btn {
-  padding: 0.75rem 1.5rem;
+  padding: 0.6rem 1.25rem;
   background: var(--primary-color);
   color: white;
   border: none;
@@ -199,8 +217,8 @@
 
 /* Permissions Section */
 .permissions-section {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
   border-top: 2px solid var(--border-color);
 }
 
@@ -208,17 +226,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .permissions-header h3 {
   margin: 0;
-  font-size: var(--font-md);
+  font-size: var(--font-sm);
   color: var(--text-color);
 }
 
 .reset-perms-btn {
-  padding: 0.4rem 0.8rem;
+  padding: 0.3rem 0.6rem;
   background: var(--bg-color);
   color: var(--text-secondary);
   border: 1px solid var(--border-color);
@@ -235,22 +253,22 @@
 
 .permissions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.5rem;
 }
 
 .permission-module {
   background: var(--bg-color);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
   overflow: hidden;
 }
 
 .module-header {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 0.75rem;
+  gap: 0.4rem;
+  padding: 0.5rem 0.6rem;
   background: white;
   border-bottom: 1px solid var(--border-color);
   cursor: pointer;
@@ -262,38 +280,38 @@
 }
 
 .module-icon {
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
 .module-label {
-  font-size: var(--font-sm);
+  font-size: var(--font-xs);
   font-weight: 600;
   color: var(--text-color);
   flex: 1;
 }
 
 .module-checkbox {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   accent-color: var(--primary-color);
   cursor: pointer;
 }
 
 .module-permissions {
-  padding: 0.5rem 0.75rem;
+  padding: 0.4rem 0.6rem;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.2rem;
 }
 
 .permission-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.3rem 0.25rem;
+  gap: 0.4rem;
+  padding: 0.2rem 0.2rem;
   border-radius: var(--radius);
   cursor: pointer;
-  font-size: var(--font-sm);
+  font-size: var(--font-xs);
   font-weight: 400;
   color: var(--text-color);
   transition: background var(--transition);
@@ -304,8 +322,8 @@
 }
 
 .permission-item input[type="checkbox"] {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   accent-color: var(--primary-color);
   cursor: pointer;
 }
@@ -315,6 +333,10 @@
   .avatar-section {
     flex-direction: column;
     text-align: center;
+  }
+
+  .employee-form .form-grid {
+    grid-template-columns: 1fr;
   }
 
   .employee-form .form-actions {

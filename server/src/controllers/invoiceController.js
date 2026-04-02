@@ -296,9 +296,6 @@ exports.updateInvoice = async (req, res, next) => {
 // @route   POST /api/invoices/:id/payment
 // @access  Private
 exports.addPayment = async (req, res, next) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     const { amount, paymentMethod = 'cash', notes } = req.body;
 
@@ -348,7 +345,7 @@ exports.addPayment = async (req, res, next) => {
     const transactionNumber = await Transaction.generateTransactionNumber();
 
     // إنشاء المعاملة
-    const transaction = await Transaction.create([{
+    const transaction = await Transaction.create({
       transactionNumber,
       type: 'income',
       amount,
@@ -364,17 +361,17 @@ exports.addPayment = async (req, res, next) => {
       balanceAfter,
       createdBy: req.user.id,
       notes
-    }], { session });
+    });
 
     // إنشاء سجل الدفعة
-    const invoicePayment = await InvoicePayment.create([{
+    const invoicePayment = await InvoicePayment.create({
       invoice: invoice._id,
       amount,
       paymentMethod,
-      transaction: transaction[0]._id,
+      transaction: transaction._id,
       createdBy: req.user.id,
       notes
-    }], { session });
+    });
 
     // حفظ المبلغ القديم للـ audit log
     const oldPaidAmount = invoice.paidAmount;
@@ -383,17 +380,17 @@ exports.addPayment = async (req, res, next) => {
     invoice.paidAmount += amount;
     invoice.remainingAmount = invoice.total - invoice.paidAmount;
     invoice.status = invoice.remainingAmount <= 0 ? 'paid' : 'partial';
-    invoice.payments.push(invoicePayment[0]._id);
-    await invoice.save({ session });
+    invoice.payments.push(invoicePayment._id);
+    await invoice.save();
 
     // تحديث الصندوق
-    await updateCashRegisterBalance(cashRegister, 'income', amount, paymentMethod, session);
+    await updateCashRegisterBalance(cashRegister, 'income', amount, paymentMethod);
 
     // تحديث إجمالي صرف العميل
     if (invoice.customer) {
       await Customer.findByIdAndUpdate(invoice.customer, {
         $inc: { totalSpent: amount }
-      }, { session });
+      });
     }
 
     // إنشاء سجل التدقيق
@@ -409,8 +406,6 @@ exports.addPayment = async (req, res, next) => {
       `تسجيل دفعة بمبلغ ${amount} على فاتورة رقم ${invoice.invoiceNumber}`
     );
 
-    await session.commitTransaction();
-
     // جلب الفاتورة محدثة
     const updatedInvoice = await Invoice.findById(invoice._id)
       .populate('customer', 'name phone')
@@ -422,16 +417,13 @@ exports.addPayment = async (req, res, next) => {
       message: 'تم تسجيل الدفعة بنجاح',
       data: {
         invoice: updatedInvoice,
-        payment: invoicePayment[0],
-        transaction: transaction[0],
+        payment: invoicePayment,
+        transaction: transaction,
         currentBalance: balanceAfter
       }
     });
   } catch (error) {
-    await session.abortTransaction();
     next(error);
-  } finally {
-    session.endSession();
   }
 };
 
@@ -641,9 +633,6 @@ exports.getInvoicePayments = async (req, res, next) => {
 // @route   POST /api/invoices/:id/payments/:paymentId/refund
 // @access  Private (Admin only)
 exports.refundPayment = async (req, res, next) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     const { reason } = req.body;
     const { id: invoiceId, paymentId } = req.params;
@@ -694,7 +683,7 @@ exports.refundPayment = async (req, res, next) => {
 
     // إنشاء معاملة الاسترداد
     const transactionNumber = await Transaction.generateTransactionNumber();
-    const refundTransaction = await Transaction.create([{
+    const refundTransaction = await Transaction.create({
       transactionNumber,
       type: 'expense',
       amount: payment.amount,
@@ -710,15 +699,15 @@ exports.refundPayment = async (req, res, next) => {
       balanceAfter,
       createdBy: req.user.id,
       notes: reason || 'استرداد دفعة'
-    }], { session });
+    });
 
     // تحديث سجل الدفعة
     payment.isRefunded = true;
     payment.refundedAt = new Date();
-    payment.refundTransaction = refundTransaction[0]._id;
+    payment.refundTransaction = refundTransaction._id;
     payment.refundReason = reason;
     payment.refundedBy = req.user.id;
-    await payment.save({ session });
+    await payment.save();
 
     // إلغاء المعاملة الأصلية
     if (payment.transaction) {
@@ -727,7 +716,7 @@ exports.refundPayment = async (req, res, next) => {
         cancelledAt: new Date(),
         cancelledBy: req.user.id,
         cancellationReason: 'استرداد الدفعة'
-      }, { session });
+      });
     }
 
     // تحديث الفاتورة
@@ -735,16 +724,16 @@ exports.refundPayment = async (req, res, next) => {
     invoice.paidAmount -= payment.amount;
     invoice.remainingAmount = invoice.total - invoice.paidAmount;
     invoice.status = invoice.paidAmount <= 0 ? 'draft' : 'partial';
-    await invoice.save({ session });
+    await invoice.save();
 
     // تحديث الصندوق
-    await updateCashRegisterBalance(cashRegister, 'expense', payment.amount, payment.paymentMethod, session);
+    await updateCashRegisterBalance(cashRegister, 'expense', payment.amount, payment.paymentMethod);
 
     // عكس من إجمالي صرف العميل
     if (invoice.customer) {
       await Customer.findByIdAndUpdate(invoice.customer, {
         $inc: { totalSpent: -payment.amount }
-      }, { session });
+      });
     }
 
     // إنشاء سجل التدقيق
@@ -760,22 +749,17 @@ exports.refundPayment = async (req, res, next) => {
       `استرداد دفعة بمبلغ ${payment.amount} من فاتورة رقم ${invoice.invoiceNumber}`
     );
 
-    await session.commitTransaction();
-
     res.json({
       success: true,
       message: 'تم استرداد الدفعة بنجاح',
       data: {
         invoice,
         payment,
-        refundTransaction: refundTransaction[0],
+        refundTransaction,
         currentBalance: balanceAfter
       }
     });
   } catch (error) {
-    await session.abortTransaction();
     next(error);
-  } finally {
-    session.endSession();
   }
 };
