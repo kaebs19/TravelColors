@@ -135,7 +135,7 @@ export const generateOverviewReport = (data, settings, dateRange) => {
   return content;
 };
 
-export const generateAppointmentsReport = (data, settings, dateRange, employeesData) => {
+export const generateAppointmentsReport = (data, settings, dateRange, employeesData, details) => {
   let totalCount = 0, totalPersons = 0, totalAmount = 0, totalPaid = 0;
   const rows = (data || []).map(item => {
     totalCount += item.count || 0;
@@ -195,6 +195,41 @@ export const generateAppointmentsReport = (data, settings, dateRange, employeesD
         <tr class="total-row-print"><td></td><td>الإجمالي</td><td>${formatNumber(empTotalAppt)}</td><td>${formatNumber(empTotalPersons)}</td><td>${formatCurrency(empTotalAmount)}</td><td></td></tr>
       </tbody>
     </table>` : ''}
+    ${Array.isArray(details) && details.length > 0 ? (() => {
+      const typeLabels = { confirmed: 'مؤكد', unconfirmed: 'غير مؤكد' };
+      let dTotalPersons = 0, dTotalAmount = 0, dTotalPaid = 0;
+      const detailRows = details.map((appt, idx) => {
+        dTotalPersons += appt.personsCount || 0;
+        dTotalAmount += appt.totalAmount || 0;
+        dTotalPaid += appt.paidAmount || 0;
+        return `
+        <tr>
+          <td>${formatNumber(idx + 1)}</td>
+          <td><strong>${appt.customerName || '-'}</strong></td>
+          <td>${appt.departmentName || '-'}</td>
+          <td>${formatNumber(appt.personsCount)}</td>
+          <td>${typeLabels[appt.type] || appt.type || '-'}</td>
+          <td>${appt.appointmentDate ? formatDateAr(appt.appointmentDate) : '-'}</td>
+          <td>${formatCurrency(appt.totalAmount)}</td>
+          <td>${formatCurrency(appt.paidAmount)}</td>
+        </tr>`;
+      }).join('');
+      return `
+      <div class="section-title">تفاصيل العملاء (${formatNumber(details.length)})</div>
+      <table>
+        <thead><tr><th>#</th><th>اسم العميل</th><th>القسم</th><th>الأشخاص</th><th>النوع</th><th>التاريخ</th><th>المبلغ</th><th>المدفوع</th></tr></thead>
+        <tbody>
+          ${detailRows}
+          <tr class="total-row-print">
+            <td colspan="3">الإجمالي</td>
+            <td>${formatNumber(dTotalPersons)}</td>
+            <td colspan="2"></td>
+            <td>${formatCurrency(dTotalAmount)}</td>
+            <td>${formatCurrency(dTotalPaid)}</td>
+          </tr>
+        </tbody>
+      </table>`;
+    })() : ''}
     ${generateFooter(settings)}
   `;
 };

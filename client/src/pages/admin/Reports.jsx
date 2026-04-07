@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { reportsApi, settingsApi } from '../../api';
+import { reportsApi, settingsApi, departmentsApi } from '../../api';
 import { Card, Loader } from '../../components/common';
 import { formatCurrency, formatDate } from '../../utils';
 import {
@@ -36,10 +36,30 @@ const Reports = () => {
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [period, setPeriod] = useState('daily');
   const [companySettings, setCompanySettings] = useState(null);
+  // استثناءات تقرير المواعيد
+  const [allDepartments, setAllDepartments] = useState([]);
+  const [excludeTypes, setExcludeTypes] = useState([]); // ['confirmed', 'unconfirmed']
+  const [excludeDepartments, setExcludeDepartments] = useState([]); // array of department ids
+  const [appointmentsDetails, setAppointmentsDetails] = useState([]);
+  const [showAppointmentsDetails, setShowAppointmentsDetails] = useState(false);
 
   useEffect(() => {
     fetchData();
-  }, [activeTab, dateRange, groupBy, period, selectedEmployee]);
+  }, [activeTab, dateRange, groupBy, period, selectedEmployee, excludeTypes, excludeDepartments, showAppointmentsDetails]);
+
+  // جلب قائمة الأقسام مرة واحدة (للفلاتر)
+  useEffect(() => {
+    const loadDepartments = async () => {
+      try {
+        const res = await departmentsApi.getDepartments({ limit: 200 });
+        const list = res?.data?.departments || res?.departments || res?.data || [];
+        setAllDepartments(Array.isArray(list) ? list : []);
+      } catch (err) {
+        console.error('Error loading departments:', err);
+      }
+    };
+    loadDepartments();
+  }, []);
 
   // جلب إعدادات الشركة + أداء الموظفين عند تحميل الصفحة
   useEffect(() => {
@@ -68,14 +88,22 @@ const Reports = () => {
           const overviewRes = await reportsApi.getOverviewReport(params);
           setOverviewData(overviewRes.data?.data || {});
           break;
-        case 'appointments':
+        case 'appointments': {
+          const apptParams = {
+            ...params,
+            excludeTypes: excludeTypes.join(',') || undefined,
+            excludeDepartments: excludeDepartments.join(',') || undefined,
+            includeDetails: showAppointmentsDetails ? 'true' : undefined
+          };
           const [appointmentsRes, empForApptRes] = await Promise.all([
-            reportsApi.getAppointmentsReport(params),
-            reportsApi.getEmployeesReport(params)
+            reportsApi.getAppointmentsReport(apptParams),
+            reportsApi.getEmployeesReport(apptParams)
           ]);
           setAppointmentsData(appointmentsRes.data?.data || []);
           setEmployeesData(empForApptRes.data?.data || []);
+          setAppointmentsDetails(appointmentsRes.data?.details || []);
           break;
+        }
         case 'employees':
           const employeesRes = await reportsApi.getEmployeesReport(params);
           setEmployeesData(employeesRes.data?.data || []);
@@ -168,7 +196,13 @@ const Reports = () => {
         content = generateOverviewReport(overviewData || {}, companySettings, dateRange);
         break;
       case 'appointments':
-        content = generateAppointmentsReport(appointmentsData, companySettings, dateRange, employeesData);
+        content = generateAppointmentsReport(
+          appointmentsData,
+          companySettings,
+          dateRange,
+          employeesData,
+          showAppointmentsDetails ? appointmentsDetails : null
+        );
         break;
       case 'tasks':
         content = generateTasksReport(tasksData, companySettings, dateRange);
@@ -345,11 +379,82 @@ const Reports = () => {
     );
   };
 
+  const toggleExcludeType = (type) => {
+    setExcludeTypes(prev => prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]);
+  };
+  const toggleExcludeDepartment = (id) => {
+    setExcludeDepartments(prev => prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]);
+  };
+
   const renderAppointmentsTab = () => {
     const maxCount = Math.max(...appointmentsData.map(d => d.count), 1);
+    const typeLabels = { confirmed: 'مؤكد', unconfirmed: 'غير مؤكد' };
+    const statusLabels = { new: 'جديد', in_progress: 'قيد التنفيذ', completed: 'مكتمل', cancelled: 'ملغي' };
 
     return (
       <div className="appointments-report">
+        {/* فلاتر الاستثناء + خيار التفاصيل */}
+        <Card className="filters-card">
+          <div className="filters-row" style={{ flexWrap: 'wrap', gap: '16px' }}>
+            <div className="filter-group">
+              <label>استثناء الأنواع:</label>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {[
+                  { value: 'confirmed', label: 'مؤكد' },
+                  { value: 'unconfirmed', label: 'غير مؤكد' }
+                ].map(t => (
+                  <label key={t.value} style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={excludeTypes.includes(t.value)}
+                      onChange={() => toggleExcludeType(t.value)}
+                    />
+                    {t.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="filter-group" style={{ flex: 1, minWidth: '250px' }}>
+              <label>استثناء الأقسام:</label>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', maxHeight: '80px', overflowY: 'auto' }}>
+                {allDepartments.length === 0 && <span style={{ color: '#999' }}>لا توجد أقسام</span>}
+                {allDepartments.map(dep => (
+                  <label key={dep._id} style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', fontSize: '12px' }}>
+                    <input
+                      type="checkbox"
+                      checked={excludeDepartments.includes(dep._id)}
+                      onChange={() => toggleExcludeDepartment(dep._id)}
+                    />
+                    {dep.title}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="filter-group">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={showAppointmentsDetails}
+                  onChange={(e) => setShowAppointmentsDetails(e.target.checked)}
+                  style={{ marginLeft: '6px' }}
+                />
+                عرض تفاصيل العملاء
+              </label>
+            </div>
+
+            {(excludeTypes.length > 0 || excludeDepartments.length > 0) && (
+              <button
+                className="quick-btn"
+                onClick={() => { setExcludeTypes([]); setExcludeDepartments([]); }}
+              >
+                مسح الاستثناءات
+              </button>
+            )}
+          </div>
+        </Card>
+
         <Card className="chart-card">
           <div className="chart-header">
             <h3>المواعيد حسب الفترة</h3>
@@ -442,6 +547,72 @@ const Reports = () => {
                 </tr>
               </tbody>
             </table>
+          </Card>
+        )}
+
+        {/* تفاصيل العملاء */}
+        {showAppointmentsDetails && (
+          <Card className="table-card">
+            <h3>📋 تفاصيل العملاء ({appointmentsDetails.length})</h3>
+            {appointmentsDetails.length === 0 ? (
+              <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>لا توجد بيانات</p>
+            ) : (
+              <div className="table-scroll" style={{ maxHeight: '500px' }}>
+                <table className="report-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>اسم العميل</th>
+                      <th>الهاتف</th>
+                      <th>القسم</th>
+                      <th>عدد الأشخاص</th>
+                      <th>النوع</th>
+                      <th>الحالة</th>
+                      <th>التاريخ</th>
+                      <th>المبلغ</th>
+                      <th>المدفوع</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {appointmentsDetails.map((appt, idx) => (
+                      <tr key={appt.appointmentId || idx}>
+                        <td>{idx + 1}</td>
+                        <td><strong>{appt.customerName || '-'}</strong></td>
+                        <td>{appt.phone || '-'}</td>
+                        <td>{appt.departmentName || '-'}</td>
+                        <td>
+                          <span className="badge badge-info">{appt.personsCount || 0}</span>
+                        </td>
+                        <td>{typeLabels[appt.type] || appt.type}</td>
+                        <td>
+                          <span className={`badge ${
+                            appt.status === 'completed' ? 'badge-success' :
+                            appt.status === 'cancelled' ? 'badge-danger' :
+                            'badge-warning'
+                          }`}>
+                            {statusLabels[appt.status] || appt.status}
+                          </span>
+                        </td>
+                        <td>{appt.appointmentDate ? formatDate(appt.appointmentDate) : '-'}</td>
+                        <td>{formatCurrency(appt.totalAmount || 0)}</td>
+                        <td className="text-success">{formatCurrency(appt.paidAmount || 0)}</td>
+                      </tr>
+                    ))}
+                    <tr className="total-row-table">
+                      <td colSpan="4"><strong>الإجمالي</strong></td>
+                      <td>
+                        <strong>{appointmentsDetails.reduce((s, a) => s + (a.personsCount || 0), 0)}</strong>
+                      </td>
+                      <td colSpan="3"></td>
+                      <td><strong>{formatCurrency(appointmentsDetails.reduce((s, a) => s + (a.totalAmount || 0), 0))}</strong></td>
+                      <td className="text-success">
+                        <strong>{formatCurrency(appointmentsDetails.reduce((s, a) => s + (a.paidAmount || 0), 0))}</strong>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
           </Card>
         )}
       </div>

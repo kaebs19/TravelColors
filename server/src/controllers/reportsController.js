@@ -15,13 +15,37 @@ const buildDateQuery = (startDate, endDate, field = 'createdAt') => {
   return query;
 };
 
+// تحويل قيمة query إلى مصفوفة (تقبل string مفصولة بفواصل أو array)
+const toArray = (val) => {
+  if (!val) return [];
+  if (Array.isArray(val)) return val.filter(Boolean);
+  return String(val).split(',').map(s => s.trim()).filter(Boolean);
+};
+
 // مراحل aggregation للمواعيد:
 // - تستثني المسودات (type: 'draft')
 // - تحسب تاريخ فعلي (effectiveDate) = appointmentDate للمؤكدة أو dateFrom لغير المؤكدة أو createdAt كاحتياط
 // - تفلتر حسب الفترة على التاريخ الفعلي بدلاً من createdAt
-const buildAppointmentMatchStages = (startDate, endDate, extraMatch = {}) => {
+// - تدعم استثناء أنواع المواعيد وأقسام معينة
+const buildAppointmentMatchStages = (startDate, endDate, extraMatch = {}, options = {}) => {
+  const mongoose = require('mongoose');
+  const excludeTypes = toArray(options.excludeTypes);
+  const excludeDepartments = toArray(options.excludeDepartments);
+
+  const excludedTypes = ['draft', ...excludeTypes];
+  const baseMatch = { type: { $nin: excludedTypes }, ...extraMatch };
+
+  if (excludeDepartments.length > 0) {
+    const validIds = excludeDepartments
+      .filter(id => mongoose.Types.ObjectId.isValid(id))
+      .map(id => new mongoose.Types.ObjectId(id));
+    if (validIds.length > 0) {
+      baseMatch.department = { $nin: validIds };
+    }
+  }
+
   const stages = [
-    { $match: { type: { $ne: 'draft' }, ...extraMatch } },
+    { $match: baseMatch },
     {
       $addFields: {
         effectiveDate: {
@@ -180,9 +204,14 @@ exports.getOverviewReport = async (req, res, next) => {
 // @access  Private/Admin
 exports.getAppointmentsReport = async (req, res, next) => {
   try {
-    const { startDate, endDate, groupBy = 'day' } = req.query;
+    const { startDate, endDate, groupBy = 'day', excludeTypes, excludeDepartments, includeDetails } = req.query;
 
-    const apptMatchStages = buildAppointmentMatchStages(startDate, endDate);
+    const apptMatchStages = buildAppointmentMatchStages(
+      startDate,
+      endDate,
+      {},
+      { excludeTypes, excludeDepartments }
+    );
 
     let groupByFormat;
     switch (groupBy) {
@@ -210,9 +239,43 @@ exports.getAppointmentsReport = async (req, res, next) => {
       { $sort: { _id: 1 } }
     ]);
 
+    // تفاصيل العملاء (قائمة المواعيد) - اختيارية عبر ?includeDetails=true
+    let details = [];
+    if (includeDetails === 'true' || includeDetails === '1') {
+      details = await Appointment.aggregate([
+        ...apptMatchStages,
+        {
+          $lookup: {
+            from: 'departments',
+            localField: 'department',
+            foreignField: '_id',
+            as: 'deptInfo'
+          }
+        },
+        { $unwind: { path: '$deptInfo', preserveNullAndEmptyArrays: true } },
+        { $sort: { effectiveDate: -1 } },
+        {
+          $project: {
+            _id: 0,
+            appointmentId: '$_id',
+            customerName: 1,
+            phone: 1,
+            personsCount: { $ifNull: ['$personsCount', 1] },
+            appointmentDate: '$effectiveDate',
+            type: 1,
+            status: 1,
+            totalAmount: { $ifNull: ['$totalAmount', 0] },
+            paidAmount: { $ifNull: ['$paidAmount', 0] },
+            departmentName: { $ifNull: ['$deptInfo.title', '-' ] }
+          }
+        }
+      ]);
+    }
+
     res.json({
       success: true,
-      data: report
+      data: report,
+      details
     });
   } catch (error) {
     next(error);
@@ -224,9 +287,14 @@ exports.getAppointmentsReport = async (req, res, next) => {
 // @access  Private/Admin
 exports.getEmployeesReport = async (req, res, next) => {
   try {
-    const { startDate, endDate } = req.query;
+    const { startDate, endDate, excludeTypes, excludeDepartments } = req.query;
 
-    const apptMatchStages = buildAppointmentMatchStages(startDate, endDate);
+    const apptMatchStages = buildAppointmentMatchStages(
+      startDate,
+      endDate,
+      {},
+      { excludeTypes, excludeDepartments }
+    );
 
     const report = await Appointment.aggregate([
       ...apptMatchStages,
