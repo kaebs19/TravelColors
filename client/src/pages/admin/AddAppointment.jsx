@@ -93,9 +93,10 @@ const AddAppointment = () => {
   const appointmentType = searchParams.get('type') || 'confirmed';
   const editId = searchParams.get('edit');
 
-  // نوع الموعد الجديد: حضوري / إلكتروني / غير مؤكد
+  // نوع الموعد الجديد: حضوري / إلكتروني / غير مؤكد / مسودة
   const getInitialMode = () => {
     if (appointmentType === 'unconfirmed') return 'unconfirmed';
+    if (appointmentType === 'draft') return 'draft';
     return 'in_person'; // الافتراضي: حضوري
   };
   const [appointmentMode, setAppointmentMode] = useState(getInitialMode());
@@ -130,7 +131,11 @@ const AddAppointment = () => {
   const savedData = getSavedData();
 
   const [formData, setFormData] = useState({
-    type: appointmentType === 'unconfirmed' ? 'unconfirmed' : (savedData?.type || 'confirmed'),
+    type: appointmentType === 'unconfirmed'
+      ? 'unconfirmed'
+      : appointmentType === 'draft'
+        ? 'draft'
+        : (savedData?.type || 'confirmed'),
     customerName: savedData?.customerName || '',
     customer: savedData?.customer || '',
     phone: savedData?.phone || '',
@@ -214,6 +219,9 @@ const AddAppointment = () => {
     if (appointmentType === 'unconfirmed') {
       setAppointmentMode('unconfirmed');
       setFormData(prev => ({ ...prev, type: 'unconfirmed' }));
+    } else if (appointmentType === 'draft') {
+      setAppointmentMode('draft');
+      setFormData(prev => ({ ...prev, type: 'draft' }));
     }
   }, [appointmentType]);
 
@@ -466,10 +474,15 @@ const AddAppointment = () => {
     // حفظ كمسودة
     try {
       setSaving(true);
+      // إذا لم يحدّد المستخدم تاريخ تذكير نُعطّل التذكير لتفادي خطأ التحقق على السيرفر
+      const hasReminderDate = !!formData.reminderDate;
       const draftData = {
         ...formData,
         type: 'draft',
-        status: 'new'
+        status: 'new',
+        reminderEnabled: hasReminderDate ? formData.reminderEnabled : false,
+        reminderDate: hasReminderDate ? formData.reminderDate : '',
+        reminderTime: hasReminderDate ? formData.reminderTime : ''
       };
 
       if (editingAppointment) {

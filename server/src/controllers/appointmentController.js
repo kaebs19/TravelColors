@@ -104,6 +104,7 @@ exports.createAppointment = async (req, res, next) => {
       duration,
       dateFrom,
       dateTo,
+      reminderEnabled,
       reminderDate,
       reminderTime,
       department,
@@ -179,8 +180,13 @@ exports.createAppointment = async (req, res, next) => {
       appointmentData.dateFrom = dateFrom;
       appointmentData.dateTo = dateTo;
     } else if (type === 'draft') {
-      appointmentData.reminderDate = reminderDate;
-      appointmentData.reminderTime = reminderTime;
+      // إذا لم يحدد المستخدم تاريخ تذكير، نُعطّل التذكير لتفادي خطأ التحقق
+      const effectiveReminderEnabled = reminderEnabled !== false && !!reminderDate;
+      appointmentData.reminderEnabled = effectiveReminderEnabled;
+      if (effectiveReminderEnabled) {
+        appointmentData.reminderDate = reminderDate;
+        appointmentData.reminderTime = reminderTime;
+      }
     }
 
     const appointment = await Appointment.create(appointmentData);
@@ -442,6 +448,7 @@ exports.updateAppointment = async (req, res, next) => {
       duration,
       dateFrom,
       dateTo,
+      reminderEnabled,
       reminderDate,
       reminderTime,
       department,
@@ -489,8 +496,13 @@ exports.updateAppointment = async (req, res, next) => {
     }
 
     if (type === 'draft' || appointment.type === 'draft') {
+      if (reminderEnabled !== undefined) appointment.reminderEnabled = reminderEnabled;
       if (reminderDate) appointment.reminderDate = reminderDate;
       if (reminderTime) appointment.reminderTime = reminderTime;
+      // إذا لم يوجد تاريخ تذكير، نُعطّل التذكير لتفادي خطأ التحقق
+      if (!appointment.reminderDate) {
+        appointment.reminderEnabled = false;
+      }
     }
 
     // حفظ البيانات القديمة للتدقيق
