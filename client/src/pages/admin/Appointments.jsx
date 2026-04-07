@@ -19,6 +19,8 @@ const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 50;
   const [stats, setStats] = useState({});
   const [search, setSearch] = useState('');
   const [filterDepartment, setFilterDepartment] = useState(urlDepartment);
@@ -113,7 +115,7 @@ const Appointments = () => {
     try {
       setLoading(true);
       const [appointmentsRes, departmentsRes, statsRes, settingsRes, employeesRes] = await Promise.all([
-        appointmentsApi.getAppointments(),
+        appointmentsApi.getAppointments({ limit: 5000 }),
         departmentsApi.getDepartments(),
         appointmentsApi.getStats(),
         settingsApi.getSettings(),
@@ -411,6 +413,19 @@ const Appointments = () => {
 
   // حساب إجمالي الأشخاص في المواعيد المفلترة
   const totalFilteredPersons = filteredAppointments.reduce((sum, a) => sum + (a.personsCount || 1), 0);
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filteredAppointments.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedAppointments = filteredAppointments.slice(
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE
+  );
+
+  // إعادة تعيين الصفحة عند تغيير الفلاتر
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterDepartment, filterStatus, filterType, filterDate, filterCity, filterSubmission, filterPeriod]);
 
   // دالة ضغط البطاقة
   const handleStatCardClick = (period) => {
@@ -790,8 +805,11 @@ const Appointments = () => {
 
   const handleDayClick = (date) => {
     if (date) {
-      const dateStr = date.toISOString().split('T')[0];
-      setFilterDate(dateStr);
+      // استخدام التاريخ المحلي لتفادي انزياح UTC (مثلاً 9 يحوّل إلى 8)
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      setFilterDate(`${y}-${m}-${d}`);
       setViewMode('table');
     }
   };
@@ -1108,7 +1126,7 @@ const Appointments = () => {
           {filteredAppointments.length === 0 ? (
             <div className="empty-grid">لا توجد مواعيد</div>
           ) : (
-            filteredAppointments.map(appointment => {
+            paginatedAppointments.map(appointment => {
               const statusInfo = getStatusBadge(appointment.status);
               const typeInfo = getTypeBadge(appointment);
 
@@ -1206,7 +1224,7 @@ const Appointments = () => {
                 </td>
               </tr>
             ) : (
-              filteredAppointments.map(appointment => {
+              paginatedAppointments.map(appointment => {
                 const statusInfo = getStatusBadge(appointment.status);
                 const typeInfo = getTypeBadge(appointment);
 
@@ -1490,6 +1508,52 @@ const Appointments = () => {
           </tbody>
         </table>
       </Card>
+      )}
+
+      {/* Pagination */}
+      {viewMode !== 'calendar' && filteredAppointments.length > 0 && (
+        <div className="pagination-bar">
+          <div className="pagination-info">
+            عرض {(safePage - 1) * PAGE_SIZE + 1} - {Math.min(safePage * PAGE_SIZE, filteredAppointments.length)} من {filteredAppointments.length}
+          </div>
+          {totalPages > 1 && (
+            <div className="pagination-controls">
+              <button
+                className="page-btn"
+                onClick={() => setCurrentPage(1)}
+                disabled={safePage === 1}
+                title="الصفحة الأولى"
+              >
+                »
+              </button>
+              <button
+                className="page-btn"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={safePage === 1}
+              >
+                السابق
+              </button>
+              <span className="page-indicator">
+                صفحة <strong>{safePage}</strong> من <strong>{totalPages}</strong>
+              </span>
+              <button
+                className="page-btn"
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={safePage === totalPages}
+              >
+                التالي
+              </button>
+              <button
+                className="page-btn"
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={safePage === totalPages}
+                title="الصفحة الأخيرة"
+              >
+                «
+              </button>
+            </div>
+          )}
+        </div>
       )}
 
       {/* View Modal */}

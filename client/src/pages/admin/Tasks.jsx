@@ -48,6 +48,13 @@ const Tasks = () => {
   // وضع العرض (شبكة أو قائمة أو كانبان أو تقويم أو تقارير)
   const [viewMode, setViewMode] = useState('list'); // 'list', 'grid', 'kanban', 'calendar', 'reports'
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 50;
+
+  // Modal عرض جميع مهام يوم من التقويم
+  const [dayTasksModal, setDayTasksModal] = useState(null); // { date, tasks }
+
   // تقارير
   const [reportType, setReportType] = useState('performance'); // 'performance', 'productivity', 'delays'
 
@@ -900,6 +907,19 @@ const Tasks = () => {
     return new Date(b.createdAt) - new Date(a.createdAt);
   });
 
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(sortedTasks.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedTasks = sortedTasks.slice(
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE
+  );
+
+  // إعادة تعيين الصفحة عند تغيير الفلاتر
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterStatus, filterDepartment, filterEmployee, filterDate, dateRangeFilter]);
+
   if (loading) return <Loader />;
 
   return (
@@ -1064,7 +1084,7 @@ const Tasks = () => {
                   <td colSpan="9" className="no-data">لا توجد مهام</td>
                 </tr>
               ) : (
-                sortedTasks.map(task => {
+                paginatedTasks.map(task => {
                   const timeInfo = getTimeRemaining(task);
                   const overdue = isTaskOverdue(task);
                   return (
@@ -1128,7 +1148,7 @@ const Tasks = () => {
           {sortedTasks.length === 0 ? (
             <div className="no-data-grid">لا توجد مهام</div>
           ) : (
-            sortedTasks.map(task => (
+            paginatedTasks.map(task => (
               <Card key={task._id} className={`task-card task-card-${task.status}`}>
                 <div className="task-card-header">
                   <span className="task-card-number" onClick={() => handleViewTask(task)}>{task.taskNumber}</span>
@@ -1168,6 +1188,52 @@ const Tasks = () => {
                 </div>
               </Card>
             ))
+          )}
+        </div>
+      )}
+
+      {/* Pagination (لـ list و grid فقط) */}
+      {(viewMode === 'list' || viewMode === 'grid') && sortedTasks.length > 0 && (
+        <div className="pagination-bar">
+          <div className="pagination-info">
+            عرض {(safePage - 1) * PAGE_SIZE + 1} - {Math.min(safePage * PAGE_SIZE, sortedTasks.length)} من {sortedTasks.length}
+          </div>
+          {totalPages > 1 && (
+            <div className="pagination-controls">
+              <button
+                className="page-btn"
+                onClick={() => setCurrentPage(1)}
+                disabled={safePage === 1}
+                title="الصفحة الأولى"
+              >
+                »
+              </button>
+              <button
+                className="page-btn"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={safePage === 1}
+              >
+                السابق
+              </button>
+              <span className="page-indicator">
+                صفحة <strong>{safePage}</strong> من <strong>{totalPages}</strong>
+              </span>
+              <button
+                className="page-btn"
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={safePage === totalPages}
+              >
+                التالي
+              </button>
+              <button
+                className="page-btn"
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={safePage === totalPages}
+                title="الصفحة الأخيرة"
+              >
+                «
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -1344,25 +1410,32 @@ const Tasks = () => {
                     <>
                       <span className="day-number">{dayInfo.day}</span>
                       {dayInfo.tasks.length > 0 && (
-                        <div className="day-tasks">
-                          {dayInfo.tasks.slice(0, 3).map(task => (
+                        <div className="day-tasks scrollable">
+                          {dayInfo.tasks.map(task => (
                             <div
                               key={task._id}
                               className={`day-task day-task-${task.status}`}
-                              onClick={() => handleViewTask(task)}
+                              onClick={(e) => { e.stopPropagation(); handleViewTask(task); }}
                               title={task.appointment?.customerName}
                             >
                               <span className="task-time-mini">
                                 {task.appointment?.appointmentTime?.substring(0, 5)}
                               </span>
                               <span className="task-name-mini">
-                                {task.appointment?.customerName?.substring(0, 10)}
+                                {task.appointment?.customerName?.substring(0, 12)}
                               </span>
                             </div>
                           ))}
                           {dayInfo.tasks.length > 3 && (
-                            <div className="more-day-tasks">
-                              +{dayInfo.tasks.length - 3}
+                            <div
+                              className="more-day-tasks clickable"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDayTasksModal({ date: dayInfo.date, tasks: dayInfo.tasks });
+                              }}
+                              title="عرض جميع المهام"
+                            >
+                              عرض الكل ({dayInfo.tasks.length})
                             </div>
                           )}
                         </div>
@@ -1769,6 +1842,49 @@ const Tasks = () => {
           )}
         </div>
       )}
+
+      {/* Modal عرض جميع مهام يوم من التقويم */}
+      <Modal
+        isOpen={!!dayTasksModal}
+        onClose={() => setDayTasksModal(null)}
+        title={dayTasksModal ? `مهام يوم ${formatDate(dayTasksModal.date)} (${dayTasksModal.tasks.length})` : ''}
+        size="large"
+      >
+        {dayTasksModal && (
+          <div className="day-tasks-modal">
+            {dayTasksModal.tasks.length === 0 ? (
+              <p className="text-center" style={{ padding: '20px', color: '#999' }}>لا توجد مهام</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '60vh', overflowY: 'auto' }}>
+                {dayTasksModal.tasks.map(task => (
+                  <div
+                    key={task._id}
+                    className={`day-modal-task day-task-${task.status}`}
+                    onClick={() => {
+                      setDayTasksModal(null);
+                      handleViewTask(task);
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#fff' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <strong>{task.appointment?.customerName || '-'}</strong>
+                        <span style={{ fontSize: '12px', color: '#64748b' }}>
+                          {task.taskNumber} · {task.appointment?.department?.title || '-'} · {task.appointment?.phone || '-'}
+                        </span>
+                        <span style={{ fontSize: '12px', color: '#475569' }}>
+                          ⏰ {task.appointment?.appointmentTime || '-'} · 👤 {task.assignedTo?.name || 'غير مسند'}
+                        </span>
+                      </div>
+                      <div>{getStatusBadge(task.status)}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
 
       {/* Modal تفاصيل المهمة - تصميم جديد */}
       <Modal

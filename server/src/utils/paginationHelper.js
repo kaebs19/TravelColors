@@ -11,7 +11,7 @@
  */
 const calculatePagination = (page = 1, limit = 50) => {
   const pageNum = Math.max(1, parseInt(page) || 1);
-  const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 50));
+  const limitNum = Math.min(5000, Math.max(1, parseInt(limit) || 50));
   const skip = (pageNum - 1) * limitNum;
 
   return {
