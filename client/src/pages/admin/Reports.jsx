@@ -17,6 +17,7 @@ import './Reports.css';
 const Reports = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [expandedEmployees, setExpandedEmployees] = useState({});
   const [dateRange, setDateRange] = useState({
     startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0]
@@ -1052,6 +1053,92 @@ const Reports = () => {
                 </table>
               </div>
             )}
+
+            {/* تفاصيل المواعيد - قائمة العملاء الكاملة */}
+            {emp.appointmentsDetails?.length > 0 && (() => {
+              const empKey = emp.employeeId?.toString() || emp.employeeEmail || emp.employeeName;
+              const isExpanded = !!expandedEmployees[empKey];
+              const details = emp.appointmentsDetails;
+              const totalPersons = details.reduce((s, a) => s + (a.personsCount || 0), 0);
+              const totalAmount = details.reduce((s, a) => s + (a.totalAmount || 0), 0);
+              const totalPaid = details.reduce((s, a) => s + (a.paidAmount || 0), 0);
+              const statusLabels = {
+                new: 'جديد',
+                in_progress: 'قيد التنفيذ',
+                completed: 'مكتمل',
+                cancelled: 'ملغي'
+              };
+              const typeLabels = {
+                confirmed: 'مؤكد',
+                unconfirmed: 'غير مؤكد'
+              };
+              return (
+                <div className="breakdown-section">
+                  <div
+                    className="breakdown-toggle"
+                    onClick={() => setExpandedEmployees(prev => ({ ...prev, [empKey]: !isExpanded }))}
+                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}
+                  >
+                    <h4 style={{ margin: 0 }}>
+                      {isExpanded ? '▼' : '◀'} تفاصيل المواعيد والعملاء ({details.length})
+                    </h4>
+                  </div>
+                  {isExpanded && (
+                    <div className="table-scroll" style={{ maxHeight: '500px' }}>
+                      <table className="report-table compact">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>اسم العميل</th>
+                            <th>الهاتف</th>
+                            <th>القسم</th>
+                            <th>الأشخاص</th>
+                            <th>النوع</th>
+                            <th>الحالة</th>
+                            <th>التاريخ</th>
+                            <th>المبلغ</th>
+                            <th>المدفوع</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {details.map((appt, idx) => (
+                            <tr key={appt.appointmentId || idx}>
+                              <td>{idx + 1}</td>
+                              <td><strong>{appt.customerName || '-'}</strong></td>
+                              <td>{appt.phone || '-'}</td>
+                              <td>{appt.departmentName || '-'}</td>
+                              <td>
+                                <span className="badge badge-info">{appt.personsCount || 0}</span>
+                              </td>
+                              <td>{typeLabels[appt.type] || appt.type}</td>
+                              <td>
+                                <span className={`badge ${
+                                  appt.status === 'completed' ? 'badge-success' :
+                                  appt.status === 'cancelled' ? 'badge-danger' :
+                                  'badge-warning'
+                                }`}>
+                                  {statusLabels[appt.status] || appt.status}
+                                </span>
+                              </td>
+                              <td>{appt.appointmentDate ? formatDate(appt.appointmentDate) : '-'}</td>
+                              <td>{formatCurrency(appt.totalAmount || 0)}</td>
+                              <td className="text-success">{formatCurrency(appt.paidAmount || 0)}</td>
+                            </tr>
+                          ))}
+                          <tr className="total-row-table">
+                            <td colSpan="4"><strong>الإجمالي</strong></td>
+                            <td><strong>{totalPersons}</strong></td>
+                            <td colSpan="3"></td>
+                            <td><strong>{formatCurrency(totalAmount)}</strong></td>
+                            <td className="text-success"><strong>{formatCurrency(totalPaid)}</strong></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </Card>
         ))}
       </div>

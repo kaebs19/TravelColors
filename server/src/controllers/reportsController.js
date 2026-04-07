@@ -15,6 +15,38 @@ const buildDateQuery = (startDate, endDate, field = 'createdAt') => {
   return query;
 };
 
+// مراحل aggregation للمواعيد:
+// - تستثني المسودات (type: 'draft')
+// - تحسب تاريخ فعلي (effectiveDate) = appointmentDate للمؤكدة أو dateFrom لغير المؤكدة أو createdAt كاحتياط
+// - تفلتر حسب الفترة على التاريخ الفعلي بدلاً من createdAt
+const buildAppointmentMatchStages = (startDate, endDate, extraMatch = {}) => {
+  const stages = [
+    { $match: { type: { $ne: 'draft' }, ...extraMatch } },
+    {
+      $addFields: {
+        effectiveDate: {
+          $ifNull: ['$appointmentDate', { $ifNull: ['$dateFrom', '$createdAt'] }]
+        }
+      }
+    }
+  ];
+
+  if (startDate || endDate) {
+    const range = {};
+    if (startDate) {
+      range.$gte = new Date(startDate);
+    }
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      range.$lte = end;
+    }
+    stages.push({ $match: { effectiveDate: range } });
+  }
+
+  return stages;
+};
+
 // @desc    تقرير إحصائيات عامة
 // @route   GET /api/reports/overview
 // @access  Private/Admin
@@ -22,20 +54,26 @@ exports.getOverviewReport = async (req, res, next) => {
   try {
     const { startDate, endDate } = req.query;
 
-    const dateQuery = buildDateQuery(startDate, endDate);
+    const customerDateQuery = buildDateQuery(startDate, endDate);
+    const apptMatchStages = buildAppointmentMatchStages(startDate, endDate);
+
+    // حساب عدد المواعيد (non-draft) ضمن الفترة
+    const apptCountAgg = await Appointment.aggregate([
+      ...apptMatchStages,
+      { $count: 'count' }
+    ]);
+    const totalAppointments = apptCountAgg[0]?.count || 0;
 
     // إحصائيات عامة
     const [
-      totalAppointments,
       totalCustomers,
       totalEmployees,
       appointmentStats
     ] = await Promise.all([
-      Appointment.countDocuments(dateQuery),
-      Customer.countDocuments(dateQuery),
+      Customer.countDocuments(customerDateQuery),
       User.countDocuments({ role: { $in: ['employee', 'admin'] } }),
       Appointment.aggregate([
-        { $match: dateQuery },
+        ...apptMatchStages,
         {
           $group: {
             _id: null,
@@ -144,22 +182,22 @@ exports.getAppointmentsReport = async (req, res, next) => {
   try {
     const { startDate, endDate, groupBy = 'day' } = req.query;
 
-    const dateQuery = buildDateQuery(startDate, endDate);
+    const apptMatchStages = buildAppointmentMatchStages(startDate, endDate);
 
     let groupByFormat;
     switch (groupBy) {
       case 'week':
-        groupByFormat = { $isoWeek: '$createdAt' };
+        groupByFormat = { $isoWeek: '$effectiveDate' };
         break;
       case 'month':
-        groupByFormat = { $month: '$createdAt' };
+        groupByFormat = { $dateToString: { format: '%Y-%m', date: '$effectiveDate' } };
         break;
       default:
-        groupByFormat = { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } };
+        groupByFormat = { $dateToString: { format: '%Y-%m-%d', date: '$effectiveDate' } };
     }
 
     const report = await Appointment.aggregate([
-      { $match: dateQuery },
+      ...apptMatchStages,
       {
         $group: {
           _id: groupByFormat,
@@ -188,10 +226,10 @@ exports.getEmployeesReport = async (req, res, next) => {
   try {
     const { startDate, endDate } = req.query;
 
-    const dateQuery = buildDateQuery(startDate, endDate);
+    const apptMatchStages = buildAppointmentMatchStages(startDate, endDate);
 
     const report = await Appointment.aggregate([
-      { $match: dateQuery },
+      ...apptMatchStages,
       {
         $group: {
           _id: '$createdBy',
@@ -253,10 +291,10 @@ exports.getDepartmentsReport = async (req, res, next) => {
   try {
     const { startDate, endDate } = req.query;
 
-    const dateQuery = buildDateQuery(startDate, endDate);
+    const apptMatchStages = buildAppointmentMatchStages(startDate, endDate);
 
     const report = await Appointment.aggregate([
-      { $match: dateQuery },
+      ...apptMatchStages,
       {
         $group: {
           _id: '$department',
@@ -310,22 +348,23 @@ exports.getFinancialReport = async (req, res, next) => {
   try {
     const { startDate, endDate, groupBy = 'day' } = req.query;
 
-    const dateQuery = buildDateQuery(startDate, endDate);
+    const apptMatchStages = buildAppointmentMatchStages(startDate, endDate);
 
     let groupByFormat;
     switch (groupBy) {
       case 'week':
-        groupByFormat = { $isoWeek: '$createdAt' };
+        groupByFormat = { $isoWeek: '$effectiveDate' };
         break;
       case 'month':
-        groupByFormat = { $month: '$createdAt' };
+        groupByFormat = { $dateToString: { format: '%Y-%m', date: '$effectiveDate' } };
         break;
       default:
-        groupByFormat = { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } };
+        groupByFormat = { $dateToString: { format: '%Y-%m-%d', date: '$effectiveDate' } };
     }
 
     const report = await Appointment.aggregate([
-      { $match: { ...dateQuery, totalAmount: { $gt: 0 } } },
+      ...apptMatchStages,
+      { $match: { totalAmount: { $gt: 0 } } },
       {
         $group: {
           _id: groupByFormat,
@@ -348,7 +387,7 @@ exports.getFinancialReport = async (req, res, next) => {
 
     // إجمالي الفترة
     const totals = await Appointment.aggregate([
-      { $match: dateQuery },
+      ...apptMatchStages,
       {
         $group: {
           _id: null,
@@ -362,7 +401,8 @@ exports.getFinancialReport = async (req, res, next) => {
 
     // توزيع طرق الدفع
     const paymentMethods = await Appointment.aggregate([
-      { $match: { ...dateQuery, paymentType: { $ne: '' } } },
+      ...apptMatchStages,
+      { $match: { paymentType: { $ne: '' } } },
       {
         $group: {
           _id: '$paymentType',
@@ -395,6 +435,7 @@ exports.getEmployeePerformance = async (req, res, next) => {
   try {
     const { startDate, endDate, employeeId, period = 'daily' } = req.query;
 
+    // فلتر التاريخ للعملاء والفواتير (على createdAt لأنه لا يوجد appointmentDate)
     let dateQuery = {};
     if (startDate && endDate) {
       dateQuery = {
@@ -412,22 +453,29 @@ exports.getEmployeePerformance = async (req, res, next) => {
       employeeMatch = { createdBy: new mongoose.Types.ObjectId(employeeId) };
     }
 
-    // تحديد صيغة التجميع حسب الفترة
+    // مراحل فلترة المواعيد حسب التاريخ الفعلي واستثناء المسودات
+    const apptMatchStages = buildAppointmentMatchStages(startDate, endDate, employeeMatch);
+
+    // تحديد صيغة التجميع حسب الفترة (يستخدم effectiveDate للمواعيد)
     let groupByFormat;
+    let customerGroupByFormat;
     switch (period) {
       case 'monthly':
-        groupByFormat = { $dateToString: { format: '%Y-%m', date: '$createdAt' } };
+        groupByFormat = { $dateToString: { format: '%Y-%m', date: '$effectiveDate' } };
+        customerGroupByFormat = { $dateToString: { format: '%Y-%m', date: '$createdAt' } };
         break;
       case 'yearly':
-        groupByFormat = { $dateToString: { format: '%Y', date: '$createdAt' } };
+        groupByFormat = { $dateToString: { format: '%Y', date: '$effectiveDate' } };
+        customerGroupByFormat = { $dateToString: { format: '%Y', date: '$createdAt' } };
         break;
       default: // daily
-        groupByFormat = { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } };
+        groupByFormat = { $dateToString: { format: '%Y-%m-%d', date: '$effectiveDate' } };
+        customerGroupByFormat = { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } };
     }
 
     // تقرير المواعيد لكل موظف
     const appointmentsByEmployee = await Appointment.aggregate([
-      { $match: { ...dateQuery, ...employeeMatch } },
+      ...apptMatchStages,
       {
         $group: {
           _id: {
@@ -486,7 +534,7 @@ exports.getEmployeePerformance = async (req, res, next) => {
         $group: {
           _id: {
             employee: '$createdBy',
-            period: groupByFormat
+            period: customerGroupByFormat
           },
           totalCustomers: { $sum: 1 }
         }
@@ -519,7 +567,7 @@ exports.getEmployeePerformance = async (req, res, next) => {
         $group: {
           _id: {
             employee: '$createdBy',
-            period: groupByFormat
+            period: customerGroupByFormat
           },
           totalInvoices: { $sum: 1 },
           totalAmount: { $sum: { $ifNull: ['$total', 0] } },
@@ -549,6 +597,40 @@ exports.getEmployeePerformance = async (req, res, next) => {
       { $sort: { period: -1 } }
     ]);
 
+    // تفاصيل المواعيد لكل موظف (قائمة العملاء)
+    const appointmentDetailsByEmployee = await Appointment.aggregate([
+      ...apptMatchStages,
+      {
+        $lookup: {
+          from: 'departments',
+          localField: 'department',
+          foreignField: '_id',
+          as: 'deptInfo'
+        }
+      },
+      { $unwind: { path: '$deptInfo', preserveNullAndEmptyArrays: true } },
+      { $sort: { effectiveDate: -1 } },
+      {
+        $group: {
+          _id: '$createdBy',
+          appointments: {
+            $push: {
+              appointmentId: '$_id',
+              customerName: '$customerName',
+              phone: '$phone',
+              personsCount: { $ifNull: ['$personsCount', 1] },
+              appointmentDate: '$effectiveDate',
+              type: '$type',
+              status: '$status',
+              totalAmount: { $ifNull: ['$totalAmount', 0] },
+              paidAmount: { $ifNull: ['$paidAmount', 0] },
+              departmentName: { $ifNull: ['$deptInfo.title', '-'] }
+            }
+          }
+        }
+      }
+    ]);
+
     // تجميع البيانات لكل موظف
     const employees = await User.find({ role: { $in: ['employee', 'admin'] } }).select('name email role');
 
@@ -556,6 +638,9 @@ exports.getEmployeePerformance = async (req, res, next) => {
       const empAppointments = appointmentsByEmployee.filter(a => a.employeeId?.toString() === emp._id.toString());
       const empCustomers = customersByEmployee.filter(c => c.employeeId?.toString() === emp._id.toString());
       const empInvoices = invoicesByEmployee.filter(i => i.employeeId?.toString() === emp._id.toString());
+      const empDetails = appointmentDetailsByEmployee.find(
+        d => d._id?.toString() === emp._id.toString()
+      );
 
       return {
         employeeId: emp._id,
@@ -577,7 +662,8 @@ exports.getEmployeePerformance = async (req, res, next) => {
           appointments: empAppointments,
           customers: empCustomers,
           invoices: empInvoices
-        }
+        },
+        appointmentsDetails: empDetails?.appointments || []
       };
     });
 
@@ -614,7 +700,7 @@ exports.getTopCustomers = async (req, res, next) => {
 
     // العملاء الأكثر إنفاقاً من المواعيد
     const topByAppointments = await Appointment.aggregate([
-      { $match: { ...dateQuery, customer: { $ne: null } } },
+      ...buildAppointmentMatchStages(startDate, endDate, { customer: { $ne: null } }),
       {
         $group: {
           _id: '$customer',
@@ -716,23 +802,27 @@ exports.getProfitLossReport = async (req, res, next) => {
     }
 
     let groupByFormat;
+    let apptGroupByFormat;
     switch (groupBy) {
       case 'yearly':
         groupByFormat = { $dateToString: { format: '%Y', date: '$createdAt' } };
+        apptGroupByFormat = { $dateToString: { format: '%Y', date: '$effectiveDate' } };
         break;
       case 'daily':
         groupByFormat = { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } };
+        apptGroupByFormat = { $dateToString: { format: '%Y-%m-%d', date: '$effectiveDate' } };
         break;
       default: // monthly
         groupByFormat = { $dateToString: { format: '%Y-%m', date: '$createdAt' } };
+        apptGroupByFormat = { $dateToString: { format: '%Y-%m', date: '$effectiveDate' } };
     }
 
     // الدخل من المواعيد
     const appointmentIncome = await Appointment.aggregate([
-      { $match: { ...dateQuery, paidAmount: { $gt: 0 } } },
+      ...buildAppointmentMatchStages(startDate, endDate, { paidAmount: { $gt: 0 } }),
       {
         $group: {
-          _id: groupByFormat,
+          _id: apptGroupByFormat,
           income: { $sum: { $ifNull: ['$paidAmount', 0] } },
           count: { $sum: 1 }
         }
@@ -826,22 +916,14 @@ exports.getChartsData = async (req, res, next) => {
   try {
     const { startDate, endDate } = req.query;
 
-    let dateQuery = {};
-    if (startDate && endDate) {
-      dateQuery = {
-        createdAt: {
-          $gte: new Date(startDate),
-          $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999))
-        }
-      };
-    }
+    const apptMatchStages = buildAppointmentMatchStages(startDate, endDate);
 
     // المواعيد اليومية (آخر 30 يوم)
     const appointmentsChart = await Appointment.aggregate([
-      { $match: dateQuery },
+      ...apptMatchStages,
       {
         $group: {
-          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$effectiveDate' } },
           count: { $sum: 1 },
           persons: { $sum: { $ifNull: ['$personsCount', 1] } },
           amount: { $sum: { $ifNull: ['$paidAmount', 0] } }
@@ -852,7 +934,7 @@ exports.getChartsData = async (req, res, next) => {
 
     // توزيع حالات المواعيد
     const statusDistribution = await Appointment.aggregate([
-      { $match: dateQuery },
+      ...apptMatchStages,
       {
         $group: {
           _id: '$status',
@@ -863,7 +945,7 @@ exports.getChartsData = async (req, res, next) => {
 
     // توزيع أنواع المواعيد
     const typeDistribution = await Appointment.aggregate([
-      { $match: dateQuery },
+      ...apptMatchStages,
       {
         $group: {
           _id: '$type',
@@ -872,12 +954,12 @@ exports.getChartsData = async (req, res, next) => {
       }
     ]);
 
-    // الإيرادات الشهرية (آخر 12 شهر)
+    // الإيرادات الشهرية (آخر 12 شهر) — مستقلة عن فلتر الفترة
     const monthlyRevenue = await Appointment.aggregate([
-      { $match: { paidAmount: { $gt: 0 } } },
+      ...buildAppointmentMatchStages(null, null, { paidAmount: { $gt: 0 } }),
       {
         $group: {
-          _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } },
+          _id: { $dateToString: { format: '%Y-%m', date: '$effectiveDate' } },
           revenue: { $sum: { $ifNull: ['$paidAmount', 0] } },
           count: { $sum: 1 }
         }
@@ -888,7 +970,7 @@ exports.getChartsData = async (req, res, next) => {
 
     // أداء الموظفين
     const employeePerformance = await Appointment.aggregate([
-      { $match: dateQuery },
+      ...apptMatchStages,
       {
         $group: {
           _id: '$createdBy',
