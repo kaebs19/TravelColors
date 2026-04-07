@@ -47,46 +47,179 @@ const generateFooter = (settings) => `
   </div>
 `;
 
-// CSS مشترك
+// CSS مشترك - تصميم احترافي
 const printStyles = `
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; padding: 24px; background: #fff; color: #333; line-height: 1.6; font-size: 13px; }
-  .print-container { max-width: 850px; margin: 0 auto; }
+  body {
+    font-family: 'Segoe UI', 'Tajawal', Tahoma, Geneva, Verdana, sans-serif;
+    direction: rtl;
+    padding: 24px;
+    background: #fff;
+    color: #1f2937;
+    line-height: 1.6;
+    font-size: 13px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .print-container { max-width: 900px; margin: 0 auto; }
 
-  .report-print-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 16px; border-bottom: 3px solid #1a56db; margin-bottom: 24px; }
-  .company-info { display: flex; align-items: center; gap: 12px; }
-  .company-logo { width: 60px; height: 60px; object-fit: contain; border-radius: 8px; }
-  .company-text h2 { color: #1a56db; font-size: 18px; margin-bottom: 2px; }
-  .company-text .en-name { color: #666; font-size: 11px; }
-  .company-text p { color: #666; font-size: 11px; margin: 1px 0; }
+  /* Header */
+  .report-print-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #1e3a8a 0%, #1a56db 100%);
+    border-radius: 12px;
+    margin-bottom: 24px;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(26, 86, 219, 0.15);
+  }
+  .company-info { display: flex; align-items: center; gap: 14px; }
+  .company-logo {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    border-radius: 10px;
+    background: #fff;
+    padding: 4px;
+  }
+  .company-text h2 { color: #fff; font-size: 20px; margin-bottom: 3px; font-weight: 700; }
+  .company-text .en-name { color: #dbeafe; font-size: 11px; font-style: italic; }
+  .company-text p { color: #e0e7ff; font-size: 11px; margin: 1px 0; }
   .report-info { text-align: left; }
-  .report-title { font-size: 18px; font-weight: bold; color: #1a56db; margin-bottom: 8px; }
-  .report-info p { font-size: 11px; margin: 2px 0; }
-  .print-date { color: #999; margin-top: 4px !important; }
+  .report-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(255,255,255,0.3);
+  }
+  .report-info p { font-size: 11px; margin: 3px 0; color: #e0e7ff; }
+  .report-info strong { color: #fff; }
+  .print-date { color: #c7d2fe !important; margin-top: 6px !important; font-size: 10px !important; }
 
-  .report-print-footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #e2e8f0; text-align: center; color: #999; font-size: 11px; }
+  /* Footer */
+  .report-print-footer {
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 2px dashed #cbd5e1;
+    text-align: center;
+    color: #64748b;
+    font-size: 11px;
+  }
+  .report-print-footer p:first-child { font-weight: 600; color: #1e3a8a; margin-bottom: 4px; }
 
-  .stats-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-  .stat-box { flex: 1; min-width: 140px; background: #f8fafc; border-radius: 8px; padding: 14px; text-align: center; border: 1px solid #e2e8f0; }
-  .stat-box .value { font-size: 22px; font-weight: bold; color: #1a56db; display: block; }
-  .stat-box .label { font-size: 12px; color: #666; display: block; margin-top: 4px; }
-  .stat-box .sub { font-size: 11px; color: #10b981; display: block; margin-top: 2px; }
+  /* Stat boxes */
+  .stats-row { display: flex; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
+  .stat-box {
+    flex: 1;
+    min-width: 150px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+    border-top: 3px solid #1a56db;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+  }
+  .stat-box .value { font-size: 24px; font-weight: 700; color: #1a56db; display: block; letter-spacing: -0.5px; }
+  .stat-box .label { font-size: 12px; color: #64748b; display: block; margin-top: 6px; font-weight: 500; }
+  .stat-box .sub { font-size: 11px; color: #10b981; display: block; margin-top: 4px; font-weight: 500; }
+  .stat-box.warning { border-top-color: #ef4444; }
   .stat-box.warning .value { color: #ef4444; }
 
-  table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-  th { background: #1a56db; color: #fff; padding: 10px 8px; text-align: right; font-size: 12px; white-space: nowrap; }
-  td { padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 12px; }
-  tr:nth-child(even) { background: #f8fafc; }
-  .total-row-print td { background: #eef2ff !important; font-weight: bold; border-top: 2px solid #1a56db; color: #1a56db; }
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 24px;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+  }
+  th {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1a56db 100%);
+    color: #fff;
+    padding: 12px 10px;
+    text-align: right;
+    font-size: 12px;
+    white-space: nowrap;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  th:first-child { border-top-right-radius: 10px; }
+  th:last-child { border-top-left-radius: 10px; }
+  td {
+    padding: 10px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 12px;
+    color: #334155;
+  }
+  tr:nth-child(even) td { background: #fafbfc; }
+  tr:hover td { background: #eff6ff; }
+  tbody tr:last-child td { border-bottom: none; }
 
-  .badge-print { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+  .total-row-print td {
+    background: #eef2ff !important;
+    font-weight: 700;
+    border-top: 2px solid #1a56db;
+    color: #1e3a8a;
+    font-size: 13px;
+  }
+
+  /* Details table - compact mode */
+  .details-table th, .details-table td { padding: 8px 6px; font-size: 11px; }
+
+  /* Badges */
+  .badge-print {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
   .badge-success { background: #dcfce7; color: #16a34a; }
   .badge-warning { background: #fef3c7; color: #d97706; }
   .badge-danger { background: #fee2e2; color: #dc2626; }
+  .badge-info { background: #dbeafe; color: #1e40af; }
 
-  .section-title { font-size: 15px; font-weight: bold; color: #1a1a2e; margin: 20px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #e9ecef; }
+  /* Employee chip */
+  .emp-chip-print {
+    display: inline-block;
+    padding: 2px 10px;
+    background: #f1f5f9;
+    border-radius: 12px;
+    font-size: 11px;
+    color: #475569;
+    font-weight: 500;
+    border: 1px solid #e2e8f0;
+  }
 
-  @media print { body { padding: 0; } .print-container { max-width: 100%; } }
+  /* Section titles */
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin: 24px 0 12px;
+    padding: 8px 12px;
+    border-right: 4px solid #1a56db;
+    background: #f8fafc;
+    border-radius: 0 6px 6px 0;
+  }
+
+  @media print {
+    body { padding: 0; }
+    .print-container { max-width: 100%; }
+    .report-print-header { box-shadow: none; }
+    table { box-shadow: none; page-break-inside: auto; }
+    tr { page-break-inside: avoid; page-break-after: auto; }
+    thead { display: table-header-group; }
+  }
 `;
 
 // ─── دالة مساعدة لحساب نسبة الإنجاز ───
@@ -207,23 +340,24 @@ export const generateAppointmentsReport = (data, settings, dateRange, employeesD
           <td>${formatNumber(idx + 1)}</td>
           <td><strong>${appt.customerName || '-'}</strong></td>
           <td>${appt.departmentName || '-'}</td>
-          <td>${formatNumber(appt.personsCount)}</td>
+          <td style="text-align:center">${formatNumber(appt.personsCount)}</td>
           <td>${typeLabels[appt.type] || appt.type || '-'}</td>
           <td>${appt.appointmentDate ? formatDateAr(appt.appointmentDate) : '-'}</td>
+          <td><span class="emp-chip-print">${appt.createdByName || '-'}</span></td>
           <td>${formatCurrency(appt.totalAmount)}</td>
           <td>${formatCurrency(appt.paidAmount)}</td>
         </tr>`;
       }).join('');
       return `
-      <div class="section-title">تفاصيل العملاء (${formatNumber(details.length)})</div>
-      <table>
-        <thead><tr><th>#</th><th>اسم العميل</th><th>القسم</th><th>الأشخاص</th><th>النوع</th><th>التاريخ</th><th>المبلغ</th><th>المدفوع</th></tr></thead>
+      <div class="section-title">📋 تفاصيل العملاء (${formatNumber(details.length)})</div>
+      <table class="details-table">
+        <thead><tr><th>#</th><th>اسم العميل</th><th>القسم</th><th>الأشخاص</th><th>النوع</th><th>التاريخ</th><th>مضاف بواسطة</th><th>المبلغ</th><th>المدفوع</th></tr></thead>
         <tbody>
           ${detailRows}
           <tr class="total-row-print">
             <td colspan="3">الإجمالي</td>
-            <td>${formatNumber(dTotalPersons)}</td>
-            <td colspan="2"></td>
+            <td style="text-align:center">${formatNumber(dTotalPersons)}</td>
+            <td colspan="3"></td>
             <td>${formatCurrency(dTotalAmount)}</td>
             <td>${formatCurrency(dTotalPaid)}</td>
           </tr>
@@ -253,6 +387,28 @@ export const generateTasksReport = (data, settings, dateRange) => {
 
   const completionRate = (summary.totalTasks || data.totalTasks) > 0 ? calcRate(summary.completedTasks || data.completedTasks, summary.totalTasks || data.totalTasks) : 0;
 
+  // تفاصيل المهام المكتملة
+  const details = data.completedTasksDetails || [];
+  let dTotalPersons = 0, dTotalAmount = 0, dTotalPaid = 0;
+  const detailRows = details.map((task, idx) => {
+    dTotalPersons += task.personsCount || 0;
+    dTotalAmount += task.totalAmount || 0;
+    dTotalPaid += task.paidAmount || 0;
+    return `
+    <tr>
+      <td>${formatNumber(idx + 1)}</td>
+      <td>${task.taskNumber || '-'}</td>
+      <td><strong>${task.customerName || '-'}</strong></td>
+      <td>${task.departmentName || '-'}</td>
+      <td style="text-align:center">${formatNumber(task.personsCount)}</td>
+      <td><span class="emp-chip-print">${task.createdByName || '-'}</span></td>
+      <td><span class="emp-chip-print">${task.employeeName || '-'}</span></td>
+      <td>${task.completedAt ? formatDateAr(task.completedAt) : '-'}</td>
+      <td>${formatCurrency(task.totalAmount)}</td>
+      <td>${formatCurrency(task.paidAmount)}</td>
+    </tr>`;
+  }).join('');
+
   return `
     ${generateHeader(settings, 'تقرير المهام', dateRange)}
     <div class="stats-row">
@@ -263,6 +419,7 @@ export const generateTasksReport = (data, settings, dateRange) => {
     </div>
     <div class="stats-row">
       <div class="stat-box"><span class="value">${formatPercent(completionRate)}</span><span class="label">نسبة الإنجاز</span></div>
+      <div class="stat-box"><span class="value">${formatNumber(summary.totalPersonsCompleted || 0)}</span><span class="label">إجمالي الأشخاص المنجزين</span></div>
     </div>
     <div class="section-title">المهام حسب الموظف</div>
     <table>
@@ -272,6 +429,34 @@ export const generateTasksReport = (data, settings, dateRange) => {
         ${empRows ? `<tr class="total-row-print"><td>الإجمالي</td><td>${formatNumber(totalCompleted)}</td><td>${formatNumber(totalPersons)}</td><td>${formatCurrency(totalAmount)}</td></tr>` : ''}
       </tbody>
     </table>
+    ${details.length > 0 ? `
+    <div class="section-title">📋 تفاصيل المهام المكتملة (${formatNumber(details.length)})</div>
+    <table class="details-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>رقم المهمة</th>
+          <th>اسم العميل</th>
+          <th>القسم</th>
+          <th>الأشخاص</th>
+          <th>مضاف بواسطة</th>
+          <th>المنفذ</th>
+          <th>تاريخ الاستكمال</th>
+          <th>المبلغ</th>
+          <th>المدفوع</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${detailRows}
+        <tr class="total-row-print">
+          <td colspan="4">الإجمالي</td>
+          <td style="text-align:center">${formatNumber(dTotalPersons)}</td>
+          <td colspan="3"></td>
+          <td>${formatCurrency(dTotalAmount)}</td>
+          <td>${formatCurrency(dTotalPaid)}</td>
+        </tr>
+      </tbody>
+    </table>` : ''}
     ${generateFooter(settings)}
   `;
 };

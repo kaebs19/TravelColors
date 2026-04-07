@@ -614,12 +614,26 @@
 }
 
 .filters-card {
-  padding: 1rem 1.5rem;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-right: 4px solid #4f46e5;
+  margin-bottom: 1rem;
+}
+
+.filters-card h3 {
+  font-size: 0.95rem;
+  color: #1e3a8a;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .filters-row {
   display: flex;
-  gap: 2rem;
+  gap: 1.5rem;
   align-items: center;
   flex-wrap: wrap;
 }
@@ -630,18 +644,49 @@
   gap: 0.75rem;
 }
 
-.filter-group label {
-  font-weight: 500;
-  color: var(--text-secondary);
+.filter-group > label {
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.85rem;
 }
 
-.filter-group select {
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius);
-  font-size: var(--font-sm);
+.filter-group select,
+.filter-group input[type="date"],
+.filter-group input[type="text"] {
+  padding: 0.5rem 0.9rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.85rem;
   background: white;
   min-width: 150px;
+  transition: all 0.2s;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.filter-group input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #4f46e5;
+}
+
+/* Employee chip (used in details tables) */
+.employee-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  background: #eef2ff;
+  color: #4338ca;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid #e0e7ff;
+  white-space: nowrap;
 }
 
 .employee-card {

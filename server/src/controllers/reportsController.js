@@ -253,6 +253,15 @@ exports.getAppointmentsReport = async (req, res, next) => {
           }
         },
         { $unwind: { path: '$deptInfo', preserveNullAndEmptyArrays: true } },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'createdBy',
+            foreignField: '_id',
+            as: 'createdByInfo'
+          }
+        },
+        { $unwind: { path: '$createdByInfo', preserveNullAndEmptyArrays: true } },
         { $sort: { effectiveDate: -1 } },
         {
           $project: {
@@ -266,7 +275,8 @@ exports.getAppointmentsReport = async (req, res, next) => {
             status: 1,
             totalAmount: { $ifNull: ['$totalAmount', 0] },
             paidAmount: { $ifNull: ['$paidAmount', 0] },
-            departmentName: { $ifNull: ['$deptInfo.title', '-' ] }
+            departmentName: { $ifNull: ['$deptInfo.title', '-' ] },
+            createdByName: { $ifNull: ['$createdByInfo.name', '-' ] }
           }
         }
       ]);
@@ -677,6 +687,15 @@ exports.getEmployeePerformance = async (req, res, next) => {
         }
       },
       { $unwind: { path: '$deptInfo', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'createdBy',
+          foreignField: '_id',
+          as: 'createdByInfo'
+        }
+      },
+      { $unwind: { path: '$createdByInfo', preserveNullAndEmptyArrays: true } },
       { $sort: { effectiveDate: -1 } },
       {
         $group: {
@@ -692,7 +711,8 @@ exports.getEmployeePerformance = async (req, res, next) => {
               status: '$status',
               totalAmount: { $ifNull: ['$totalAmount', 0] },
               paidAmount: { $ifNull: ['$paidAmount', 0] },
-              departmentName: { $ifNull: ['$deptInfo.title', '-'] }
+              departmentName: { $ifNull: ['$deptInfo.title', '-'] },
+              createdByName: { $ifNull: ['$createdByInfo.name', '-'] }
             }
           }
         }
@@ -1087,7 +1107,21 @@ exports.getChartsData = async (req, res, next) => {
 // @access  Private/Admin
 exports.getTasksReport = async (req, res, next) => {
   try {
-    const { startDate, endDate, month, specificDate, groupBy = 'day' } = req.query;
+    const { startDate, endDate, month, specificDate, groupBy = 'day', excludeTypes, excludeDepartments } = req.query;
+
+    // فلتر استثناء أنواع وأقسام المواعيد المرتبطة بالمهام
+    // (يُطبّق بعد $lookup على appointmentInfo)
+    const mongoose = require('mongoose');
+    const excludedTypes = ['draft', ...toArray(excludeTypes)];
+    const excludedDepIds = toArray(excludeDepartments)
+      .filter(id => mongoose.Types.ObjectId.isValid(id))
+      .map(id => new mongoose.Types.ObjectId(id));
+
+    const taskApptFilter = { 'appointmentInfo.type': { $nin: excludedTypes } };
+    if (excludedDepIds.length > 0) {
+      taskApptFilter['appointmentInfo.department'] = { $nin: excludedDepIds };
+    }
+    const taskApptFilterStage = { $match: taskApptFilter };
 
     let dateQuery = {};
 
@@ -1153,6 +1187,7 @@ exports.getTasksReport = async (req, res, next) => {
         }
       },
       { $unwind: { path: '$appointmentInfo', preserveNullAndEmptyArrays: true } },
+      taskApptFilterStage,
       {
         $group: {
           _id: '$assignedTo',
@@ -1196,6 +1231,7 @@ exports.getTasksReport = async (req, res, next) => {
         }
       },
       { $unwind: { path: '$appointmentInfo', preserveNullAndEmptyArrays: true } },
+      taskApptFilterStage,
       {
         $group: {
           _id: null,
@@ -1244,6 +1280,7 @@ exports.getTasksReport = async (req, res, next) => {
         }
       },
       { $unwind: { path: '$appointmentInfo', preserveNullAndEmptyArrays: true } },
+      taskApptFilterStage,
       {
         $lookup: {
           from: 'customers',
@@ -1263,19 +1300,42 @@ exports.getTasksReport = async (req, res, next) => {
       },
       { $unwind: { path: '$employeeInfo', preserveNullAndEmptyArrays: true } },
       {
+        $lookup: {
+          from: 'users',
+          localField: 'appointmentInfo.createdBy',
+          foreignField: '_id',
+          as: 'createdByInfo'
+        }
+      },
+      { $unwind: { path: '$createdByInfo', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'departments',
+          localField: 'appointmentInfo.department',
+          foreignField: '_id',
+          as: 'deptInfo'
+        }
+      },
+      { $unwind: { path: '$deptInfo', preserveNullAndEmptyArrays: true } },
+      {
         $project: {
           _id: 0,
           taskNumber: 1,
-          customerName: { $ifNull: ['$customerInfo.name', 'غير معروف'] },
-          customerPhone: '$customerInfo.phone',
+          customerName: {
+            $ifNull: ['$customerInfo.name', { $ifNull: ['$appointmentInfo.customerName', 'غير معروف'] }]
+          },
+          customerPhone: { $ifNull: ['$customerInfo.phone', '$appointmentInfo.phone'] },
           personsCount: { $ifNull: ['$appointmentInfo.personsCount', 1] },
           completedAt: 1,
           employeeName: { $ifNull: ['$employeeInfo.name', 'غير معروف'] },
-          appointmentDate: '$appointmentInfo.appointmentDate'
+          createdByName: { $ifNull: ['$createdByInfo.name', '-'] },
+          departmentName: { $ifNull: ['$deptInfo.title', '-'] },
+          appointmentDate: '$appointmentInfo.appointmentDate',
+          totalAmount: { $ifNull: ['$appointmentInfo.totalAmount', 0] },
+          paidAmount: { $ifNull: ['$appointmentInfo.paidAmount', 0] }
         }
       },
-      { $sort: { completedAt: -1 } },
-      { $limit: 100 }
+      { $sort: { completedAt: -1 } }
     ]);
 
     // تجميع المهام حسب الشهر

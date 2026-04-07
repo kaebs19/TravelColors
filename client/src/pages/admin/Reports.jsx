@@ -569,6 +569,7 @@ const Reports = () => {
                       <th>النوع</th>
                       <th>الحالة</th>
                       <th>التاريخ</th>
+                      <th>مضاف بواسطة</th>
                       <th>المبلغ</th>
                       <th>المدفوع</th>
                     </tr>
@@ -594,6 +595,7 @@ const Reports = () => {
                           </span>
                         </td>
                         <td>{appt.appointmentDate ? formatDate(appt.appointmentDate) : '-'}</td>
+                        <td><span className="employee-chip">{appt.createdByName || '-'}</span></td>
                         <td>{formatCurrency(appt.totalAmount || 0)}</td>
                         <td className="text-success">{formatCurrency(appt.paidAmount || 0)}</td>
                       </tr>
@@ -603,7 +605,7 @@ const Reports = () => {
                       <td>
                         <strong>{appointmentsDetails.reduce((s, a) => s + (a.personsCount || 0), 0)}</strong>
                       </td>
-                      <td colSpan="3"></td>
+                      <td colSpan="4"></td>
                       <td><strong>{formatCurrency(appointmentsDetails.reduce((s, a) => s + (a.totalAmount || 0), 0))}</strong></td>
                       <td className="text-success">
                         <strong>{formatCurrency(appointmentsDetails.reduce((s, a) => s + (a.paidAmount || 0), 0))}</strong>
@@ -1553,6 +1555,8 @@ const Reports = () => {
           } else if (tasksFilter.filterType === 'specific' && tasksFilter.specificDate) {
             params.specificDate = tasksFilter.specificDate;
           }
+          if (excludeTypes.length > 0) params.excludeTypes = excludeTypes.join(',');
+          if (excludeDepartments.length > 0) params.excludeDepartments = excludeDepartments.join(',');
           const tasksRes = await reportsApi.getTasksReport(params);
           setTasksData(tasksRes.data?.data || {});
         } catch (error) {
@@ -1563,7 +1567,7 @@ const Reports = () => {
       };
       fetchTasksData();
     }
-  }, [tasksFilter, dateRange, activeTab]);
+  }, [tasksFilter, dateRange, activeTab, excludeTypes, excludeDepartments]);
 
   // تبويب تقرير المهام
   const renderTasksTab = () => {
@@ -1613,6 +1617,55 @@ const Reports = () => {
                   onChange={(e) => handleTasksFilterChange('specific', e.target.value)}
                 />
               </div>
+            )}
+          </div>
+        </Card>
+
+        {/* فلاتر الاستثناء (مشتركة مع تبويب المواعيد) */}
+        <Card className="filters-card">
+          <h3>استثناءات</h3>
+          <div className="filters-row" style={{ flexWrap: 'wrap', gap: '16px' }}>
+            <div className="filter-group">
+              <label>استثناء الأنواع:</label>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {[
+                  { value: 'confirmed', label: 'مؤكد' },
+                  { value: 'unconfirmed', label: 'غير مؤكد' }
+                ].map(t => (
+                  <label key={t.value} style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={excludeTypes.includes(t.value)}
+                      onChange={() => toggleExcludeType(t.value)}
+                    />
+                    {t.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="filter-group" style={{ flex: 1, minWidth: '250px' }}>
+              <label>استثناء الأقسام:</label>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', maxHeight: '80px', overflowY: 'auto' }}>
+                {allDepartments.length === 0 && <span style={{ color: '#999' }}>لا توجد أقسام</span>}
+                {allDepartments.map(dep => (
+                  <label key={dep._id} style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', fontSize: '12px' }}>
+                    <input
+                      type="checkbox"
+                      checked={excludeDepartments.includes(dep._id)}
+                      onChange={() => toggleExcludeDepartment(dep._id)}
+                    />
+                    {dep.title}
+                  </label>
+                ))}
+              </div>
+            </div>
+            {(excludeTypes.length > 0 || excludeDepartments.length > 0) && (
+              <button
+                className="quick-btn"
+                onClick={() => { setExcludeTypes([]); setExcludeDepartments([]); }}
+              >
+                مسح الاستثناءات
+              </button>
             )}
           </div>
         </Card>
@@ -1694,8 +1747,8 @@ const Reports = () => {
 
         {/* تفاصيل المهام المكتملة مع بيانات العملاء */}
         <Card className="table-card">
-          <h3>تفاصيل المهام المكتملة</h3>
-          <div className="table-scroll" style={{ maxHeight: '400px' }}>
+          <h3>📋 تفاصيل المهام المكتملة ({completedTasksDetails?.length || 0})</h3>
+          <div className="table-scroll" style={{ maxHeight: '500px' }}>
             <table className="report-table">
               <thead>
                 <tr>
@@ -1703,31 +1756,52 @@ const Reports = () => {
                   <th>رقم المهمة</th>
                   <th>اسم العميل</th>
                   <th>الهاتف</th>
-                  <th>عدد الأشخاص</th>
-                  <th>الموظف المنفذ</th>
+                  <th>القسم</th>
+                  <th>الأشخاص</th>
+                  <th>مضاف بواسطة</th>
+                  <th>المنفذ</th>
                   <th>تاريخ الاستكمال</th>
+                  <th>المبلغ</th>
+                  <th>المدفوع</th>
                 </tr>
               </thead>
               <tbody>
                 {completedTasksDetails?.length > 0 ? (
-                  completedTasksDetails.map((task, index) => (
-                    <tr key={index}>
-                      <td>{index + 1}</td>
+                  <>
+                    {completedTasksDetails.map((task, index) => (
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>
+                          <span className="badge badge-primary">{task.taskNumber || '-'}</span>
+                        </td>
+                        <td><strong>{task.customerName}</strong></td>
+                        <td>{task.customerPhone || '-'}</td>
+                        <td>{task.departmentName || '-'}</td>
+                        <td>
+                          <span className="badge badge-info">{task.personsCount}</span>
+                        </td>
+                        <td><span className="employee-chip">{task.createdByName || '-'}</span></td>
+                        <td><span className="employee-chip">{task.employeeName}</span></td>
+                        <td>{task.completedAt ? formatDate(task.completedAt) : '-'}</td>
+                        <td>{formatCurrency(task.totalAmount || 0)}</td>
+                        <td className="text-success">{formatCurrency(task.paidAmount || 0)}</td>
+                      </tr>
+                    ))}
+                    <tr className="total-row-table">
+                      <td colSpan="5"><strong>الإجمالي</strong></td>
                       <td>
-                        <span className="badge badge-primary">{task.taskNumber || '-'}</span>
+                        <strong>{completedTasksDetails.reduce((s, t) => s + (t.personsCount || 0), 0)}</strong>
                       </td>
-                      <td>{task.customerName}</td>
-                      <td>{task.customerPhone || '-'}</td>
-                      <td>
-                        <span className="badge badge-info">{task.personsCount}</span>
+                      <td colSpan="3"></td>
+                      <td><strong>{formatCurrency(completedTasksDetails.reduce((s, t) => s + (t.totalAmount || 0), 0))}</strong></td>
+                      <td className="text-success">
+                        <strong>{formatCurrency(completedTasksDetails.reduce((s, t) => s + (t.paidAmount || 0), 0))}</strong>
                       </td>
-                      <td>{task.employeeName}</td>
-                      <td>{task.completedAt ? formatDate(task.completedAt) : '-'}</td>
                     </tr>
-                  ))
+                  </>
                 ) : (
                   <tr>
-                    <td colSpan="7" className="text-center">لا توجد مهام مكتملة</td>
+                    <td colSpan="11" className="text-center">لا توجد مهام مكتملة</td>
                   </tr>
                 )}
               </tbody>
