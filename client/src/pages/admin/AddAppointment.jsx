@@ -637,10 +637,17 @@ const AddAppointment = () => {
     }
   };
 
+  // التقديم الإلكتروني: يسمح بتاريخ اليوم
+  // الحضوري وغير المؤكد: يبدأ من الغد
   const getMinDate = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
+    const d = new Date();
+    if (appointmentMode !== 'electronic') {
+      d.setDate(d.getDate() + 1);
+    }
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
   };
 
   const getTitle = () => {
@@ -1513,32 +1520,34 @@ const AddAppointment = () => {
               </div>
             </>
           )}
-          {/* ========== مضاف بواسطة ========== */}
-          <div className="form-section">
-            <div className="section-title">
-              <span className="section-icon">👤</span>
-              <h4>مضاف بواسطة</h4>
-            </div>
-            <div className="form-grid">
-              <div className="form-group">
-                <label>الموظف المسؤول</label>
-                <select
-                  name="createdBy"
-                  value={formData.createdBy || user?._id || user?.id || ''}
-                  onChange={handleChange}
-                  className="form-select"
-                >
-                  <option value="">-- الموظف الحالي --</option>
-                  {allEmployees.map(emp => (
-                    <option key={emp._id} value={emp._id}>
-                      {emp.name} {emp.role === 'admin' ? '(مدير)' : ''}
-                    </option>
-                  ))}
-                </select>
-                <small className="form-hint">اختر الموظف الذي أضاف هذا الموعد. الافتراضي: الموظف الحالي</small>
+          {/* ========== مضاف بواسطة — المدير فقط يختار ========== */}
+          {user?.role === 'admin' && (
+            <div className="form-section">
+              <div className="section-title">
+                <span className="section-icon">👤</span>
+                <h4>مضاف بواسطة</h4>
+              </div>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>الموظف المسؤول</label>
+                  <select
+                    name="createdBy"
+                    value={formData.createdBy || user?._id || user?.id || ''}
+                    onChange={handleChange}
+                    className="form-select"
+                  >
+                    <option value="">-- الموظف الحالي --</option>
+                    {allEmployees.map(emp => (
+                      <option key={emp._id} value={emp._id}>
+                        {emp.name} {emp.role === 'admin' ? '(مدير)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <small className="form-hint">اختر الموظف الذي أضاف هذا الموعد. الافتراضي: الموظف الحالي</small>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* شريط التقدم وأزرار الإجراءات */}

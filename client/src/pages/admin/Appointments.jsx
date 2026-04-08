@@ -21,6 +21,7 @@ const Appointments = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 50;
+  const [dayApptsModal, setDayApptsModal] = useState(null); // { date, appointments }
   const [stats, setStats] = useState({});
   const [search, setSearch] = useState('');
   const [filterDepartment, setFilterDepartment] = useState(urlDepartment);
@@ -1086,25 +1087,44 @@ const Appointments = () => {
                   <div
                     key={index}
                     className={`calendar-day ${!item.day ? 'empty' : ''} ${isToday(item.date) ? 'today' : ''} ${isWeekend(item.date) ? 'weekend' : ''} ${hasAppointments ? 'has-appointments' : ''}`}
-                    onClick={() => item.day && handleDayClick(item.date)}
                   >
                     {item.day && (
                       <>
-                        <span className="day-number">{item.day}</span>
+                        <div className="day-header-row">
+                          <span className="day-number">{item.day}</span>
+                          {hasAppointments && (
+                            <span className="day-persons-chip">{totalPersons}👥</span>
+                          )}
+                        </div>
                         {hasAppointments && (
-                          <div className="day-appointments">
-                            <span className="appt-count">{dayAppointments.length}</span>
-                            <span className="person-count">{totalPersons}👥</span>
-                            <div className="appt-types">
-                              {dayAppointments.slice(0, 3).map((appt, i) => (
-                                <span
-                                  key={i}
-                                  className={`appt-dot type-${appt.type}`}
-                                  title={appt.customerName}
-                                ></span>
-                              ))}
-                              {dayAppointments.length > 3 && <span className="more-dots">+{dayAppointments.length - 3}</span>}
-                            </div>
+                          <div className="day-appointments scrollable">
+                            {dayAppointments.map(appt => (
+                              <div
+                                key={appt._id}
+                                className={`day-appt-item type-${appt.type}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleView(appt);
+                                }}
+                                title={`${appt.customerName} - ${appt.personsCount || 1} شخص`}
+                              >
+                                {appt.type === 'confirmed' && appt.appointmentTime && (
+                                  <span className="day-appt-time">{appt.appointmentTime.substring(0, 5)}</span>
+                                )}
+                                <span className="day-appt-name">{appt.customerName}</span>
+                              </div>
+                            ))}
+                            {dayAppointments.length > 3 && (
+                              <div
+                                className="day-view-all"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDayApptsModal({ date: item.date, appointments: dayAppointments });
+                                }}
+                              >
+                                عرض الكل ({dayAppointments.length})
+                              </div>
+                            )}
                           </div>
                         )}
                       </>
@@ -1555,6 +1575,60 @@ const Appointments = () => {
           )}
         </div>
       )}
+
+      {/* Modal لعرض جميع مواعيد يوم من التقويم */}
+      <Modal
+        isOpen={!!dayApptsModal}
+        onClose={() => setDayApptsModal(null)}
+        title={dayApptsModal ? `مواعيد ${formatDateDisplay(dayApptsModal.date, true)} (${dayApptsModal.appointments.length})` : ''}
+        size="large"
+      >
+        {dayApptsModal && (
+          <div className="day-appts-modal" style={{ maxHeight: '60vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {dayApptsModal.appointments.map(appt => {
+              const typeInfo = getTypeBadge(appt);
+              const statusInfo = getStatusBadge(appt.status);
+              return (
+                <div
+                  key={appt._id}
+                  onClick={() => {
+                    setDayApptsModal(null);
+                    handleView(appt);
+                  }}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '12px 14px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '10px',
+                    background: '#fff',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <strong>
+                      {appt.isVIP && '⭐ '}{appt.customerName}
+                    </strong>
+                    <span style={{ fontSize: '12px', color: '#64748b' }}>
+                      {appt.phone || '-'} · {appt.department?.title || '-'} · {appt.personsCount || 1} شخص
+                    </span>
+                    {appt.type === 'confirmed' && appt.appointmentTime && (
+                      <span style={{ fontSize: '12px', color: '#475569' }}>
+                        ⏰ {formatTimeDisplay(appt.appointmentTime)}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <span className={`type-badge ${typeInfo.class}`}>{typeInfo.label}</span>
+                    <span className={`status-badge ${statusInfo.class}`}>{statusInfo.label}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Modal>
 
       {/* View Modal */}
       <Modal

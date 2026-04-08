@@ -44,7 +44,7 @@ export const generateConfirmedMessageFromTemplate = (template, data, department)
     return generateConfirmedFallback({ ...data, _mapLink: mapLink }, department?.title || '');
   }
 
-  return template
+  let message = template
     .replace(/\{اسم_العميل\}/g, data.customerName || '')
     .replace(/\{الجهة\}/g, department?.title || '')
     .replace(/\{التاريخ\}/g, formatDate(data.appointmentDate))
@@ -52,6 +52,19 @@ export const generateConfirmedMessageFromTemplate = (template, data, department)
     .replace(/\{العدد\}/g, data.personsCount || 1)
     .replace(/\{رابط_الموقع\}/g, mapLink)
     .replace(/\{المدينة\}/g, data.city || '');
+
+  // إضافة المدينة تلقائياً إذا لم يكن القالب يحتوي عليها
+  const cityText = data.city || '';
+  if (cityText && !template.includes('{المدينة}') && !message.includes(cityText)) {
+    message += `\n- المدينة: ${cityText}`;
+  }
+
+  // إضافة رسالة تطمينية إذا لم تكن موجودة في القالب
+  if (!/سوف نتواصل|سنتواصل|سنقوم بالتواصل/.test(message)) {
+    message += `\n\n📞 سوف نتواصل معك قريباً لاستكمال إجراءات التأشيرة.`;
+  }
+
+  return message;
 };
 
 /**
@@ -64,7 +77,7 @@ export const generateUnconfirmedMessageFromTemplate = (template, data, departmen
 
   const mapLink = getMapLink(department, data.city);
 
-  return template
+  let message = template
     .replace(/\{اسم_العميل\}/g, data.customerName || '')
     .replace(/\{الجهة\}/g, department?.title || '')
     .replace(/\{تاريخ_البداية\}/g, formatDate(data.dateFrom))
@@ -72,6 +85,17 @@ export const generateUnconfirmedMessageFromTemplate = (template, data, departmen
     .replace(/\{العدد\}/g, data.personsCount || 1)
     .replace(/\{رابط_الموقع\}/g, mapLink)
     .replace(/\{المدينة\}/g, data.city || '');
+
+  const cityText = data.city || '';
+  if (cityText && !template.includes('{المدينة}') && !message.includes(cityText)) {
+    message += `\n- المدينة: ${cityText}`;
+  }
+
+  if (!/سوف نتواصل|سنتواصل|سنقوم بالتواصل/.test(message)) {
+    message += `\n\n📞 سوف نتواصل معك قريباً لاستكمال إجراءات التأشيرة.`;
+  }
+
+  return message;
 };
 
 /**

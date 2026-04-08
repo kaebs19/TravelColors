@@ -168,7 +168,8 @@ exports.createAppointment = async (req, res, next) => {
       paymentType: paymentType || '',
       totalAmount: parseFloat(totalAmount) || 0,
       paidAmount: parseFloat(paidAmount) || 0,
-      createdBy: createdBy || req.user.id
+      // فقط المدير يستطيع تحديد موظف آخر كمنشئ
+      createdBy: (req.user.role === 'admin' && createdBy) ? createdBy : req.user.id
     };
 
     // إضافة الحقول حسب نوع الموعد
