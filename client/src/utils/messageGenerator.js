@@ -44,7 +44,7 @@ export const generateConfirmedMessageFromTemplate = (template, data, department)
     return generateConfirmedFallback({ ...data, _mapLink: mapLink }, department?.title || '');
   }
 
-  let message = template
+  return template
     .replace(/\{اسم_العميل\}/g, data.customerName || '')
     .replace(/\{الجهة\}/g, department?.title || '')
     .replace(/\{التاريخ\}/g, formatDate(data.appointmentDate))
@@ -52,19 +52,6 @@ export const generateConfirmedMessageFromTemplate = (template, data, department)
     .replace(/\{العدد\}/g, data.personsCount || 1)
     .replace(/\{رابط_الموقع\}/g, mapLink)
     .replace(/\{المدينة\}/g, data.city || '');
-
-  // إضافة المدينة تلقائياً إذا لم يكن القالب يحتوي عليها
-  const cityText = data.city || '';
-  if (cityText && !template.includes('{المدينة}') && !message.includes(cityText)) {
-    message += `\n- المدينة: ${cityText}`;
-  }
-
-  // إضافة رسالة تطمينية إذا لم تكن موجودة في القالب
-  if (!/سوف نتواصل|سنتواصل|سنقوم بالتواصل/.test(message)) {
-    message += `\n\n📞 سوف نتواصل معك قريباً لاستكمال إجراءات التأشيرة.`;
-  }
-
-  return message;
 };
 
 /**
@@ -77,7 +64,7 @@ export const generateUnconfirmedMessageFromTemplate = (template, data, departmen
 
   const mapLink = getMapLink(department, data.city);
 
-  let message = template
+  return template
     .replace(/\{اسم_العميل\}/g, data.customerName || '')
     .replace(/\{الجهة\}/g, department?.title || '')
     .replace(/\{تاريخ_البداية\}/g, formatDate(data.dateFrom))
@@ -85,17 +72,6 @@ export const generateUnconfirmedMessageFromTemplate = (template, data, departmen
     .replace(/\{العدد\}/g, data.personsCount || 1)
     .replace(/\{رابط_الموقع\}/g, mapLink)
     .replace(/\{المدينة\}/g, data.city || '');
-
-  const cityText = data.city || '';
-  if (cityText && !template.includes('{المدينة}') && !message.includes(cityText)) {
-    message += `\n- المدينة: ${cityText}`;
-  }
-
-  if (!/سوف نتواصل|سنتواصل|سنقوم بالتواصل/.test(message)) {
-    message += `\n\n📞 سوف نتواصل معك قريباً لاستكمال إجراءات التأشيرة.`;
-  }
-
-  return message;
 };
 
 /**
@@ -173,10 +149,9 @@ const generateConfirmedFallback = (data, deptTitle) => {
 - التاريخ: ${formatDate(data.appointmentDate)}
 - الوقت: ${formatTime(data.appointmentTime)}
 - عدد الأشخاص: ${data.personsCount || 1}
-- المدينة: ${data.city || ''}
-${mapLink ? `- الموقع: ${mapLink}` : ''}
+${mapLink ? `- الموقع: ${mapLink}` : ''}- المدينة ${data.city || ''}
+
 ⏰ الرجاء الحضور قبل الموعد بـ 15 دقيقة.
-📞 سوف نتواصل معك قريباً لاستكمال الإجراءات.
 
 مع أطيب التحيات،
 ألوان المسافر للسفر والسياحة 🌍`;
@@ -191,11 +166,10 @@ const generateUnconfirmedFallback = (data, deptTitle) => {
 - من: ${formatDate(data.dateFrom)}
 - إلى: ${formatDate(data.dateTo)}
 - عدد الأشخاص: ${data.personsCount || 1}
-- المدينة: ${data.city || ''}
+- المدينة ${data.city || ''}
 
 📌 ملاحظة مهمة:
 هذا الموعد قيد التأكيد، وسنوافيك بالتاريخ والوقت المحدد فور تأكيده.
-📞 سوف نتواصل معك قريباً لاستكمال الإجراءات.
 
 مع أطيب التحيات،
 ألوان المسافر للسفر والسياحة 🌍`;

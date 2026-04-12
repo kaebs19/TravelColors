@@ -1123,41 +1123,36 @@ exports.getTasksReport = async (req, res, next) => {
     }
     const taskApptFilterStage = { $match: taskApptFilter };
 
-    let dateQuery = {};
+    // بناء فلتر التاريخ بناءً على تاريخ الموعد (وليس تاريخ إنشاء المهمة)
+    let dateStart = null;
+    let dateEnd = null;
 
-    // فلتر حسب تاريخ محدد
     if (specificDate) {
-      const date = new Date(specificDate);
-      const nextDay = new Date(date);
-      nextDay.setDate(nextDay.getDate() + 1);
-      dateQuery = {
-        createdAt: {
-          $gte: date,
-          $lt: nextDay
-        }
-      };
-    }
-    // فلتر حسب الشهر
-    else if (month) {
+      dateStart = new Date(specificDate);
+      dateEnd = new Date(specificDate);
+      dateEnd.setHours(23, 59, 59, 999);
+    } else if (month) {
       const year = new Date().getFullYear();
       const monthNum = parseInt(month);
-      const startOfMonth = new Date(year, monthNum - 1, 1);
-      const endOfMonth = new Date(year, monthNum, 0, 23, 59, 59, 999);
-      dateQuery = {
-        createdAt: {
-          $gte: startOfMonth,
-          $lte: endOfMonth
-        }
-      };
+      dateStart = new Date(year, monthNum - 1, 1);
+      dateEnd = new Date(year, monthNum, 0, 23, 59, 59, 999);
+    } else if (startDate && endDate) {
+      dateStart = new Date(startDate);
+      dateEnd = new Date(new Date(endDate).setHours(23, 59, 59, 999));
     }
-    // فلتر حسب نطاق التاريخ
-    else if (startDate && endDate) {
-      dateQuery = {
-        createdAt: {
-          $gte: new Date(startDate),
-          $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999))
-        }
-      };
+
+    // البحث عن المواعيد ضمن نطاق التاريخ ثم استخدام معرّفاتها لفلترة المهام
+    let dateQuery = {};
+    if (dateStart && dateEnd) {
+      const dateRange = { $gte: dateStart, $lte: dateEnd };
+      const matchingAppointments = await Appointment.find({
+        $or: [
+          { appointmentDate: dateRange },
+          { appointmentDate: null, dateFrom: dateRange }
+        ]
+      }).select('_id');
+      const appointmentIds = matchingAppointments.map(a => a._id);
+      dateQuery = { appointment: { $in: appointmentIds } };
     }
 
     // إحصائيات عامة للمهام
