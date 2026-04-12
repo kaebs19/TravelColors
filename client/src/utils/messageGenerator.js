@@ -51,7 +51,7 @@ export const generateConfirmedMessageFromTemplate = (template, data, department)
     .replace(/\{الوقت\}/g, formatTime(data.appointmentTime))
     .replace(/\{العدد\}/g, data.personsCount || 1)
     .replace(/\{رابط_الموقع\}/g, mapLink)
-    .replace(/\{المدينة\}/g, data.city || '');
+    .replace(/\{المدينة\}|\{اسم[_ ]مدينة\}|\{اسم[_ ]المدينة\}/g, data.city || '');
 };
 
 /**
@@ -71,7 +71,7 @@ export const generateUnconfirmedMessageFromTemplate = (template, data, departmen
     .replace(/\{تاريخ_النهاية\}/g, formatDate(data.dateTo))
     .replace(/\{العدد\}/g, data.personsCount || 1)
     .replace(/\{رابط_الموقع\}/g, mapLink)
-    .replace(/\{المدينة\}/g, data.city || '');
+    .replace(/\{المدينة\}|\{اسم[_ ]مدينة\}|\{اسم[_ ]المدينة\}/g, data.city || '');
 };
 
 /**

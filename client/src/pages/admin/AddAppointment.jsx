@@ -1520,8 +1520,8 @@ const AddAppointment = () => {
               </div>
             </>
           )}
-          {/* ========== مضاف بواسطة — المدير فقط يختار ========== */}
-          {user?.role === 'admin' && (
+          {/* ========== مضاف بواسطة ========== */}
+          {(
             <div className="form-section">
               <div className="section-title">
                 <span className="section-icon">👤</span>
