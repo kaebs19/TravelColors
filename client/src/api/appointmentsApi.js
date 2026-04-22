@@ -15,7 +15,8 @@ export const createAppointment = (data) => {
       'isSubmission', 'isVIP', 'appointmentDate', 'appointmentTime',
       'duration', 'dateFrom', 'dateTo', 'reminderDate', 'reminderTime',
       'department', 'city', 'notes', 'paymentType', 'totalAmount',
-      'paidAmount', 'visibility', 'reminderEnabled'
+      'paidAmount', 'visibility', 'reminderEnabled', 'createdBy',
+      'reminderType', 'emailNotification'
     ];
 
     fields.forEach(field => {
@@ -23,6 +24,11 @@ export const createAppointment = (data) => {
         formData.append(field, data[field]);
       }
     });
+
+    // المهام الفرعية — ترسل كـ JSON string لأنها مصفوفة
+    if (Array.isArray(data.subTasks)) {
+      formData.append('subTasks', JSON.stringify(data.subTasks));
+    }
 
     // إضافة الملفات
     data.newFiles.forEach(file => {

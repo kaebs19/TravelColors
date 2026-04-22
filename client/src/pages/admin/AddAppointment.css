@@ -853,3 +853,115 @@
     min-width: 100%;
   }
 }
+
+/* ========== نوع التذكير ========== */
+.reminder-type-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 0.75rem;
+}
+
+.reminder-type-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.9rem 0.5rem;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.reminder-type-btn:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+}
+
+.reminder-type-btn.active {
+  border-width: 2px;
+  font-weight: 600;
+}
+
+.reminder-type-icon {
+  font-size: 1.6rem;
+}
+
+.reminder-type-label {
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+/* ========== المهام الفرعية ========== */
+.subtasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.subtask-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.subtask-check {
+  display: flex;
+  align-items: center;
+  padding: 0 0.3rem;
+}
+
+.subtask-check input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  cursor: pointer;
+  accent-color: #10b981;
+}
+
+.subtask-input {
+  flex: 1;
+}
+
+.subtask-input.completed {
+  text-decoration: line-through;
+  color: #9ca3af;
+  background: #f9fafb;
+}
+
+.subtask-remove {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: #fee2e2;
+  color: #b91c1c;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.subtask-remove:hover {
+  background: #fecaca;
+}
+
+.subtask-add-btn {
+  align-self: flex-start;
+  padding: 0.5rem 1rem;
+  background: #dbeafe;
+  color: #1d4ed8;
+  border: 1px dashed #60a5fa;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.subtask-add-btn:hover {
+  background: #bfdbfe;
+}

@@ -55,7 +55,28 @@ const noteSchema = new mongoose.Schema({
   },
   reminderTime: {
     type: String,
-    default: '08:00'
+    default: '09:00'
+  },
+  // نوع التذكير: مكالمة / اجتماع / متابعة / مهمة / أخرى
+  reminderType: {
+    type: String,
+    enum: ['call', 'meeting', 'follow_up', 'task', 'other'],
+    default: 'other'
+  },
+  // مهام فرعية (checklist)
+  subTasks: [{
+    title: { type: String, trim: true, required: true },
+    completed: { type: Boolean, default: false },
+    completedAt: { type: Date, default: null }
+  }],
+  // تنبيه بالبريد الإلكتروني
+  emailNotification: {
+    type: Boolean,
+    default: false
+  },
+  emailNotifiedAt: {
+    type: Date,
+    default: null
   },
 
   // الحالة

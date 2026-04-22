@@ -115,6 +115,9 @@ exports.createNote = async (req, res, next) => {
       reminderEnabled,
       reminderDate,
       reminderTime,
+      reminderType,
+      subTasks,
+      emailNotification,
       department
     } = req.body;
 
@@ -147,13 +150,25 @@ exports.createNote = async (req, res, next) => {
       visibility: visibility || 'private',
       priority: priority || 'medium',
       reminderEnabled: reminderEnabled !== false,
+      reminderType: reminderType || 'other',
+      emailNotification: !!emailNotification,
       department: department || undefined,
       createdBy: req.user.id
     };
 
     if (reminderEnabled !== false && reminderDate) {
       noteData.reminderDate = reminderDate;
-      noteData.reminderTime = reminderTime || '08:00';
+      noteData.reminderTime = reminderTime || '09:00';
+    }
+
+    if (Array.isArray(subTasks)) {
+      noteData.subTasks = subTasks
+        .filter(t => t && (t.title || '').trim())
+        .map(t => ({
+          title: t.title.trim(),
+          completed: !!t.completed,
+          completedAt: t.completed ? (t.completedAt || new Date()) : null
+        }));
     }
 
     const note = await Note.create(noteData);
@@ -210,6 +225,9 @@ exports.updateNote = async (req, res, next) => {
       reminderEnabled,
       reminderDate,
       reminderTime,
+      reminderType,
+      subTasks,
+      emailNotification,
       status,
       action,
       actionNotes,
@@ -226,6 +244,23 @@ exports.updateNote = async (req, res, next) => {
     if (reminderEnabled !== undefined) note.reminderEnabled = reminderEnabled;
     if (reminderDate) note.reminderDate = reminderDate;
     if (reminderTime) note.reminderTime = reminderTime;
+    if (reminderType) note.reminderType = reminderType;
+    if (emailNotification !== undefined) {
+      note.emailNotification = !!emailNotification;
+      // إعادة ضبط حالة الإرسال عند تغيير الإيميل/التاريخ
+      if (!!emailNotification && reminderDate) {
+        note.emailNotifiedAt = null;
+      }
+    }
+    if (Array.isArray(subTasks)) {
+      note.subTasks = subTasks
+        .filter(t => t && (t.title || '').trim())
+        .map(t => ({
+          title: t.title.trim(),
+          completed: !!t.completed,
+          completedAt: t.completed ? (t.completedAt || new Date()) : null
+        }));
+    }
     if (status) note.status = status;
     if (action) note.action = action;
     if (actionNotes !== undefined) note.actionNotes = actionNotes;

@@ -5,6 +5,32 @@ import { Card, Loader, Modal } from '../../components/common';
 import { useToast } from '../../context';
 import './Notes.css';
 
+// أنواع التذكير مع أيقونات وألوان مميزة
+const REMINDER_TYPES = [
+  { value: 'call', label: 'مكالمة', icon: '📞', color: '#3b82f6' },
+  { value: 'meeting', label: 'اجتماع', icon: '👥', color: '#8b5cf6' },
+  { value: 'follow_up', label: 'متابعة', icon: '🔄', color: '#f59e0b' },
+  { value: 'task', label: 'مهمة', icon: '✅', color: '#10b981' },
+  { value: 'other', label: 'أخرى', icon: '📌', color: '#6b7280' }
+];
+
+const REMINDER_TYPE_MAP = REMINDER_TYPES.reduce((acc, t) => { acc[t.value] = t; return acc; }, {});
+
+// خيارات وقت التذكير — 6ص إلى 10م بفواصل 15 دقيقة
+const REMINDER_TIME_OPTIONS = (() => {
+  const opts = [];
+  for (let h = 6; h <= 22; h++) {
+    for (const m of [0, 15, 30, 45]) {
+      const hh = String(h).padStart(2, '0');
+      const mm = String(m).padStart(2, '0');
+      const period = h < 12 ? 'ص' : 'م';
+      const disp = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+      opts.push({ value: `${hh}:${mm}`, label: `${disp}:${mm} ${period}` });
+    }
+  }
+  return opts;
+})();
+
 const Notes = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -47,7 +73,10 @@ const Notes = () => {
     priority: 'medium',
     reminderEnabled: true,
     reminderDate: '',
-    reminderTime: '08:00',
+    reminderTime: '09:00',
+    reminderType: 'other',
+    subTasks: [],
+    emailNotification: false,
     department: ''
   });
 
@@ -111,7 +140,7 @@ const Notes = () => {
     }
   };
 
-  const handleOpenAddModal = (note = null) => {
+  const handleOpenAddModal = (note = null, presetType = null) => {
     if (note) {
       setEditingNote(note);
       setFormData({
@@ -124,7 +153,10 @@ const Notes = () => {
         priority: note.priority || 'medium',
         reminderEnabled: note.reminderEnabled !== false,
         reminderDate: note.reminderDate ? new Date(note.reminderDate).toISOString().split('T')[0] : '',
-        reminderTime: note.reminderTime || '08:00',
+        reminderTime: note.reminderTime || '09:00',
+        reminderType: note.reminderType || 'other',
+        subTasks: Array.isArray(note.subTasks) ? note.subTasks.map(t => ({ title: t.title, completed: !!t.completed })) : [],
+        emailNotification: !!note.emailNotification,
         department: note.department?._id || ''
       });
     } else {
@@ -139,7 +171,10 @@ const Notes = () => {
         priority: 'medium',
         reminderEnabled: true,
         reminderDate: '',
-        reminderTime: '08:00',
+        reminderTime: '09:00',
+        reminderType: presetType || 'other',
+        subTasks: [],
+        emailNotification: false,
         department: ''
       });
     }
@@ -416,10 +451,16 @@ const Notes = () => {
       <div className="page-header">
         <div className="header-right">
           {activeTab === 'drafts' ? (
-            <button className="add-btn" onClick={() => handleOpenAddModal()}>
-              <span>+</span>
-              إضافة مسودة
-            </button>
+            <div className="header-actions-group">
+              <button className="add-btn" onClick={() => handleOpenAddModal()}>
+                <span>+</span>
+                إضافة مسودة
+              </button>
+              <button className="add-btn reminder-btn" onClick={() => handleOpenAddModal(null, 'call')}>
+                <span>🔔</span>
+                إضافة تذكير
+              </button>
+            </div>
           ) : (
             <button className="add-btn" onClick={() => handleOpenQuickNoteModal()}>
               <span>+</span>
@@ -541,53 +582,77 @@ const Notes = () => {
               const priorityInfo = getPriorityBadge(note.priority);
               const statusInfo = getStatusBadge(note.status);
 
+              const rt = REMINDER_TYPE_MAP[note.reminderType] || REMINDER_TYPE_MAP.other;
+              const totalTasks = (note.subTasks || []).length;
+              const doneTasks = (note.subTasks || []).filter(t => t.completed).length;
+              const taskProgress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+
               return (
-                <div key={note._id} className="note-card">
-                  <div className="note-card-header">
-                    <span className={`visibility-badge ${visibilityInfo.class}`}>
-                      {visibilityInfo.icon} {visibilityInfo.label}
-                    </span>
-                    <span className={`priority-badge ${priorityInfo.class}`}>
-                      {priorityInfo.label}
-                    </span>
-                  </div>
-                  <div className="note-card-body">
-                    <h4 className="note-customer">
-                      {note.customer ? (
-                        <button
-                          className="customer-link"
-                          onClick={() => navigate(`/control/customers/${note.customer._id}`)}
-                        >
-                          {note.customerName}
-                        </button>
-                      ) : note.customerName}
-                    </h4>
-                    {note.phone && <p className="note-phone" dir="ltr">{note.phone}</p>}
-                    {note.title && <p className="note-title-text">{note.title}</p>}
-                    {note.notes && (
-                      <p className="note-content">
-                        {note.notes.length > 100 ? note.notes.substring(0, 100) + '...' : note.notes}
-                      </p>
-                    )}
-                    {note.reminderEnabled && note.reminderDate && (
-                      <div className="note-reminder">
-                        🔔 {formatDateDisplay(note.reminderDate)} - {formatTimeDisplay(note.reminderTime)}
+                <div key={note._id} className="note-card" style={{ borderTop: `4px solid ${rt.color}` }}>
+                  <div className="note-card-main">
+                    <div className="note-card-header">
+                      <span className="reminder-type-badge" style={{ background: rt.color + '20', color: rt.color }}>
+                        {rt.icon} {rt.label}
+                      </span>
+                      <div className="note-card-header-badges">
+                        <span className={`visibility-badge ${visibilityInfo.class}`}>
+                          {visibilityInfo.icon}
+                        </span>
+                        <span className={`priority-badge ${priorityInfo.class}`}>
+                          {priorityInfo.label}
+                        </span>
                       </div>
-                    )}
-                  </div>
-                  <div className="note-card-footer">
-                    <span className={`status-badge ${statusInfo.class}`}>
-                      {statusInfo.icon} {statusInfo.label}
-                    </span>
-                    <div className="note-card-actions">
-                      <button onClick={() => { setViewingNote(note); setShowViewModal(true); }} title="عرض">👁️</button>
-                      <button onClick={() => handleOpenAddModal(note)} title="تعديل">✏️</button>
-                      {note.phone && <button onClick={() => handleSendWhatsApp(note)} title="واتساب">📱</button>}
-                      {note.status === 'active' && (
-                        <button onClick={() => handleOpenConvertModal(note)} title="تحويل لموعد">🔄</button>
-                      )}
-                      <button onClick={() => handleDelete(note._id)} title="حذف">🗑️</button>
                     </div>
+                    <div className="note-card-body">
+                      <h4 className="note-customer">
+                        {note.customer ? (
+                          <button
+                            className="customer-link"
+                            onClick={() => navigate(`/control/customers/${note.customer._id}`)}
+                          >
+                            {note.customerName}
+                          </button>
+                        ) : note.customerName}
+                      </h4>
+                      {note.phone && <p className="note-phone" dir="ltr">{note.phone}</p>}
+                      {note.title && <p className="note-title-text">{note.title}</p>}
+                      {note.notes && (
+                        <p className="note-content">
+                          {note.notes.length > 100 ? note.notes.substring(0, 100) + '...' : note.notes}
+                        </p>
+                      )}
+                      {note.reminderEnabled && note.reminderDate && (
+                        <div className="note-reminder">
+                          🔔 {formatDateDisplay(note.reminderDate)} - {formatTimeDisplay(note.reminderTime)}
+                          {note.emailNotification && <span className="email-indicator" title="تنبيه بالبريد مفعّل">📧</span>}
+                        </div>
+                      )}
+                      {totalTasks > 0 && (
+                        <div className="subtasks-progress">
+                          <div className="subtasks-progress-info">
+                            <span>📋 {doneTasks}/{totalTasks} مهام</span>
+                            <span className="subtasks-progress-percent">{taskProgress}%</span>
+                          </div>
+                          <div className="subtasks-progress-bar">
+                            <div className="subtasks-progress-fill" style={{ width: `${taskProgress}%`, background: rt.color }} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="note-card-footer">
+                      <span className={`status-badge ${statusInfo.class}`}>
+                        {statusInfo.icon} {statusInfo.label}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="note-card-actions-vertical">
+                    <button onClick={() => { setViewingNote(note); setShowViewModal(true); }} title="عرض" className="card-action-btn view">👁️</button>
+                    <button onClick={() => handleOpenAddModal(note)} title="تعديل" className="card-action-btn edit">✏️</button>
+                    {note.phone && <button onClick={() => handleSendWhatsApp(note)} title="واتساب" className="card-action-btn whatsapp">📱</button>}
+                    {note.status === 'active' && (
+                      <button onClick={() => handleOpenConvertModal(note)} title="تحويل لموعد" className="card-action-btn convert">🔄</button>
+                    )}
+                    <button onClick={() => handleDelete(note._id)} title="حذف" className="card-action-btn delete">🗑️</button>
                   </div>
                 </div>
               );
@@ -857,6 +922,25 @@ const Notes = () => {
             </div>
           </div>
 
+          {/* نوع التذكير */}
+          <div className="form-group">
+            <label>نوع التذكير</label>
+            <div className="reminder-type-selector">
+              {REMINDER_TYPES.map(rt => (
+                <button
+                  key={rt.value}
+                  type="button"
+                  className={`reminder-type-btn ${formData.reminderType === rt.value ? 'active' : ''}`}
+                  style={formData.reminderType === rt.value ? { borderColor: rt.color, background: rt.color + '15' } : {}}
+                  onClick={() => setFormData(prev => ({ ...prev, reminderType: rt.value }))}
+                >
+                  <span className="reminder-type-icon">{rt.icon}</span>
+                  <span className="reminder-type-label">{rt.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="form-group checkbox-group">
             <label>
               <input
@@ -869,29 +953,94 @@ const Notes = () => {
           </div>
 
           {formData.reminderEnabled && (
-            <div className="form-row">
-              <div className="form-group">
-                <label>تاريخ التذكير</label>
-                <input
-                  type="date"
-                  value={formData.reminderDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, reminderDate: e.target.value }))}
-                  min={new Date().toISOString().split('T')[0]}
-                />
+            <>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>تاريخ التذكير</label>
+                  <input
+                    type="date"
+                    value={formData.reminderDate}
+                    onChange={(e) => setFormData(prev => ({ ...prev, reminderDate: e.target.value }))}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>وقت التذكير</label>
+                  <select
+                    value={formData.reminderTime}
+                    onChange={(e) => setFormData(prev => ({ ...prev, reminderTime: e.target.value }))}
+                  >
+                    {REMINDER_TIME_OPTIONS.map(slot => (
+                      <option key={slot.value} value={slot.value}>{slot.label}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div className="form-group">
-                <label>وقت التذكير</label>
-                <select
-                  value={formData.reminderTime}
-                  onChange={(e) => setFormData(prev => ({ ...prev, reminderTime: e.target.value }))}
-                >
-                  {hourSlots.map(slot => (
-                    <option key={slot.value} value={slot.value}>{slot.label}</option>
-                  ))}
-                </select>
+
+              <div className="form-group checkbox-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={formData.emailNotification}
+                    onChange={(e) => setFormData(prev => ({ ...prev, emailNotification: e.target.checked }))}
+                  />
+                  📧 إرسال تنبيه بالبريد الإلكتروني
+                </label>
               </div>
-            </div>
+            </>
           )}
+
+          {/* المهام الفرعية */}
+          <div className="form-group">
+            <label>المهام الفرعية (اختياري)</label>
+            <div className="subtasks-list">
+              {(formData.subTasks || []).map((task, idx) => (
+                <div key={idx} className="subtask-row">
+                  <input
+                    type="checkbox"
+                    checked={!!task.completed}
+                    onChange={(e) => {
+                      const newTasks = [...formData.subTasks];
+                      newTasks[idx] = { ...newTasks[idx], completed: e.target.checked };
+                      setFormData(prev => ({ ...prev, subTasks: newTasks }));
+                    }}
+                  />
+                  <input
+                    type="text"
+                    value={task.title}
+                    onChange={(e) => {
+                      const newTasks = [...formData.subTasks];
+                      newTasks[idx] = { ...newTasks[idx], title: e.target.value };
+                      setFormData(prev => ({ ...prev, subTasks: newTasks }));
+                    }}
+                    placeholder="عنوان المهمة"
+                    className={`subtask-input ${task.completed ? 'completed' : ''}`}
+                  />
+                  <button
+                    type="button"
+                    className="subtask-remove"
+                    onClick={() => {
+                      const newTasks = formData.subTasks.filter((_, i) => i !== idx);
+                      setFormData(prev => ({ ...prev, subTasks: newTasks }));
+                    }}
+                    aria-label="حذف"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                className="subtask-add-btn"
+                onClick={() => setFormData(prev => ({
+                  ...prev,
+                  subTasks: [...(prev.subTasks || []), { title: '', completed: false }]
+                }))}
+              >
+                + إضافة مهمة
+              </button>
+            </div>
+          </div>
 
           <div className="form-group">
             <label>القسم (اختياري)</label>

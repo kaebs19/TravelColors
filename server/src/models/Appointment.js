@@ -86,6 +86,27 @@ const appointmentSchema = new mongoose.Schema({
       return this.type === 'draft' && this.reminderEnabled;
     }
   },
+  // نوع التذكير: مكالمة / اجتماع / متابعة / مهمة / أخرى
+  reminderType: {
+    type: String,
+    enum: ['call', 'meeting', 'follow_up', 'task', 'other'],
+    default: 'other'
+  },
+  // مهام فرعية (checklist)
+  subTasks: [{
+    title: { type: String, trim: true, required: true },
+    completed: { type: Boolean, default: false },
+    completedAt: { type: Date, default: null }
+  }],
+  // تنبيه بالبريد الإلكتروني
+  emailNotification: {
+    type: Boolean,
+    default: false
+  },
+  emailNotifiedAt: {
+    type: Date,
+    default: null
+  },
 
   // خصوصية المسودة
   visibility: {

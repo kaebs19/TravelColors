@@ -35,6 +35,16 @@ const isWeekend = (date) => {
   return day === 5 || day === 6;
 };
 
+// دالة للتحقق من أن التاريخ ليس في الماضي (قبل اليوم)
+const isPastDate = (dateStr) => {
+  if (!dateStr) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const selected = new Date(dateStr);
+  selected.setHours(0, 0, 0, 0);
+  return selected < today;
+};
+
 // دالة لتنسيق التاريخ بالعربي
 const formatDateArabic = (dateStr) => {
   if (!dateStr) return '';
@@ -83,6 +93,17 @@ const generateHourSlots = (startHour = 8, endHour = 14, minuteIntervals = [0]) =
 const DEFAULT_HOUR_OPTIONS = generateHourOptions(8, 14);
 const DEFAULT_MINUTE_OPTIONS = generateMinuteOptions([0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]);
 const DEFAULT_HOUR_SLOTS = generateHourSlots(8, 14, [0]);
+// خيارات وقت التذكير — أوسع نطاق (6 صباحاً - 10 مساءً) بفواصل 15 دقيقة
+const REMINDER_HOUR_SLOTS = generateHourSlots(6, 22, [0, 15, 30, 45]);
+
+// أنواع التذكير مع أيقونات وألوان مميزة
+const REMINDER_TYPES = [
+  { value: 'call', label: 'مكالمة', icon: '📞', color: '#3b82f6' },
+  { value: 'meeting', label: 'اجتماع', icon: '👥', color: '#8b5cf6' },
+  { value: 'follow_up', label: 'متابعة', icon: '🔄', color: '#f59e0b' },
+  { value: 'task', label: 'مهمة', icon: '✅', color: '#10b981' },
+  { value: 'other', label: 'أخرى', icon: '📌', color: '#6b7280' }
+];
 const STORAGE_KEY = 'appointmentFormDraft';
 
 const AddAppointment = () => {
@@ -151,7 +172,10 @@ const AddAppointment = () => {
     dateTo: savedData?.dateTo || '',
     reminderEnabled: savedData?.reminderEnabled ?? true,
     reminderDate: savedData?.reminderDate || '',
-    reminderTime: savedData?.reminderTime || '08:00',
+    reminderTime: savedData?.reminderTime || '09:00',
+    reminderType: savedData?.reminderType || 'other',
+    subTasks: savedData?.subTasks || [],
+    emailNotification: savedData?.emailNotification || false,
     department: savedData?.department || '',
     city: savedData?.city || 'الرياض',
     notes: savedData?.notes || '',
@@ -415,7 +439,10 @@ const AddAppointment = () => {
     setFormData(prev => ({ ...prev, [name]: newValue }));
 
     if (name === 'appointmentDate' || name === 'dateFrom' || name === 'dateTo' || name === 'reminderDate') {
-      if (newValue && isWeekend(newValue)) {
+      if (newValue && isPastDate(newValue)) {
+        setDateError('التاريخ المحدد في الماضي — يرجى اختيار تاريخ اليوم أو بعده');
+        showToast('⚠️ لا يمكن اختيار تاريخ في الماضي', 'warning');
+      } else if (newValue && isWeekend(newValue)) {
         setDateError('لا يمكن اختيار يوم الجمعة أو السبت (إجازة)');
       } else {
         setDateError('');
@@ -571,6 +598,10 @@ const AddAppointment = () => {
         showToast('تاريخ الموعد مطلوب', 'warning');
         return;
       }
+      if (!editingAppointment && isPastDate(formData.appointmentDate)) {
+        showToast('⚠️ لا يمكن إنشاء موعد بتاريخ في الماضي', 'warning');
+        return;
+      }
       if (isWeekend(formData.appointmentDate)) {
         showToast('لا يمكن اختيار يوم الجمعة أو السبت', 'warning');
         return;
@@ -584,6 +615,10 @@ const AddAppointment = () => {
         showToast('يجب تحديد تاريخ البداية والنهاية', 'warning');
         return;
       }
+      if (!editingAppointment && (isPastDate(formData.dateFrom) || isPastDate(formData.dateTo))) {
+        showToast('⚠️ لا يمكن إنشاء موعد بتاريخ في الماضي', 'warning');
+        return;
+      }
       if (new Date(formData.dateFrom) > new Date(formData.dateTo)) {
         showToast('تاريخ البداية يجب أن يكون قبل تاريخ النهاية', 'warning');
         return;
@@ -591,6 +626,10 @@ const AddAppointment = () => {
     } else if (formData.type === 'draft') {
       if (formData.reminderEnabled && (!formData.reminderDate || !formData.reminderTime)) {
         showToast('يجب تحديد تاريخ ووقت التذكير', 'warning');
+        return;
+      }
+      if (!editingAppointment && formData.reminderEnabled && isPastDate(formData.reminderDate)) {
+        showToast('⚠️ لا يمكن تحديد تاريخ تذكير في الماضي', 'warning');
         return;
       }
     }
@@ -1450,6 +1489,28 @@ const AddAppointment = () => {
                 </p>
               </div>
 
+              {/* نوع التذكير */}
+              <div className="form-section">
+                <div className="section-title">
+                  <span className="section-icon">🏷️</span>
+                  <h4>نوع التذكير</h4>
+                </div>
+                <div className="reminder-type-selector">
+                  {REMINDER_TYPES.map(rt => (
+                    <button
+                      key={rt.value}
+                      type="button"
+                      className={`reminder-type-btn ${formData.reminderType === rt.value ? 'active' : ''}`}
+                      style={formData.reminderType === rt.value ? { borderColor: rt.color, background: rt.color + '15' } : {}}
+                      onClick={() => setFormData(prev => ({ ...prev, reminderType: rt.value }))}
+                    >
+                      <span className="reminder-type-icon">{rt.icon}</span>
+                      <span className="reminder-type-label">{rt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* التذكير */}
               <div className="form-section">
                 <div className="section-title">
@@ -1470,35 +1531,109 @@ const AddAppointment = () => {
                 </div>
 
                 {formData.reminderEnabled && (
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label>تاريخ التذكير</label>
-                      <input
-                        type="date"
-                        name="reminderDate"
-                        value={formData.reminderDate}
-                        onChange={handleChange}
-                        className="form-input"
-                      />
-                      {formData.reminderDate && (
-                        <span className="date-preview">{formatDateArabic(formData.reminderDate)}</span>
-                      )}
+                  <>
+                    <div className="form-grid">
+                      <div className="form-group">
+                        <label>تاريخ التذكير</label>
+                        <input
+                          type="date"
+                          name="reminderDate"
+                          value={formData.reminderDate}
+                          onChange={handleChange}
+                          className="form-input"
+                        />
+                        {formData.reminderDate && (
+                          <span className="date-preview">{formatDateArabic(formData.reminderDate)}</span>
+                        )}
+                      </div>
+                      <div className="form-group">
+                        <label>وقت التذكير</label>
+                        <select
+                          name="reminderTime"
+                          value={formData.reminderTime}
+                          onChange={handleChange}
+                          className="form-select"
+                        >
+                          {REMINDER_HOUR_SLOTS.map(slot => (
+                            <option key={slot.value} value={slot.value}>{slot.label}</option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
-                    <div className="form-group">
-                      <label>وقت التذكير</label>
-                      <select
-                        name="reminderTime"
-                        value={formData.reminderTime}
-                        onChange={handleChange}
-                        className="form-select"
-                      >
-                        {hourSlots.map(slot => (
-                          <option key={slot.value} value={slot.value}>{slot.label}</option>
-                        ))}
-                      </select>
+
+                    {/* تنبيه بالبريد الإلكتروني */}
+                    <div className="form-group" style={{ marginTop: '0.75rem' }}>
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          name="emailNotification"
+                          checked={formData.emailNotification}
+                          onChange={handleChange}
+                        />
+                        <span className="checkbox-text">📧 إرسال تنبيه بالبريد الإلكتروني للموظف المسؤول</span>
+                      </label>
                     </div>
-                  </div>
+                  </>
                 )}
+              </div>
+
+              {/* المهام الفرعية */}
+              <div className="form-section">
+                <div className="section-title">
+                  <span className="section-icon">📋</span>
+                  <h4>المهام الفرعية (اختياري)</h4>
+                </div>
+                <div className="subtasks-list">
+                  {(formData.subTasks || []).map((task, idx) => (
+                    <div key={idx} className="subtask-row">
+                      <label className="subtask-check">
+                        <input
+                          type="checkbox"
+                          checked={!!task.completed}
+                          onChange={(e) => {
+                            const newTasks = [...formData.subTasks];
+                            newTasks[idx] = { ...newTasks[idx], completed: e.target.checked };
+                            setFormData(prev => ({ ...prev, subTasks: newTasks }));
+                          }}
+                        />
+                      </label>
+                      <input
+                        type="text"
+                        value={task.title}
+                        onChange={(e) => {
+                          const newTasks = [...formData.subTasks];
+                          newTasks[idx] = { ...newTasks[idx], title: e.target.value };
+                          setFormData(prev => ({ ...prev, subTasks: newTasks }));
+                        }}
+                        placeholder="عنوان المهمة"
+                        className={`form-input subtask-input ${task.completed ? 'completed' : ''}`}
+                      />
+                      <button
+                        type="button"
+                        className="subtask-remove"
+                        onClick={() => {
+                          const newTasks = formData.subTasks.filter((_, i) => i !== idx);
+                          setFormData(prev => ({ ...prev, subTasks: newTasks }));
+                        }}
+                        aria-label="حذف"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    className="subtask-add-btn"
+                    onClick={() => {
+                      setFormData(prev => ({
+                        ...prev,
+                        subTasks: [...(prev.subTasks || []), { title: '', completed: false }]
+                      }));
+                    }}
+                  >
+                    + إضافة مهمة
+                  </button>
+                </div>
               </div>
 
               {/* ملاحظات */}

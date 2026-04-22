@@ -121,6 +121,10 @@ const startServer = async () => {
       console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
       console.log(`API: http://localhost:${PORT}`);
     });
+
+    // تشغيل مهمة تذكيرات البريد (كل 5 دقائق)
+    const { startReminderJob } = require('./jobs/reminderEmailJob');
+    startReminderJob();
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);

@@ -571,11 +571,219 @@
   box-shadow: var(--shadow-sm);
   overflow: hidden;
   transition: all var(--transition);
+  display: flex;
+  flex-direction: row-reverse;
 }
 
 .note-card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
+}
+
+.note-card-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.note-card-actions-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  background: #f9fafb;
+  border-left: 1px solid var(--border-color);
+}
+
+.note-card-actions-vertical .card-action-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.note-card-actions-vertical .card-action-btn.view { background: #dbeafe; color: #1d4ed8; }
+.note-card-actions-vertical .card-action-btn.edit { background: #fef3c7; color: #92400e; }
+.note-card-actions-vertical .card-action-btn.whatsapp { background: #d1fae5; color: #15803d; }
+.note-card-actions-vertical .card-action-btn.convert { background: #e0e7ff; color: #4338ca; }
+.note-card-actions-vertical .card-action-btn.delete { background: #fee2e2; color: #b91c1c; }
+.note-card-actions-vertical .card-action-btn:hover { transform: scale(1.08); }
+
+.reminder-type-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.note-card-header-badges {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.email-indicator {
+  margin-right: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.subtasks-progress {
+  margin-top: 0.6rem;
+  padding: 0.5rem 0.6rem;
+  background: #f9fafb;
+  border-radius: 6px;
+}
+
+.subtasks-progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: #374151;
+  margin-bottom: 0.3rem;
+}
+
+.subtasks-progress-percent {
+  font-weight: 600;
+}
+
+.subtasks-progress-bar {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.subtasks-progress-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+/* زر "إضافة تذكير" الثانوي */
+.header-actions-group {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.add-btn.reminder-btn {
+  background: #f59e0b;
+}
+
+.add-btn.reminder-btn:hover {
+  background: #d97706;
+}
+
+/* نوع التذكير في النموذج */
+.reminder-type-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.6rem;
+}
+
+.reminder-type-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.75rem 0.4rem;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.reminder-type-btn:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+}
+
+.reminder-type-btn.active {
+  font-weight: 600;
+}
+
+.reminder-type-icon {
+  font-size: 1.5rem;
+}
+
+.reminder-type-label {
+  font-size: 0.82rem;
+}
+
+/* المهام الفرعية في النموذج */
+.subtasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.subtask-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.subtask-row input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  cursor: pointer;
+  accent-color: #10b981;
+}
+
+.subtask-input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-family: inherit;
+}
+
+.subtask-input.completed {
+  text-decoration: line-through;
+  color: #9ca3af;
+  background: #f9fafb;
+}
+
+.subtask-remove {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 6px;
+  background: #fee2e2;
+  color: #b91c1c;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.subtask-remove:hover {
+  background: #fecaca;
+}
+
+.subtask-add-btn {
+  align-self: flex-start;
+  padding: 0.45rem 0.9rem;
+  background: #dbeafe;
+  color: #1d4ed8;
+  border: 1px dashed #60a5fa;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.subtask-add-btn:hover {
+  background: #bfdbfe;
 }
 
 .note-card-header {

@@ -107,6 +107,9 @@ exports.createAppointment = async (req, res, next) => {
       reminderEnabled,
       reminderDate,
       reminderTime,
+      reminderType,
+      subTasks,
+      emailNotification,
       department,
       city,
       notes,
@@ -127,6 +130,34 @@ exports.createAppointment = async (req, res, next) => {
           message: 'القسم غير موجود'
         });
       }
+    }
+
+    // التحقق من أن التاريخ ليس في الماضي عند إنشاء موعد جديد
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const isBeforeToday = (dateStr) => {
+      if (!dateStr) return false;
+      const d = new Date(dateStr);
+      d.setHours(0, 0, 0, 0);
+      return d < startOfToday;
+    };
+    if (type === 'confirmed' && isBeforeToday(appointmentDate)) {
+      return res.status(400).json({
+        success: false,
+        message: 'لا يمكن إنشاء موعد بتاريخ في الماضي'
+      });
+    }
+    if (type === 'unconfirmed' && (isBeforeToday(dateFrom) || isBeforeToday(dateTo))) {
+      return res.status(400).json({
+        success: false,
+        message: 'لا يمكن إنشاء موعد بتاريخ في الماضي'
+      });
+    }
+    if (type === 'draft' && reminderEnabled && isBeforeToday(reminderDate)) {
+      return res.status(400).json({
+        success: false,
+        message: 'لا يمكن تحديد تاريخ تذكير في الماضي'
+      });
     }
 
     // إضافة العميل تلقائياً إذا لم يكن موجوداً
@@ -168,8 +199,8 @@ exports.createAppointment = async (req, res, next) => {
       paymentType: paymentType || '',
       totalAmount: parseFloat(totalAmount) || 0,
       paidAmount: parseFloat(paidAmount) || 0,
-      // فقط المدير يستطيع تحديد موظف آخر كمنشئ
-      createdBy: (req.user.role === 'admin' && createdBy) ? createdBy : req.user.id
+      // السماح لأي موظف بتحديد "مضاف بواسطة"، وإلا استخدام المستخدم الحالي
+      createdBy: createdBy || req.user.id
     };
 
     // إضافة الحقول حسب نوع الموعد
@@ -187,6 +218,20 @@ exports.createAppointment = async (req, res, next) => {
       if (effectiveReminderEnabled) {
         appointmentData.reminderDate = reminderDate;
         appointmentData.reminderTime = reminderTime;
+      }
+      if (reminderType) appointmentData.reminderType = reminderType;
+      if (emailNotification !== undefined) appointmentData.emailNotification = !!emailNotification;
+      if (subTasks) {
+        const parsed = typeof subTasks === 'string' ? JSON.parse(subTasks) : subTasks;
+        if (Array.isArray(parsed)) {
+          appointmentData.subTasks = parsed
+            .filter(t => t && (t.title || '').trim())
+            .map(t => ({
+              title: t.title.trim(),
+              completed: !!t.completed,
+              completedAt: t.completed ? (t.completedAt || new Date()) : null
+            }));
+        }
       }
     }
 
@@ -452,6 +497,9 @@ exports.updateAppointment = async (req, res, next) => {
       reminderEnabled,
       reminderDate,
       reminderTime,
+      reminderType,
+      subTasks,
+      emailNotification,
       department,
       city,
       notes,
@@ -500,6 +548,26 @@ exports.updateAppointment = async (req, res, next) => {
       if (reminderEnabled !== undefined) appointment.reminderEnabled = reminderEnabled;
       if (reminderDate) appointment.reminderDate = reminderDate;
       if (reminderTime) appointment.reminderTime = reminderTime;
+      if (reminderType) appointment.reminderType = reminderType;
+      if (emailNotification !== undefined) {
+        appointment.emailNotification = !!emailNotification;
+        // إعادة ضبط حالة الإرسال عند تغيير الميعاد أو تفعيل الإيميل
+        if (!!emailNotification && reminderDate) {
+          appointment.emailNotifiedAt = null;
+        }
+      }
+      if (subTasks !== undefined) {
+        const parsed = typeof subTasks === 'string' ? JSON.parse(subTasks) : subTasks;
+        if (Array.isArray(parsed)) {
+          appointment.subTasks = parsed
+            .filter(t => t && (t.title || '').trim())
+            .map(t => ({
+              title: t.title.trim(),
+              completed: !!t.completed,
+              completedAt: t.completed ? (t.completedAt || new Date()) : null
+            }));
+        }
+      }
       // إذا لم يوجد تاريخ تذكير، نُعطّل التذكير لتفادي خطأ التحقق
       if (!appointment.reminderDate) {
         appointment.reminderEnabled = false;
