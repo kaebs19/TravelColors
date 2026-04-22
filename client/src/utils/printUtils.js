@@ -291,7 +291,7 @@ export const formatInvoiceForPrint = (invoice, settings = {}) => {
 
   const formatDate = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString('ar-SA', {
+    return new Date(date).toLocaleDateString('ar-u-nu-latn', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -299,7 +299,7 @@ export const formatInvoiceForPrint = (invoice, settings = {}) => {
   };
 
   const formatCurrency = (amount) => {
-    return `${(amount || 0).toLocaleString('ar-SA')} ر.س`;
+    return `${(amount || 0).toLocaleString('en-US')} ر.س`;
   };
 
   const itemsRows = (invoice.items || []).map(item => `
@@ -429,7 +429,7 @@ export const formatReceiptForPrint = (receipt, settings = {}) => {
 
   const formatDate = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString('ar-SA', {
+    return new Date(date).toLocaleDateString('ar-u-nu-latn', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -439,7 +439,7 @@ export const formatReceiptForPrint = (receipt, settings = {}) => {
   };
 
   const formatCurrency = (amount) => {
-    return `${(amount || 0).toLocaleString('ar-SA')} ر.س`;
+    return `${(amount || 0).toLocaleString('en-US')} ر.س`;
   };
 
   return `
