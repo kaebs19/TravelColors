@@ -84,6 +84,9 @@ const buildLicenseReceiptHTML = (appData) => {
           <span>0558741741</span>
           <span>info@trcolors.com</span>
         </div>
+        <div style="margin-top: 4px; text-align: center; font-size: 9px; opacity: 0.85; font-family: 'Tajawal', sans-serif; letter-spacing: 0.2px;">
+          مرخص من هيئة السياحة رقم: <strong>73104877</strong>
+        </div>
       </div>
 
       <!-- عنوان الإيصال -->

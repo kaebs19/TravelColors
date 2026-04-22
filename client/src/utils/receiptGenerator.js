@@ -111,6 +111,9 @@ const buildReceiptHTML = (appointmentData, options = {}) => {
           <span>${companyPhone}</span>
           <span>${companyEmail}</span>
         </div>
+        <div style="margin-top: 4px; text-align: center; font-size: 9px; opacity: 0.85; font-family: 'Tajawal', sans-serif; letter-spacing: 0.2px;">
+          مرخص من هيئة السياحة رقم: <strong>73104877</strong>
+        </div>
         ` : ''}
       </div>
 

@@ -307,6 +307,7 @@ export const formatInvoiceForPrint = (invoice, settings = {}) => {
         <p>هاتف: ${invoice.companyInfo?.phone || settings.phone || ''}</p>
         ${invoice.companyInfo?.email ? `<p>بريد: ${invoice.companyInfo.email}</p>` : ''}
         ${invoice.companyInfo?.taxNumber ? `<p>الرقم الضريبي: ${invoice.companyInfo.taxNumber}</p>` : ''}
+        <p>مرخص من هيئة السياحة رقم: <strong>73104877</strong></p>
       </div>
       <div class="document-info">
         <div class="doc-type">${typeLabels[invoice.type] || 'فاتورة'}</div>
@@ -431,6 +432,7 @@ export const formatReceiptForPrint = (receipt, settings = {}) => {
         ${receipt.companyInfo?.nameEn ? `<p>${receipt.companyInfo.nameEn}</p>` : ''}
         <p>${receipt.companyInfo?.address || settings.address || ''}</p>
         <p>هاتف: ${receipt.companyInfo?.phone || settings.phone || ''}</p>
+        <p>مرخص من هيئة السياحة رقم: <strong>73104877</strong></p>
       </div>
       <div class="document-info">
         <div class="doc-type">إيصال استلام</div>
