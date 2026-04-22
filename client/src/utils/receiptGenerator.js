@@ -260,7 +260,7 @@ const htmlToPdf = async (receiptContainer) => {
   await document.fonts.ready;
 
   const canvas = await html2canvas(receiptContainer, {
-    scale: 2,
+    scale: 1.5,
     useCORS: true,
     allowTaint: true,
     logging: false,
@@ -270,7 +270,8 @@ const htmlToPdf = async (receiptContainer) => {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
-    format: 'a4'
+    format: 'a4',
+    compress: true
   });
 
   const pageWidth = 210;
@@ -295,7 +296,8 @@ const htmlToPdf = async (receiptContainer) => {
   const xOffset = (pageWidth - finalWidth) / 2;
   const yOffset = margin;
 
-  doc.addImage(canvas.toDataURL('image/png'), 'PNG', xOffset, yOffset, finalWidth, finalHeight);
+  // JPEG بجودة 0.85 — أصغر بـ ~85% من PNG مع جودة بصرية ممتازة
+  doc.addImage(canvas.toDataURL('image/jpeg', 0.85), 'JPEG', xOffset, yOffset, finalWidth, finalHeight, undefined, 'FAST');
 
   return doc;
 };

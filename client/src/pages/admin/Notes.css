@@ -572,7 +572,7 @@
   overflow: hidden;
   transition: all var(--transition);
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: column;
 }
 
 .note-card:hover {
@@ -587,26 +587,30 @@
   min-width: 0;
 }
 
+/* أزرار البطاقة — صف أفقي مدمج أسفل البطاقة */
 .note-card-actions-vertical {
   display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  padding: 0.5rem;
+  flex-direction: row;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.75rem;
   background: #f9fafb;
-  border-left: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
+  flex-wrap: wrap;
 }
 
 .note-card-actions-vertical .card-action-btn {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.15s;
+  flex-shrink: 0;
 }
 
 .note-card-actions-vertical .card-action-btn.view { background: #dbeafe; color: #1d4ed8; }
@@ -614,7 +618,7 @@
 .note-card-actions-vertical .card-action-btn.whatsapp { background: #d1fae5; color: #15803d; }
 .note-card-actions-vertical .card-action-btn.convert { background: #e0e7ff; color: #4338ca; }
 .note-card-actions-vertical .card-action-btn.delete { background: #fee2e2; color: #b91c1c; }
-.note-card-actions-vertical .card-action-btn:hover { transform: scale(1.08); }
+.note-card-actions-vertical .card-action-btn:hover { transform: scale(1.1); }
 
 .reminder-type-badge {
   font-size: 0.78rem;

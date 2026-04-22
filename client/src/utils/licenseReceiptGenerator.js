@@ -221,14 +221,14 @@ const htmlToPdf = async (container) => {
   await document.fonts.ready;
 
   const canvas = await html2canvas(container, {
-    scale: 2,
+    scale: 1.5,
     useCORS: true,
     allowTaint: true,
     logging: false,
     backgroundColor: '#f5f3ef'
   });
 
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
   const pageWidth = 210;
   const pageHeight = 297;
   const margin = 10;
@@ -248,7 +248,7 @@ const htmlToPdf = async (container) => {
   }
 
   const xOffset = (pageWidth - finalWidth) / 2;
-  doc.addImage(canvas.toDataURL('image/png'), 'PNG', xOffset, margin, finalWidth, finalHeight);
+  doc.addImage(canvas.toDataURL('image/jpeg', 0.85), 'JPEG', xOffset, margin, finalWidth, finalHeight, undefined, 'FAST');
 
   return doc;
 };
