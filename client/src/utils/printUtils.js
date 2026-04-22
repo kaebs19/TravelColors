@@ -46,6 +46,20 @@ export const printContent = (content, title = 'طباعة') => {
           margin-bottom: 20px;
         }
 
+        .company-brand {
+          display: flex;
+          align-items: flex-start;
+          gap: 14px;
+        }
+
+        .company-logo {
+          width: 70px;
+          height: 70px;
+          object-fit: contain;
+          border-radius: 10px;
+          flex-shrink: 0;
+        }
+
         .company-info h2 {
           color: #1a56db;
           font-size: 24px;
@@ -300,14 +314,17 @@ export const formatInvoiceForPrint = (invoice, settings = {}) => {
 
   return `
     <div class="print-header">
-      <div class="company-info">
-        <h2>${invoice.companyInfo?.name || settings.companyName || 'ألوان المسافر'}</h2>
-        ${invoice.companyInfo?.nameEn ? `<p>${invoice.companyInfo.nameEn}</p>` : ''}
-        <p>${invoice.companyInfo?.address || settings.address || ''}</p>
-        <p>هاتف: ${invoice.companyInfo?.phone || settings.phone || ''}</p>
-        ${invoice.companyInfo?.email ? `<p>بريد: ${invoice.companyInfo.email}</p>` : ''}
-        ${invoice.companyInfo?.taxNumber ? `<p>الرقم الضريبي: ${invoice.companyInfo.taxNumber}</p>` : ''}
-        <p>مرخص من هيئة السياحة رقم: <strong>73104877</strong></p>
+      <div class="company-brand">
+        <img src="${typeof window !== 'undefined' ? window.location.origin : ''}/logo512.png" alt="Logo" class="company-logo" onerror="this.style.display='none'" />
+        <div class="company-info">
+          <h2>${invoice.companyInfo?.name || settings.companyName || 'ألوان المسافر'}</h2>
+          ${invoice.companyInfo?.nameEn ? `<p>${invoice.companyInfo.nameEn}</p>` : ''}
+          <p>${invoice.companyInfo?.address || settings.address || ''}</p>
+          <p>هاتف: ${invoice.companyInfo?.phone || settings.phone || ''}</p>
+          ${invoice.companyInfo?.email ? `<p>بريد: ${invoice.companyInfo.email}</p>` : ''}
+          ${invoice.companyInfo?.taxNumber ? `<p>الرقم الضريبي: ${invoice.companyInfo.taxNumber}</p>` : ''}
+          <p>مرخص من هيئة السياحة رقم: 73104877</p>
+        </div>
       </div>
       <div class="document-info">
         <div class="doc-type">${typeLabels[invoice.type] || 'فاتورة'}</div>
@@ -427,12 +444,15 @@ export const formatReceiptForPrint = (receipt, settings = {}) => {
 
   return `
     <div class="print-header">
-      <div class="company-info">
-        <h2>${receipt.companyInfo?.name || settings.companyName || 'ألوان المسافر'}</h2>
-        ${receipt.companyInfo?.nameEn ? `<p>${receipt.companyInfo.nameEn}</p>` : ''}
-        <p>${receipt.companyInfo?.address || settings.address || ''}</p>
-        <p>هاتف: ${receipt.companyInfo?.phone || settings.phone || ''}</p>
-        <p>مرخص من هيئة السياحة رقم: <strong>73104877</strong></p>
+      <div class="company-brand">
+        <img src="${typeof window !== 'undefined' ? window.location.origin : ''}/logo512.png" alt="Logo" class="company-logo" onerror="this.style.display='none'" />
+        <div class="company-info">
+          <h2>${receipt.companyInfo?.name || settings.companyName || 'ألوان المسافر'}</h2>
+          ${receipt.companyInfo?.nameEn ? `<p>${receipt.companyInfo.nameEn}</p>` : ''}
+          <p>${receipt.companyInfo?.address || settings.address || ''}</p>
+          <p>هاتف: ${receipt.companyInfo?.phone || settings.phone || ''}</p>
+          <p>مرخص من هيئة السياحة رقم: 73104877</p>
+        </div>
       </div>
       <div class="document-info">
         <div class="doc-type">إيصال استلام</div>
