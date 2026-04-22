@@ -83,173 +83,150 @@ const buildReceiptHTML = (appointmentData, options = {}) => {
   // نص التذييل
   const footerTerms = receiptTerms || `شكراً لاختياركم ${companyName}\nنتمنى لكم رحلة سعيدة`;
 
+  // ═══════════════════════════════════════════════════════════
+  // تصميم هادئ — ألوان دافئة ومريحة، تخطيط واسع، قراءة مريحة
+  // ═══════════════════════════════════════════════════════════
+  const C = {
+    bg: '#fbfaf6',           // كريمي فاتح جداً
+    card: '#ffffff',
+    border: '#e8e3d7',       // حدود كريمية ناعمة
+    borderLight: '#f0ebe0',
+    primary: '#4a6572',      // أزرق رمادي ناعم
+    primaryDark: '#2f3e46',
+    primarySoft: '#eef2f4',
+    accent: '#c8a44e',       // ذهبي
+    accentSoft: '#f7efd8',
+    sage: '#6b9d7e',         // أخضر مريم
+    sageSoft: '#e8f1ea',
+    danger: '#c05746',       // أحمر دافئ
+    dangerSoft: '#faebe7',
+    text: '#2f3e46',
+    textMuted: '#7c8a92',
+    textLight: '#a8b3ba'
+  };
+
+  const row = (label, value, valueDir = '') => `
+    <div style="display: flex; align-items: center; padding: 6px 0; border-bottom: 1px dashed ${C.borderLight}; font-family: 'Tajawal', sans-serif;">
+      <span style="color: ${C.textMuted}; font-size: 11px; font-weight: 500; min-width: 90px;">${label}</span>
+      <span style="color: ${C.text}; font-size: 12px; font-weight: 600; flex: 1;"${valueDir ? ` dir="${valueDir}"` : ''}>${value}</span>
+    </div>
+  `;
+
+  const sectionTitle = (icon, title, color = C.primary) => `
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+      <span style="font-size: 14px;">${icon}</span>
+      <span style="font-size: 13px; color: ${color}; font-weight: 700; font-family: 'Tajawal', sans-serif;">${title}</span>
+      <span style="flex: 1; height: 1px; background: ${C.borderLight};"></span>
+    </div>
+  `;
+
   return `
-    <div style="border: 1.5px solid #1e3a5f; border-radius: 10px; overflow: hidden; font-family: 'Tajawal', sans-serif;">
+    <div style="background: ${C.bg}; border-radius: 14px; overflow: hidden; font-family: 'Tajawal', sans-serif; border: 1px solid ${C.border};">
 
-      <!-- رأس الإيصال -->
-      <div style="background: linear-gradient(135deg, #0c1f3f 0%, #1e3a5f 50%, #2d5a8e 100%); padding: 14px 16px 12px; color: white; position: relative;">
-        <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #c8a44e, #e8c96e, #c8a44e);"></div>
-
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="${logoUrl}" alt="Logo" style="width: 50px; height: 50px; border-radius: 8px; object-fit: contain;" crossorigin="anonymous" />
+      <!-- رأس الإيصال — بسيط ونظيف -->
+      <div style="background: ${C.card}; padding: 20px 22px 16px; border-bottom: 1px solid ${C.border};">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <img src="${logoUrl}" alt="Logo" style="width: 54px; height: 54px; border-radius: 10px; object-fit: contain;" crossorigin="anonymous" />
             <div>
-              <div style="margin: 0; font-size: 17px; font-weight: 800; font-family: 'Tajawal', sans-serif;">${companyName}</div>
-              <div style="margin: 2px 0; font-size: 10px; opacity: 0.85; font-weight: 400; font-family: 'Tajawal', sans-serif;">${companyNameEn}</div>
-              <div style="margin: 1px 0; font-size: 9px; opacity: 0.6; font-family: 'Tajawal', sans-serif;">للسفر والسياحة</div>
+              <div style="font-size: 18px; font-weight: 800; color: ${C.primaryDark}; font-family: 'Tajawal', sans-serif; line-height: 1.3;">${companyName}</div>
+              <div style="font-size: 11px; color: ${C.textMuted}; font-weight: 500; font-family: 'Tajawal', sans-serif; margin-top: 2px;">${companyNameEn} · للسفر والسياحة</div>
             </div>
           </div>
-          <div style="text-align: center; background: rgba(255,255,255,0.92); padding: 7px 10px; border-radius: 6px; min-width: 90px;">
-            <div style="margin: 0; font-size: 11px; color: #1e3a5f; font-weight: 700; font-family: 'Tajawal', sans-serif;">رقم الإيصال</div>
-            <div style="margin: 3px 0 0 0; font-size: 12px; color: #1e3a5f; font-weight: 800; font-family: 'Tajawal', sans-serif;">${receiptNumber}</div>
+          <div style="text-align: center; padding: 8px 14px; background: ${C.accentSoft}; border-radius: 10px; border: 1px solid ${C.accent};">
+            <div style="font-size: 10px; color: ${C.primary}; font-weight: 600; font-family: 'Tajawal', sans-serif;">رقم الإيصال</div>
+            <div style="font-size: 13px; color: ${C.primaryDark}; font-weight: 800; font-family: 'Tajawal', sans-serif; margin-top: 2px;">${receiptNumber}</div>
           </div>
         </div>
 
         ${showCompanyInfo ? `
-        <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.12); display: flex; justify-content: center; gap: 18px; font-size: 9px; opacity: 0.8; font-family: 'Tajawal', sans-serif;">
-          <span>${companyAddress}</span>
-          <span>${companyPhone}</span>
-          <span>${companyEmail}</span>
+        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed ${C.border}; display: flex; justify-content: space-between; font-size: 10px; color: ${C.textMuted}; font-family: 'Tajawal', sans-serif;">
+          <span>📍 ${companyAddress}</span>
+          <span>📞 ${companyPhone}</span>
+          <span>✉️ ${companyEmail}</span>
         </div>
-        <div style="margin-top: 4px; text-align: center; font-size: 9px; opacity: 0.85; font-family: 'Tajawal', sans-serif; letter-spacing: 0.2px;">
-          مرخص من هيئة السياحة رقم: <strong>73104877</strong>
+        <div style="margin-top: 8px; text-align: center; font-size: 10px; color: ${C.accent}; font-weight: 700; font-family: 'Tajawal', sans-serif; padding: 5px 0; background: ${C.accentSoft}; border-radius: 6px;">
+          مرخص من هيئة السياحة رقم ٧٣١٠٤٨٧٧
         </div>
         ` : ''}
       </div>
 
-      <!-- عنوان الإيصال -->
-      <div style="background: #eef2f7; padding: 8px 16px; border-bottom: 1px solid #d0d7e0; display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <div style="width: 3px; height: 20px; background: #1e3a5f; border-radius: 2px;"></div>
-          <div>
-            <div style="margin: 0; font-size: 13px; color: #1e293b; font-weight: 700; font-family: 'Tajawal', sans-serif;">إيصال موعد</div>
-            <div style="margin: 0; font-size: 8px; color: #94a3b8; font-family: 'Tajawal', sans-serif;">Appointment Receipt</div>
-          </div>
+      <!-- شريط العنوان -->
+      <div style="background: ${C.primarySoft}; padding: 12px 22px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-size: 15px; color: ${C.primaryDark}; font-weight: 700; font-family: 'Tajawal', sans-serif;">إيصال موعد</div>
+          <div style="font-size: 9px; color: ${C.textLight}; font-family: 'Tajawal', sans-serif; letter-spacing: 1px;">APPOINTMENT RECEIPT</div>
         </div>
-        <div style="text-align: left; font-size: 9px; color: #64748b; font-family: 'Tajawal', sans-serif;">
-          <div style="margin: 0;">التاريخ: <strong>${receiptDate}</strong></div>
-          <div style="margin: 1px 0 0 0;">الوقت: <strong>${receiptTime}</strong></div>
+        <div style="text-align: left; font-size: 10px; color: ${C.textMuted}; font-family: 'Tajawal', sans-serif;">
+          <div>التاريخ: <span style="color: ${C.text}; font-weight: 700;">${receiptDate}</span></div>
+          <div style="margin-top: 2px;">الوقت: <span style="color: ${C.text}; font-weight: 700;">${receiptTime}</span></div>
         </div>
       </div>
 
       <!-- محتوى الإيصال -->
-      <div style="padding: 12px 16px;">
+      <div style="padding: 20px 22px; background: ${C.card};">
 
         <!-- بيانات العميل -->
-        <div style="background: #f0f4f8; padding: 10px 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #d0d7e0;">
-          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 7px; padding-bottom: 6px; border-bottom: 1px solid #d0d7e0;">
-            <div style="width: 20px; height: 20px; background: #1e3a5f; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white;">👤</div>
-            <div style="margin: 0; font-size: 11px; color: #1e3a5f; font-weight: 700; font-family: 'Tajawal', sans-serif;">بيانات العميل</div>
-          </div>
-          <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'Tajawal', sans-serif;">
-            <tr>
-              <td style="padding: 3px 0; color: #6b7280; width: 80px; font-weight: 600;">الاسم:</td>
-              <td style="padding: 3px 0; font-weight: 700; color: #1e293b; font-size: 11px;">${appointmentData.customerName || '-'}</td>
-            </tr>
-            <tr>
-              <td style="padding: 3px 0; color: #6b7280; font-weight: 600;">الجوال:</td>
-              <td style="padding: 3px 0; font-weight: 600; color: #1e293b;" dir="ltr">${appointmentData.phone || '-'}</td>
-            </tr>
-            <tr>
-              <td style="padding: 3px 0; color: #6b7280; font-weight: 600;">عدد الأشخاص:</td>
-              <td style="padding: 3px 0; font-weight: 600; color: #1e293b;">${appointmentData.personsCount || 1} شخص</td>
-            </tr>
-          </table>
+        <div style="margin-bottom: 18px;">
+          ${sectionTitle('👤', 'بيانات العميل', C.primary)}
+          ${row('الاسم', appointmentData.customerName || '-')}
+          ${row('الجوال', appointmentData.phone || '-', 'ltr')}
+          ${row('عدد الأشخاص', `${appointmentData.personsCount || 1} شخص`)}
         </div>
 
         <!-- تفاصيل الموعد -->
-        <div style="background: white; padding: 10px 12px; border: 1px solid #d0d7e0; border-radius: 8px; margin-bottom: 10px;">
-          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 7px; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0;">
-            <div style="width: 20px; height: 20px; background: #047857; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white;">📅</div>
-            <div style="margin: 0; font-size: 11px; color: #047857; font-weight: 700; font-family: 'Tajawal', sans-serif;">تفاصيل الموعد</div>
+        <div style="margin-bottom: 18px;">
+          ${sectionTitle('📅', 'تفاصيل الموعد', C.sage)}
+          ${row('الجهة', departmentTitle)}
+          ${row('المدينة', appointmentData.city || 'الرياض')}
+          ${row('التاريخ', appointmentDateStr || '-')}
+          ${appointmentTimeStr ? row('الوقت', appointmentTimeStr) : ''}
+          <div style="display: flex; gap: 8px; padding: 8px 0;">
+            <span style="background: ${typeStatus.bg}; color: ${typeStatus.color}; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; font-family: 'Tajawal', sans-serif;">${typeStatus.text}</span>
+            <span style="background: ${appointmentStatus.bg}; color: ${appointmentStatus.color}; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; font-family: 'Tajawal', sans-serif;">${appointmentStatus.text}</span>
           </div>
-          <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'Tajawal', sans-serif;">
-            <tr>
-              <td style="padding: 3px 0; color: #6b7280; width: 80px; font-weight: 600;">الجهة:</td>
-              <td style="padding: 3px 0; font-weight: 700; color: #1e293b;">${departmentTitle}</td>
-            </tr>
-            <tr>
-              <td style="padding: 3px 0; color: #6b7280; font-weight: 600;">المدينة:</td>
-              <td style="padding: 3px 0; font-weight: 600; color: #1e293b;">${appointmentData.city || 'الرياض'}</td>
-            </tr>
-            <tr>
-              <td style="padding: 3px 0; color: #6b7280; font-weight: 600;">التاريخ:</td>
-              <td style="padding: 3px 0; font-weight: 600; color: #1e293b;">${appointmentDateStr || '-'}</td>
-            </tr>
-            ${appointmentTimeStr ? `
-            <tr>
-              <td style="padding: 3px 0; color: #6b7280; font-weight: 600;">الوقت:</td>
-              <td style="padding: 3px 0; font-weight: 600; color: #1e293b;">${appointmentTimeStr}</td>
-            </tr>
-            ` : ''}
-            <tr>
-              <td style="padding: 3px 0; color: #6b7280; font-weight: 600;">النوع:</td>
-              <td style="padding: 3px 0;">
-                <span style="background: ${typeStatus.bg}; color: ${typeStatus.color}; padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; font-family: 'Tajawal', sans-serif;">${typeStatus.text}</span>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding: 3px 0; color: #6b7280; font-weight: 600;">الحالة:</td>
-              <td style="padding: 3px 0;">
-                <span style="background: ${appointmentStatus.bg}; color: ${appointmentStatus.color}; padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; font-family: 'Tajawal', sans-serif;">${appointmentStatus.text}</span>
-              </td>
-            </tr>
-          </table>
         </div>
 
         ${totalAmount > 0 && showPaymentDetails ? `
         <!-- بيانات الدفع -->
-        <div style="background: #f0faf5; padding: 10px 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #a7e8c5;">
-          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 7px; padding-bottom: 6px; border-bottom: 1px solid #a7e8c5;">
-            <div style="width: 20px; height: 20px; background: #047857; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white;">💰</div>
-            <div style="margin: 0; font-size: 11px; color: #047857; font-weight: 700; font-family: 'Tajawal', sans-serif;">بيانات الدفع</div>
+        <div style="background: ${C.sageSoft}; padding: 14px 16px; border-radius: 10px; border: 1px solid ${C.sage}33; margin-bottom: 14px;">
+          ${sectionTitle('💰', 'بيانات الدفع', C.sage)}
+          ${row('طريقة الدفع', paymentLabel)}
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; font-family: 'Tajawal', sans-serif;">
+            <span style="color: ${C.textMuted}; font-size: 12px; font-weight: 500;">المبلغ الإجمالي</span>
+            <span style="color: ${C.text}; font-size: 13px; font-weight: 700;">${totalAmount.toFixed(2)} ر.س</span>
           </div>
-          <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'Tajawal', sans-serif;">
-            <tr>
-              <td style="padding: 3px 0; color: #047857; font-weight: 600;">طريقة الدفع:</td>
-              <td style="padding: 3px 0; font-weight: 600; color: #047857; text-align: left;">${paymentLabel}</td>
-            </tr>
-          </table>
-          <div style="margin-top: 7px; padding-top: 7px; border-top: 2px dashed #a7e8c5;">
-            <div style="display: flex; justify-content: space-between; padding: 3px 0; font-size: 11px; font-family: 'Tajawal', sans-serif;">
-              <span style="color: #047857;">المبلغ الإجمالي:</span>
-              <span style="font-weight: 700; color: #047857; font-size: 12px;">${totalAmount.toFixed(2)} ر.س</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 3px 0; font-size: 11px; font-family: 'Tajawal', sans-serif;">
-              <span style="color: #059669;">المبلغ المدفوع:</span>
-              <span style="font-weight: 700; color: #059669;">${paidAmount.toFixed(2)} ر.س</span>
-            </div>
-            ${remaining > 0 ? `
-            <div style="display: flex; justify-content: space-between; padding: 5px 8px; margin-top: 4px; background: rgba(220, 38, 38, 0.06); border-radius: 5px; font-size: 12px; font-family: 'Tajawal', sans-serif;">
-              <span style="color: #dc2626; font-weight: 700;">المتبقي:</span>
-              <span style="font-weight: 800; color: #dc2626;">${remaining.toFixed(2)} ر.س</span>
-            </div>
-            ` : `
-            <div style="display: flex; justify-content: center; padding: 5px 0; margin-top: 4px;">
-              <span style="background: #059669; color: white; padding: 3px 12px; border-radius: 12px; font-size: 10px; font-weight: 700; font-family: 'Tajawal', sans-serif;">✓ تم السداد بالكامل</span>
-            </div>
-            `}
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px dashed ${C.sage}40; font-family: 'Tajawal', sans-serif;">
+            <span style="color: ${C.sage}; font-size: 12px; font-weight: 600;">المدفوع</span>
+            <span style="color: ${C.sage}; font-size: 13px; font-weight: 700;">${paidAmount.toFixed(2)} ر.س</span>
           </div>
+          ${remaining > 0 ? `
+          <div style="display: flex; justify-content: space-between; margin-top: 8px; padding: 10px 12px; background: ${C.dangerSoft}; border-radius: 8px; font-family: 'Tajawal', sans-serif;">
+            <span style="color: ${C.danger}; font-size: 12px; font-weight: 700;">المتبقي</span>
+            <span style="color: ${C.danger}; font-size: 14px; font-weight: 800;">${remaining.toFixed(2)} ر.س</span>
+          </div>
+          ` : `
+          <div style="margin-top: 10px; text-align: center;">
+            <span style="background: ${C.sage}; color: white; padding: 5px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; font-family: 'Tajawal', sans-serif;">✓ تم السداد بالكامل</span>
+          </div>
+          `}
         </div>
         ` : ''}
 
         ${showEmployeeName ? `
         <!-- معلومات الموظف -->
-        <div style="background: #f8f9fb; padding: 6px 10px; border-radius: 5px; display: flex; justify-content: space-between; font-size: 9px; color: #64748b; border: 1px solid #e2e8f0; font-family: 'Tajawal', sans-serif;">
-          <span>المستخدم: <strong>${employeeName}</strong></span>
-          <span>تاريخ الطباعة: ${receiptDate} - ${receiptTime}</span>
+        <div style="padding: 8px 12px; background: ${C.primarySoft}; border-radius: 6px; display: flex; justify-content: space-between; font-size: 10px; color: ${C.textMuted}; font-family: 'Tajawal', sans-serif;">
+          <span>المستخدم: <span style="color: ${C.primary}; font-weight: 700;">${employeeName}</span></span>
+          <span>${receiptDate} — ${receiptTime}</span>
         </div>
         ` : ''}
       </div>
 
       ${showTerms ? `
-      <!-- تذييل الإيصال -->
-      <div style="background: linear-gradient(135deg, #0c1f3f 0%, #1e3a5f 100%); padding: 10px 16px; text-align: center; color: white;">
-        <div style="position: relative;">
-          <div style="position: absolute; top: -10px; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #c8a44e, transparent);"></div>
-        </div>
-        <div style="margin: 0 0 4px 0; font-size: 10px; font-weight: 600; font-family: 'Tajawal', sans-serif; white-space: pre-line; line-height: 1.5;">${footerTerms}</div>
-        <div style="margin: 0; font-size: 8px; opacity: 0.5; font-family: 'Tajawal', sans-serif;">www.trcolors.com</div>
+      <!-- تذييل الإيصال — دافئ وبسيط -->
+      <div style="background: ${C.primarySoft}; padding: 14px 22px; text-align: center; border-top: 2px solid ${C.accent};">
+        <div style="font-size: 11px; color: ${C.primaryDark}; font-weight: 600; font-family: 'Tajawal', sans-serif; white-space: pre-line; line-height: 1.7;">${footerTerms}</div>
+        <div style="margin-top: 6px; font-size: 9px; color: ${C.textLight}; font-family: 'Tajawal', sans-serif; letter-spacing: 0.5px;">www.trcolors.com</div>
       </div>
       ` : ''}
     </div>
