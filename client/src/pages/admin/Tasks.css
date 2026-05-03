@@ -1563,8 +1563,8 @@
 }
 
 .btn-add-comment {
-  padding: 10px 16px;
-  background: var(--primary);
+  padding: 10px 18px;
+  background: var(--primary, #3b82f6);
   color: white;
   border: none;
   border-radius: 8px;
@@ -1572,10 +1572,13 @@
   font-weight: 500;
   font-size: 0.875rem;
   transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 140px;
 }
 
 .btn-add-comment:hover:not(:disabled) {
-  background: var(--primary-dark);
+  background: var(--primary-dark, #2563eb);
 }
 
 .btn-add-comment:disabled {
