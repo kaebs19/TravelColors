@@ -1401,6 +1401,36 @@
   background: var(--border-color, #e2e8f0);
 }
 
+/* زر إضافة مرفقات */
+.add-attachment-row {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.add-attachment-btn {
+  padding: 10px 18px;
+  background: var(--bg-input, #f8fafc);
+  border: 1px dashed var(--border-color, #cbd5e1);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #64748b);
+  transition: all 0.2s;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.add-attachment-btn:hover:not(:disabled) {
+  border-color: var(--primary, #3b82f6);
+  color: var(--primary, #3b82f6);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.add-attachment-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* البطاقة القديمة - للتوافق */
 .attachment-card {
   display: flex;

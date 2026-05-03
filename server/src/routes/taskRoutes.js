@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const taskController = require('../controllers/taskController');
 const { protect, requirePermission } = require('../middlewares/auth');
+const upload = require('../middlewares/upload');
 
 // جميع الـ routes تتطلب تسجيل دخول
 router.use(protect);
@@ -45,6 +46,6 @@ router.put('/:id/link-application', requirePermission('tasks.edit'), taskControl
 
 // الملاحظات والمرفقات
 router.post('/:id/notes', requirePermission('tasks.add'), taskController.addTaskNote);
-router.post('/:id/attachments', requirePermission('tasks.add'), taskController.addTaskAttachment);
+router.post('/:id/attachments', requirePermission('tasks.add'), upload.array('attachments', 5), taskController.addTaskAttachment);
 
 module.exports = router;

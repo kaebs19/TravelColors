@@ -520,8 +520,6 @@ exports.addTaskNote = async (req, res, next) => {
 // @access  Private
 exports.addTaskAttachment = async (req, res, next) => {
   try {
-    const { filename, originalName, path, url, mimetype, size } = req.body;
-
     const task = await Task.findById(req.params.id);
 
     if (!task) {
@@ -531,21 +529,29 @@ exports.addTaskAttachment = async (req, res, next) => {
       });
     }
 
-    task.taskAttachments.push({
-      filename,
-      originalName,
-      path,
-      url,
-      mimetype,
-      size,
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'لم يتم رفع أي ملفات'
+      });
+    }
+
+    const newAttachments = req.files.map(file => ({
+      filename: file.filename,
+      originalName: file.originalname,
+      path: file.path,
+      mimetype: file.mimetype,
+      size: file.size,
       uploadedBy: req.user.id,
       uploadedAt: new Date()
-    });
+    }));
+
+    task.taskAttachments.push(...newAttachments);
     await task.save();
 
     res.json({
       success: true,
-      message: 'تمت إضافة المرفق',
+      message: `تم إضافة ${newAttachments.length} مرفق بنجاح`,
       data: task.taskAttachments
     });
   } catch (error) {

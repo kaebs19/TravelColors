@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { tasksApi, departmentsApi, employeesApi, visaApi } from '../../api';
 import { Card, Loader, Modal } from '../../components/common';
 import { useAuth, useToast } from '../../context';
@@ -33,6 +33,10 @@ const Tasks = () => {
   // إضافة ملاحظة
   const [newNote, setNewNote] = useState('');
   const [addingNote, setAddingNote] = useState(false);
+
+  // إضافة مرفقات
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const taskAttachmentInputRef = useRef(null);
 
   // سجل النشاط
   const [activityLogs, setActivityLogs] = useState([]);
@@ -338,11 +342,45 @@ const Tasks = () => {
       setNewNote('');
       const res = await tasksApi.getTask(selectedTask._id);
       setSelectedTask(res.data?.data?.task || res.data?.task);
+      showToast('تمت إضافة الملاحظة بنجاح', 'success');
     } catch (error) {
       console.error('Error adding note:', error);
       showToast(error.response?.data?.message || 'حدث خطأ أثناء إضافة الملاحظة', 'error');
     } finally {
       setAddingNote(false);
+    }
+  };
+
+  const handleAddTaskAttachment = async (e) => {
+    if (!selectedTask || !e.target.files?.length) return;
+    const files = Array.from(e.target.files);
+
+    const validFiles = files.filter(file => {
+      const isValidType = file.type.startsWith('image/') || file.type === 'application/pdf';
+      const isValidSize = file.size <= 10 * 1024 * 1024;
+      return isValidType && isValidSize;
+    });
+
+    if (validFiles.length === 0) {
+      showToast('الملفات غير مدعومة أو تتجاوز الحجم المسموح (10MB)', 'warning');
+      return;
+    }
+
+    setUploadingAttachment(true);
+    try {
+      const formData = new FormData();
+      validFiles.forEach(file => formData.append('attachments', file));
+
+      await tasksApi.addAttachment(selectedTask._id, formData);
+      const res = await tasksApi.getTask(selectedTask._id);
+      setSelectedTask(res.data?.data?.task || res.data?.task);
+      showToast(`تم رفع ${validFiles.length} مرفق بنجاح`, 'success');
+    } catch (error) {
+      console.error('Error uploading attachments:', error);
+      showToast(error.response?.data?.message || 'حدث خطأ أثناء رفع المرفقات', 'error');
+    } finally {
+      setUploadingAttachment(false);
+      e.target.value = '';
     }
   };
 
@@ -2012,6 +2050,24 @@ const Tasks = () => {
                     <p className="no-items">لا توجد مرفقات</p>
                   )}
                 </div>
+                <div className="add-attachment-row">
+                  <input
+                    type="file"
+                    ref={taskAttachmentInputRef}
+                    onChange={handleAddTaskAttachment}
+                    accept="image/*,.pdf"
+                    multiple
+                    style={{ display: 'none' }}
+                  />
+                  <button
+                    type="button"
+                    className="add-attachment-btn"
+                    onClick={() => taskAttachmentInputRef.current?.click()}
+                    disabled={uploadingAttachment}
+                  >
+                    {uploadingAttachment ? '⏳ جاري الرفع...' : '➕ إضافة مرفقات'}
+                  </button>
+                </div>
               </div>
 
               {/* الملاحظات */}
@@ -2041,23 +2097,21 @@ const Tasks = () => {
                 </div>
 
                 {/* إضافة ملاحظة */}
-                {(selectedTask.status === 'new' || selectedTask.status === 'in_progress') && (
-                  <div className="add-comment-form">
-                    <textarea
-                      placeholder="أضف ملاحظة..."
-                      value={newNote}
-                      onChange={(e) => setNewNote(e.target.value)}
-                      rows={2}
-                    />
-                    <button
-                      className="btn-add-comment"
-                      onClick={handleAddNote}
-                      disabled={addingNote || !newNote.trim()}
-                    >
-                      {addingNote ? '...' : 'إضافة'}
-                    </button>
-                  </div>
-                )}
+                <div className="add-comment-form">
+                  <textarea
+                    placeholder="أضف ملاحظة..."
+                    value={newNote}
+                    onChange={(e) => setNewNote(e.target.value)}
+                    rows={2}
+                  />
+                  <button
+                    className="btn-add-comment"
+                    onClick={handleAddNote}
+                    disabled={addingNote || !newNote.trim()}
+                  >
+                    {addingNote ? '⏳ جاري الإضافة...' : '➕ إضافة ملاحظة'}
+                  </button>
+                </div>
               </div>
             </div>
 
