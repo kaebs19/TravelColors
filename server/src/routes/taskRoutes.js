@@ -46,6 +46,6 @@ router.put('/:id/link-application', requirePermission('tasks.edit'), taskControl
 
 // الملاحظات والمرفقات
 router.post('/:id/notes', requirePermission('tasks.add'), taskController.addTaskNote);
-router.post('/:id/attachments', requirePermission('tasks.add'), upload.array('attachments', 5), taskController.addTaskAttachment);
+router.post('/:id/attachments', requirePermission('tasks.add'), upload.array('attachments', 20), taskController.addTaskAttachment);
 
 module.exports = router;

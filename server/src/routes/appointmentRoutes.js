@@ -17,14 +17,14 @@ router.get('/overdue-electronic', appointmentController.getOverdueElectronic);
 // CRUD
 router.get('/', appointmentController.getAppointments);
 router.get('/:id', appointmentController.getAppointment);
-router.post('/', requirePermission('appointments.add'), upload.array('attachments', 5), appointmentController.createAppointment);
+router.post('/', requirePermission('appointments.add'), upload.array('attachments', 20), appointmentController.createAppointment);
 router.put('/:id', requirePermission('appointments.edit'), appointmentController.updateAppointment);
 router.put('/:id/status', requirePermission('appointments.edit'), appointmentController.changeStatus);
 router.post('/:id/payment', requirePermission('appointments.edit'), appointmentController.addPayment);
 router.post('/:id/log-quick-update', appointmentController.logQuickUpdate);
 
 // مرفقات الموعد
-router.post('/:id/attachments', upload.array('attachments', 5), appointmentController.addAttachments);
+router.post('/:id/attachments', upload.array('attachments', 20), appointmentController.addAttachments);
 router.delete('/:id/attachments/:attachmentId', appointmentController.deleteAttachment);
 
 // حذف الموعد

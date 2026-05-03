@@ -472,25 +472,34 @@ const AddAppointment = () => {
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     const validFiles = files.filter(file => {
-      const isValidType = file.type.startsWith('image/') || file.type === 'application/pdf';
-      const isValidSize = file.size <= 10 * 1024 * 1024;
-      return isValidType && isValidSize;
+      return file.type.startsWith('image/') || file.type === 'application/pdf';
     });
 
     if (validFiles.length !== files.length) {
-      showToast('بعض الملفات غير مدعومة أو تتجاوز الحجم المسموح (10MB)', 'warning');
+      showToast('بعض الملفات غير مدعومة (يسمح بالصور و PDF فقط)', 'warning');
     }
 
-    const newAttachments = validFiles.map(file => ({
-      file,
-      filename: URL.createObjectURL(file),
-      originalName: file.name,
-      mimetype: file.type,
-      size: file.size,
-      isNew: true
-    }));
-
-    setAttachments(prev => [...prev, ...newAttachments]);
+    const MAX_FILES = 20;
+    setAttachments(prev => {
+      const remaining = MAX_FILES - prev.length;
+      if (remaining <= 0) {
+        showToast(`الحد الأقصى ${MAX_FILES} مرفق`, 'warning');
+        return prev;
+      }
+      const accepted = validFiles.slice(0, remaining);
+      if (validFiles.length > remaining) {
+        showToast(`تم إضافة ${accepted.length} فقط — الحد الأقصى ${MAX_FILES} مرفق`, 'warning');
+      }
+      const newAttachments = accepted.map(file => ({
+        file,
+        filename: URL.createObjectURL(file),
+        originalName: file.name,
+        mimetype: file.type,
+        size: file.size,
+        isNew: true
+      }));
+      return [...prev, ...newAttachments];
+    });
   };
 
   const removeAttachment = (index) => {
@@ -996,7 +1005,7 @@ const AddAppointment = () => {
                     className="upload-btn"
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <span>📤</span> رفع ملفات (صور / PDF - حتى 10MB)
+                    <span>📤</span> رفع ملفات (صور / PDF - حتى 20 ملف)
                   </button>
                   {attachments.length > 0 && (
                     <div className="attachments-list">
@@ -1309,7 +1318,7 @@ const AddAppointment = () => {
                     className="upload-btn"
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <span>📤</span> رفع ملفات (صور / PDF - حتى 10MB)
+                    <span>📤</span> رفع ملفات (صور / PDF - حتى 20 ملف)
                   </button>
                   {attachments.length > 0 && (
                     <div className="attachments-list">

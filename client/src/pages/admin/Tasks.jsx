@@ -356,13 +356,17 @@ const Tasks = () => {
     const files = Array.from(e.target.files);
 
     const validFiles = files.filter(file => {
-      const isValidType = file.type.startsWith('image/') || file.type === 'application/pdf';
-      const isValidSize = file.size <= 10 * 1024 * 1024;
-      return isValidType && isValidSize;
+      return file.type.startsWith('image/') || file.type === 'application/pdf';
     });
 
     if (validFiles.length === 0) {
-      showToast('الملفات غير مدعومة أو تتجاوز الحجم المسموح (10MB)', 'warning');
+      showToast('الملفات غير مدعومة (يسمح بالصور و PDF فقط)', 'warning');
+      return;
+    }
+
+    const MAX_FILES = 20;
+    if (validFiles.length > MAX_FILES) {
+      showToast(`الحد الأقصى ${MAX_FILES} مرفق في المرة الواحدة`, 'warning');
       return;
     }
 
