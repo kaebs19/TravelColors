@@ -74,6 +74,13 @@ const noteSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  // البريد الإلكتروني لتلقي التذكير (اختياري - إن لم يُحدَّد يُرسل لمنشئ المسودة)
+  reminderEmail: {
+    type: String,
+    trim: true,
+    lowercase: true,
+    default: ''
+  },
   emailNotifiedAt: {
     type: Date,
     default: null

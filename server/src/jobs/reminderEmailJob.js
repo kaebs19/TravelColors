@@ -43,7 +43,7 @@ const buildEmailHtml = (appointment, recipientName) => {
         <h2 style="margin:0">🔔 تذكير: ${typeLabel}</h2>
       </div>
       <div style="background:white;padding:20px;border-radius:0 0 8px 8px;border:1px solid #e5e7eb">
-        <p>مرحباً ${recipientName}،</p>
+        ${recipientName ? `<p>مرحباً ${recipientName}،</p>` : ''}
         <p>هذا تذكير بخصوص:</p>
         <div style="background:#f3f4f6;padding:12px;border-radius:6px;border-right:4px solid #3b82f6">
           <p style="margin:4px 0"><strong>العميل:</strong> ${appointment.customerName}</p>
@@ -64,7 +64,11 @@ const sendOne = async (doc, now) => {
   if (!fireAt || fireAt > now) return false;
 
   const recipient = doc.createdBy;
-  if (!recipient || !recipient.email) {
+  const customEmail = (doc.reminderEmail || '').trim();
+  const targetEmail = customEmail || recipient?.email;
+  const recipientName = customEmail ? '' : (recipient?.name || '');
+
+  if (!targetEmail) {
     console.warn(`[ReminderJob] Skip ${doc._id}: no recipient email`);
     doc.emailNotifiedAt = new Date();
     await doc.save();
@@ -73,9 +77,9 @@ const sendOne = async (doc, now) => {
 
   try {
     await sendEmail({
-      email: recipient.email,
+      email: targetEmail,
       subject: `🔔 تذكير: ${doc.customerName}`,
-      html: buildEmailHtml(doc, recipient.name || '')
+      html: buildEmailHtml(doc, recipientName)
     });
     doc.emailNotifiedAt = new Date();
     await doc.save();

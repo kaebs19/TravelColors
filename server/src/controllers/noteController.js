@@ -118,6 +118,7 @@ exports.createNote = async (req, res, next) => {
       reminderType,
       subTasks,
       emailNotification,
+      reminderEmail,
       department
     } = req.body;
 
@@ -152,6 +153,7 @@ exports.createNote = async (req, res, next) => {
       reminderEnabled: reminderEnabled !== false,
       reminderType: reminderType || 'other',
       emailNotification: !!emailNotification,
+      reminderEmail: (reminderEmail || '').trim(),
       department: department || undefined,
       createdBy: req.user.id
     };
@@ -228,6 +230,7 @@ exports.updateNote = async (req, res, next) => {
       reminderType,
       subTasks,
       emailNotification,
+      reminderEmail,
       status,
       action,
       actionNotes,
@@ -249,6 +252,14 @@ exports.updateNote = async (req, res, next) => {
       note.emailNotification = !!emailNotification;
       // إعادة ضبط حالة الإرسال عند تغيير الإيميل/التاريخ
       if (!!emailNotification && reminderDate) {
+        note.emailNotifiedAt = null;
+      }
+    }
+    if (reminderEmail !== undefined) {
+      const newEmail = (reminderEmail || '').trim();
+      if (newEmail !== (note.reminderEmail || '')) {
+        note.reminderEmail = newEmail;
+        // إعادة ضبط حالة الإرسال عند تغيير الإيميل
         note.emailNotifiedAt = null;
       }
     }

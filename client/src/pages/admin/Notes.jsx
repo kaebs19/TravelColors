@@ -77,6 +77,7 @@ const Notes = () => {
     reminderType: 'other',
     subTasks: [],
     emailNotification: false,
+    reminderEmail: '',
     department: ''
   });
 
@@ -157,6 +158,7 @@ const Notes = () => {
         reminderType: note.reminderType || 'other',
         subTasks: Array.isArray(note.subTasks) ? note.subTasks.map(t => ({ title: t.title, completed: !!t.completed })) : [],
         emailNotification: !!note.emailNotification,
+        reminderEmail: note.reminderEmail || '',
         department: note.department?._id || ''
       });
     } else {
@@ -175,6 +177,7 @@ const Notes = () => {
         reminderType: presetType || 'other',
         subTasks: [],
         emailNotification: false,
+        reminderEmail: '',
         department: ''
       });
     }
@@ -987,6 +990,19 @@ const Notes = () => {
                   📧 إرسال تنبيه بالبريد الإلكتروني
                 </label>
               </div>
+
+              {formData.emailNotification && (
+                <div className="form-group">
+                  <label>البريد الإلكتروني لتلقي التذكير</label>
+                  <input
+                    type="email"
+                    value={formData.reminderEmail}
+                    onChange={(e) => setFormData(prev => ({ ...prev, reminderEmail: e.target.value }))}
+                    placeholder="example@email.com (اختياري - يُرسل لمنشئ المسودة افتراضياً)"
+                    dir="ltr"
+                  />
+                </div>
+              )}
             </>
           )}
 
