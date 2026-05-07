@@ -57,6 +57,11 @@ const Appointments = () => {
   const [quickCopySuccess, setQuickCopySuccess] = useState(false);
   const [quickSending, setQuickSending] = useState(false);
 
+  // حالة مودال تفاصيل الموعد بعد التحويل
+  const [postConvertModal, setPostConvertModal] = useState(null); // { appointment }
+  const [postConvertText, setPostConvertText] = useState('');
+  const [postConvertCopySuccess, setPostConvertCopySuccess] = useState(false);
+
   // حالة رفع المرفقات في نافذة التفاصيل
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const viewAttachmentInputRef = useRef(null);
@@ -307,14 +312,30 @@ const Appointments = () => {
 
     setConverting(true);
     try {
-      await appointmentsApi.updateAppointment(convertingAppointment._id, {
+      const res = await appointmentsApi.updateAppointment(convertingAppointment._id, {
         type: 'confirmed',
         appointmentDate: convertData.appointmentDate,
         appointmentTime: convertData.appointmentTime,
         duration: convertData.duration
       });
+
+      const updated = res?.data?.data?.appointment || res?.data?.appointment || {
+        ...convertingAppointment,
+        type: 'confirmed',
+        appointmentDate: convertData.appointmentDate,
+        appointmentTime: convertData.appointmentTime,
+        duration: convertData.duration
+      };
+      const dept = departments.find(d => d._id === (updated.department?._id || convertingAppointment.department?._id))
+        || updated.department || convertingAppointment.department;
+      const message = generateAppointmentMessage('confirmed', companySettings, updated, dept);
+
       setShowConvertModal(false);
       setConvertingAppointment(null);
+      setPostConvertText(message);
+      setPostConvertCopySuccess(false);
+      setPostConvertModal({ appointment: updated });
+      showToast('تم تحويل الموعد إلى مؤكد', 'success');
       fetchData();
     } catch (error) {
       console.error('Error converting appointment:', error);
@@ -322,6 +343,30 @@ const Appointments = () => {
     } finally {
       setConverting(false);
     }
+  };
+
+  // نسخ رسالة تفاصيل الموعد بعد التحويل
+  const handlePostConvertCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(postConvertText);
+      setPostConvertCopySuccess(true);
+      setTimeout(() => setPostConvertCopySuccess(false), 2000);
+    } catch (err) {
+      console.error('فشل النسخ:', err);
+      showToast('فشل نسخ الرسالة', 'error');
+    }
+  };
+
+  // إرسال رسالة تفاصيل الموعد بعد التحويل عبر واتساب
+  const handlePostConvertSend = () => {
+    if (!postConvertModal?.appointment) return;
+    const phone = postConvertModal.appointment.phone?.replace(/[^0-9]/g, '');
+    const phoneNumber = phone?.startsWith('0') ? '966' + phone.slice(1) : phone;
+    const encodedMessage = encodeURIComponent(postConvertText);
+    const whatsappUrl = phoneNumber
+      ? `https://wa.me/${phoneNumber}?text=${encodedMessage}`
+      : `https://wa.me/?text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   // توليد ساعات العمل
@@ -337,6 +382,7 @@ const Appointments = () => {
   };
 
   const hourSlots = generateHourSlots();
+  const minuteOptions = ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'];
   const durationOptions = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
 
   // دالة للتحقق من الفترة الزمنية
@@ -1983,14 +2029,33 @@ const Appointments = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label>الوقت *</label>
-                  <select
-                    value={convertData.appointmentTime}
-                    onChange={(e) => setConvertData(prev => ({ ...prev, appointmentTime: e.target.value }))}
-                  >
-                    {hourSlots.map(slot => (
-                      <option key={slot.value} value={slot.value}>{slot.label}</option>
-                    ))}
-                  </select>
+                  <div className="time-picker-row">
+                    <select
+                      aria-label="الساعة"
+                      value={(convertData.appointmentTime || '08:00').split(':')[0]}
+                      onChange={(e) => {
+                        const minute = (convertData.appointmentTime || '08:00').split(':')[1] || '00';
+                        setConvertData(prev => ({ ...prev, appointmentTime: `${e.target.value}:${minute}` }));
+                      }}
+                    >
+                      {hourSlots.map(slot => {
+                        const h = slot.value.split(':')[0];
+                        return <option key={h} value={h}>{slot.label}</option>;
+                      })}
+                    </select>
+                    <select
+                      aria-label="الدقائق"
+                      value={(convertData.appointmentTime || '08:00').split(':')[1] || '00'}
+                      onChange={(e) => {
+                        const hour = (convertData.appointmentTime || '08:00').split(':')[0];
+                        setConvertData(prev => ({ ...prev, appointmentTime: `${hour}:${e.target.value}` }));
+                      }}
+                    >
+                      {minuteOptions.map(m => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
                 <div className="form-group">
                   <label>المدة (دقيقة)</label>
@@ -2025,6 +2090,50 @@ const Appointments = () => {
                   {converting ? 'جاري التحويل...' : 'تأكيد التحويل'}
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Post-Convert Appointment Details Modal */}
+      <Modal
+        isOpen={!!postConvertModal}
+        onClose={() => setPostConvertModal(null)}
+        title="✅ تفاصيل الموعد المؤكد"
+        size="medium"
+      >
+        {postConvertModal && (
+          <div className="quick-message-modal-content">
+            <div className="quick-message-info">
+              <span className="quick-message-customer">👤 {postConvertModal.appointment.customerName}</span>
+              <span className="quick-message-dept">🏛️ {postConvertModal.appointment.department?.title || 'غير محدد'}</span>
+            </div>
+
+            <div className="quick-message-preview">
+              <textarea
+                value={postConvertText}
+                onChange={(e) => setPostConvertText(e.target.value)}
+                className="quick-message-textarea"
+                rows="10"
+                dir="rtl"
+              />
+            </div>
+
+            <div className="quick-message-actions">
+              <button
+                className={`quick-msg-btn copy-btn ${postConvertCopySuccess ? 'success' : ''}`}
+                onClick={handlePostConvertCopy}
+              >
+                <span>{postConvertCopySuccess ? '✓' : '📋'}</span>
+                {postConvertCopySuccess ? 'تم النسخ!' : 'نسخ الرسالة'}
+              </button>
+              <button
+                className="quick-msg-btn send-btn"
+                onClick={handlePostConvertSend}
+              >
+                <span>📱</span>
+                إرسال عبر واتساب
+              </button>
             </div>
           </div>
         )}

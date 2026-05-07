@@ -514,13 +514,19 @@
 }
 
 .phone-hover-actions {
-  display: none;
+  display: inline-flex;
   align-items: center;
   gap: 0.125rem;
+  min-width: 5.5rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
 }
 
-.phone-cell-wrapper:hover .phone-hover-actions {
-  display: inline-flex;
+.phone-cell-wrapper:hover .phone-hover-actions,
+.phone-hover-actions:focus-within {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .phone-hover-actions button {
@@ -530,9 +536,9 @@
   font-size: 0.85rem;
   padding: 0.125rem 0.25rem;
   border-radius: 4px;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease;
   line-height: 1;
-  opacity: 0.6;
+  opacity: 0.7;
 }
 
 .phone-hover-actions button:hover {
@@ -543,7 +549,14 @@
 .phone-hover-actions .copy-success {
   color: #059669;
   font-size: var(--font-xs);
+  white-space: nowrap;
   opacity: 1;
+  min-width: 4rem;
+  text-align: center;
+}
+
+.phone-hover-actions > button:first-child {
+  min-width: 4rem;
 }
 
 .empty-row {
@@ -1643,6 +1656,12 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+}
+
+.convert-form .time-picker-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
 }
 
 .convert-note {
