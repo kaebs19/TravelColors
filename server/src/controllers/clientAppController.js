@@ -16,6 +16,7 @@ const getEmailOverrides = async (templateKey) => {
 // الحقول المشتركة التي تُنسخ عند إضافة فرد عائلة
 const SHARED_FIELDS = [
   'visaType',
+  'applicationCity',
   'contactInfo',
   'travelInfo',
   'financialInfo',
@@ -211,7 +212,7 @@ exports.updateApplication = async (req, res, next) => {
 
     // تحديث الحقول المسموحة
     const allowedFields = [
-      'visaType', 'currentStep', 'passportImage',
+      'visaType', 'applicationCity', 'currentStep', 'passportImage',
       'personalInfo', 'passportDetails', 'contactInfo',
       'travelInfo', 'financialInfo',
       'hostInfo', 'travelCompanions', 'previousUSTravel',
@@ -264,9 +265,11 @@ exports.submitApplication = async (req, res, next) => {
 
     // التحقق من اكتمال البيانات الأساسية
     const missing = [];
+    if (!application.applicationCity) missing.push('مدينة التقديم');
     if (!application.personalInfo?.fullName) missing.push('الاسم');
     if (!application.personalInfo?.maritalStatus) missing.push('الحالة الاجتماعية');
     if (!application.personalInfo?.dateOfBirth) missing.push('تاريخ الميلاد');
+    if (!application.personalInfo?.birthCity) missing.push('مدينة الميلاد');
     if (!application.personalInfo?.nationality) missing.push('الجنسية');
     if (!application.personalInfo?.nationalId) missing.push('رقم الهوية');
     if (!application.passportDetails?.passportNumber) missing.push('رقم الجواز');
@@ -304,6 +307,29 @@ exports.submitApplication = async (req, res, next) => {
       if (!application.employmentInfo?.monthlySalary) missing.push('الراتب الشهري');
       if (!application.employmentInfo?.jobDescription) missing.push('وصف العمل');
       if (!application.employmentInfo?.currentJobStartDate) missing.push('تاريخ بدء العمل');
+    }
+
+    // الأعمال السابقة (متعددة) — تاريخ البدء والانتهاء إجباري لكل عمل
+    if (application.employmentInfo?.hasPreviousJob === true) {
+      const jobs = application.employmentInfo.previousJobs || [];
+      if (jobs.length === 0) missing.push('بيانات العمل السابق');
+      jobs.forEach((j, i) => {
+        if (!j.startDate) missing.push(`تاريخ بدء العمل السابق ${i + 1}`);
+        if (!j.endDate) missing.push(`تاريخ انتهاء العمل السابق ${i + 1}`);
+      });
+    }
+
+    // التعليم (متعدد) — الجامعة والتخصص والمدينة والتواريخ إجبارية
+    if (application.educationInfo?.hasEducation === true) {
+      const recs = application.educationInfo.records || [];
+      if (recs.length === 0) missing.push('بيانات التعليم');
+      recs.forEach((r, i) => {
+        if (!r.universityName) missing.push(`اسم الجامعة ${i + 1}`);
+        if (!r.major) missing.push(`التخصص ${i + 1}`);
+        if (!r.universityCity) missing.push(`مدينة الجامعة ${i + 1}`);
+        if (!r.studyStartDate) missing.push(`تاريخ بدء الدراسة ${i + 1}`);
+        if (!r.graduationDate) missing.push(`تاريخ التخرج ${i + 1}`);
+      });
     }
 
     if (!application.interviewSocialMedia?.interviewLanguage) missing.push('لغة المقابلة');

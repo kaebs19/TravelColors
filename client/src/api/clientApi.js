@@ -84,11 +84,18 @@ const clientApi = {
     return response.data;
   },
 
-  ocrPassport: async (formData) => {
-    const response = await clientAxios.post('/visa/ocr-passport', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 30000
-    });
+  // قراءة بيانات الجواز عبر OCR — يعيد استخدام الملف المرفوع مسبقاً (filePath)
+  // أو يقبل FormData لرفع ملف جديد مباشرة
+  ocrPassport: async (payload) => {
+    const isFormData = typeof FormData !== 'undefined' && payload instanceof FormData;
+    const response = await clientAxios.post(
+      '/visa/ocr-passport',
+      isFormData ? payload : { filePath: payload },
+      {
+        headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : { 'Content-Type': 'application/json' },
+        timeout: 30000
+      }
+    );
     return response.data;
   }
 };

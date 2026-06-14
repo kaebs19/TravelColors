@@ -7,15 +7,20 @@ import './UsVisaForm.css';
 const STEPS = [
   { id: 1,  title: 'صورة الجواز وبياناته' },
   { id: 2,  title: 'البيانات الشخصية' },
-  { id: 3,  title: 'معلومات الاتصال' },
+  { id: 3,  title: 'معلومات الاتصال والتواصل' },
   { id: 4,  title: 'السفر والإقامة' },
   { id: 5,  title: 'السفر السابق لأمريكا' },
   { id: 6,  title: 'العائلة والزوج/ة' },
   { id: 7,  title: 'العمل والتعليم' },
   { id: 8,  title: 'السفر والخدمة العسكرية' },
-  { id: 9,  title: 'المقابلة والتواصل' },
-  { id: 10, title: 'الصورة الشخصية' },
-  { id: 11, title: 'المراجعة والإقرار' },
+  { id: 9,  title: 'الصورة الشخصية' },
+  { id: 10, title: 'المراجعة والإقرار' },
+];
+
+const APPLICATION_CITY_OPTIONS = [
+  { value: 'riyadh', label: 'الرياض' },
+  { value: 'jeddah', label: 'جدة' },
+  { value: 'dammam', label: 'الدمام' }
 ];
 
 const MARITAL_OPTIONS = [
@@ -105,6 +110,7 @@ const UsVisaForm = () => {
 
   const [formData, setFormData] = useState({
     visaType: searchParams.get('type') || 'tourism',
+    applicationCity: '',
     passportImage: '',
     personalInfo: {
       fullName: '', maritalStatus: '', birthCity: '', dateOfBirth: '',
@@ -158,16 +164,13 @@ const UsVisaForm = () => {
       isEmployed: null,
       currentJobTitle: '', currentEmployer: '', employerAddress: '',
       monthlySalary: '', jobDescription: '', currentJobStartDate: '',
-      hasPreviousJob: null, prevEmployerName: '', prevEmployerAddress: '',
-      prevJobStartDate: '', prevJobEndDate: '', prevJobTitle: '', prevManagerName: ''
+      hasPreviousJob: null, previousJobs: []
     },
     educationInfo: {
-      hasEducation: null,
-      universityName: '', universityCity: '', universityAddress: '',
-      major: '', studyStartDate: '', graduationDate: ''
+      hasEducation: null, records: []
     },
     travelHistoryMilitary: {
-      countriesVisited5Years: '', visitedCountries: [],
+      countriesVisited5Years: '', hasVisitedCountries: null, visitedCountries: [],
       militaryService: null,
       militaryRank: '', militarySpecialty: '', militaryStartDate: '', militaryEndDate: ''
     },
@@ -207,7 +210,7 @@ const UsVisaForm = () => {
         // تحميل البيانات المحفوظة
         const loaded = {};
         const fields = [
-          'visaType', 'passportImage', 'personalInfo', 'passportDetails',
+          'visaType', 'applicationCity', 'passportImage', 'personalInfo', 'passportDetails',
           'contactInfo', 'travelInfo', 'financialInfo', 'hostInfo',
           'travelCompanions', 'previousUSTravel', 'familyInfo', 'spouseInfo',
           'employmentInfo', 'educationInfo', 'travelHistoryMilitary',
@@ -430,12 +433,80 @@ const UsVisaForm = () => {
     }));
   };
 
+  // === Previous jobs helpers (multiple) ===
+  const addPreviousJob = () => {
+    setFormData(prev => ({
+      ...prev,
+      employmentInfo: {
+        ...prev.employmentInfo,
+        previousJobs: [...prev.employmentInfo.previousJobs, {
+          employerName: '', employerAddress: '', jobTitle: '', managerName: '', startDate: '', endDate: ''
+        }]
+      }
+    }));
+  };
+  const removePreviousJob = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      employmentInfo: {
+        ...prev.employmentInfo,
+        previousJobs: prev.employmentInfo.previousJobs.filter((_, i) => i !== index)
+      }
+    }));
+  };
+  const updatePreviousJob = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      employmentInfo: {
+        ...prev.employmentInfo,
+        previousJobs: prev.employmentInfo.previousJobs.map((j, i) => i === index ? { ...j, [field]: value } : j)
+      }
+    }));
+    const key = `employmentInfo.previousJobs.${index}.${field}`;
+    if (errors[key]) setErrors(prev => { const u = { ...prev }; delete u[key]; return u; });
+  };
+
+  // === Education records helpers (multiple) ===
+  const addEducationRecord = () => {
+    setFormData(prev => ({
+      ...prev,
+      educationInfo: {
+        ...prev.educationInfo,
+        records: [...prev.educationInfo.records, {
+          universityName: '', universityCity: '', universityAddress: '', country: '',
+          major: '', studyStartDate: '', graduationDate: ''
+        }]
+      }
+    }));
+  };
+  const removeEducationRecord = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      educationInfo: {
+        ...prev.educationInfo,
+        records: prev.educationInfo.records.filter((_, i) => i !== index)
+      }
+    }));
+  };
+  const updateEducationRecord = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      educationInfo: {
+        ...prev.educationInfo,
+        records: prev.educationInfo.records.map((r, i) => i === index ? { ...r, [field]: value } : r)
+      }
+    }));
+    const key = `educationInfo.records.${index}.${field}`;
+    if (errors[key]) setErrors(prev => { const u = { ...prev }; delete u[key]; return u; });
+  };
+
   // === Validation ===
   const validateStep = (step) => {
     const newErrors = {};
     const today = new Date().toISOString().slice(0, 10);
 
     if (step === 1) {
+      if (!formData.applicationCity) newErrors['applicationCity'] = 'مدينة التقديم مطلوبة';
       if (!formData.passportDetails.passportNumber) newErrors['passportDetails.passportNumber'] = 'رقم الجواز مطلوب';
       if (!formData.passportDetails.passportIssueDate) newErrors['passportDetails.passportIssueDate'] = 'تاريخ الإصدار مطلوب';
       if (!formData.passportDetails.passportExpiryDate) {
@@ -457,6 +528,7 @@ const UsVisaForm = () => {
       } else if (formData.personalInfo.dateOfBirth > today) {
         newErrors['personalInfo.dateOfBirth'] = 'تاريخ الميلاد لا يمكن أن يكون في المستقبل';
       }
+      if (!formData.personalInfo.birthCity) newErrors['personalInfo.birthCity'] = 'مدينة الميلاد مطلوبة';
       if (!formData.personalInfo.nationality) newErrors['personalInfo.nationality'] = 'الجنسية مطلوبة';
       if (!formData.personalInfo.nationalId) newErrors['personalInfo.nationalId'] = 'رقم الهوية مطلوب';
     }
@@ -485,6 +557,8 @@ const UsVisaForm = () => {
         p => p.trim() && !/^[\d+\s()-]{7,15}$/.test(p.trim())
       );
       if (badPhone) newErrors['contactInfo.phones'] = 'أحد أرقام الهاتف الإضافية غير صحيح';
+      // لغة المقابلة (نُقلت إلى خطوة الاتصال)
+      if (!formData.interviewSocialMedia.interviewLanguage) newErrors['interviewSocialMedia.interviewLanguage'] = 'لغة المقابلة مطلوبة';
     }
 
     if (step === 4) {
@@ -529,20 +603,40 @@ const UsVisaForm = () => {
         if (!formData.employmentInfo.jobDescription) newErrors['employmentInfo.jobDescription'] = 'وصف العمل مطلوب';
         if (!formData.employmentInfo.currentJobStartDate) newErrors['employmentInfo.currentJobStartDate'] = 'تاريخ بدء العمل مطلوب';
       }
+      // الأعمال السابقة المتعددة — التواريخ إجبارية
+      if (formData.employmentInfo.hasPreviousJob === true) {
+        if (formData.employmentInfo.previousJobs.length === 0) {
+          newErrors['employmentInfo.previousJobs'] = 'أضف عملاً سابقاً واحداً على الأقل';
+        }
+        formData.employmentInfo.previousJobs.forEach((j, i) => {
+          if (!j.startDate) newErrors[`employmentInfo.previousJobs.${i}.startDate`] = 'تاريخ البدء مطلوب';
+          if (!j.endDate) newErrors[`employmentInfo.previousJobs.${i}.endDate`] = 'تاريخ الانتهاء مطلوب';
+        });
+      }
+      // التعليم المتعدد — حقول إجبارية
+      if (formData.educationInfo.hasEducation === true) {
+        if (formData.educationInfo.records.length === 0) {
+          newErrors['educationInfo.records'] = 'أضف ملفاً دراسياً واحداً على الأقل';
+        }
+        formData.educationInfo.records.forEach((r, i) => {
+          if (!r.universityName) newErrors[`educationInfo.records.${i}.universityName`] = 'اسم الجامعة مطلوب';
+          if (!r.major) newErrors[`educationInfo.records.${i}.major`] = 'التخصص مطلوب';
+          if (!r.universityCity) newErrors[`educationInfo.records.${i}.universityCity`] = 'المدينة مطلوبة';
+          if (!r.studyStartDate) newErrors[`educationInfo.records.${i}.studyStartDate`] = 'تاريخ بدء الدراسة مطلوب';
+          if (!r.graduationDate) newErrors[`educationInfo.records.${i}.graduationDate`] = 'تاريخ التخرج مطلوب';
+        });
+      }
     }
 
-    // Step 8: Travel History + Military — all optional now except militaryService toggle
+    // Step 8: Travel History + Military
     if (step === 8) {
+      if (formData.travelHistoryMilitary.hasVisitedCountries === null) newErrors['travelHistoryMilitary.hasVisitedCountries'] = 'يرجى الإجابة';
       if (formData.travelHistoryMilitary.militaryService === null) newErrors['travelHistoryMilitary.militaryService'] = 'يرجى الإجابة';
     }
 
-    if (step === 9) {
-      if (!formData.interviewSocialMedia.interviewLanguage) newErrors['interviewSocialMedia.interviewLanguage'] = 'لغة المقابلة مطلوبة';
-    }
-
-    // Step 10: Photo — optional on step level
-    // Step 11: Review + Declaration
-    if (step === 11) {
+    // Step 9: Photo — optional on step level
+    // Step 10: Review + Declaration
+    if (step === 10) {
       if (!formData.declaration.declarationAccepted) newErrors['declaration.declarationAccepted'] = 'يجب الموافقة على الإقرار';
     }
 
@@ -599,9 +693,8 @@ const UsVisaForm = () => {
         try {
           setOcrProcessing(true);
           setMessage({ type: 'info', text: '🔍 جاري قراءة بيانات الجواز تلقائياً...' });
-          const ocrFd = new FormData();
-          ocrFd.append('passport', file);
-          const ocrRes = await clientApi.ocrPassport(ocrFd);
+          // إعادة استخدام الملف المرفوع بدل رفعه مرة أخرى
+          const ocrRes = await clientApi.ocrPassport(res.data.path);
           if (ocrRes.success && ocrRes.data) {
             const { personalInfo: pi, passportDetails: pd } = ocrRes.data;
             // تعبئة بيانات الجواز
@@ -691,6 +784,7 @@ const UsVisaForm = () => {
   const getMaritalLabel = (val) => MARITAL_OPTIONS.find(o => o.value === val)?.label || val;
   const getPurposeLabel = (val) => PURPOSE_OPTIONS.find(o => o.value === val)?.label || val;
   const getVisaTypeLabel = (val) => VISA_TYPE_OPTIONS.find(o => o.value === val)?.label || val;
+  const getCityLabel = (val) => APPLICATION_CITY_OPTIONS.find(o => o.value === val)?.label || val;
   const getStateLabel = (val) => US_STATES.find(s => s.value === val)?.label || val;
   const getDurationTypeLabel = (val) => STAY_DURATION_TYPES.find(t => t.value === val)?.label || val;
 
@@ -764,6 +858,19 @@ const UsVisaForm = () => {
             </label>
           ))}
         </div>
+      </div>
+      <div className="vf-form-group">
+        <label>مدينة التقديم (مكان المقابلة) <span className="vf-required">*</span></label>
+        <div className="vf-radio-group">
+          {APPLICATION_CITY_OPTIONS.map(opt => (
+            <label key={opt.value} className={`vf-radio-card ${formData.applicationCity === opt.value ? 'active' : ''}`}>
+              <input type="radio" name="applicationCity" value={opt.value} checked={formData.applicationCity === opt.value}
+                onChange={() => { updateSimpleField('applicationCity', opt.value); if (errors['applicationCity']) setErrors(prev => { const u = { ...prev }; delete u['applicationCity']; return u; }); }} />
+              <span>{opt.label}</span>
+            </label>
+          ))}
+        </div>
+        {errors['applicationCity'] && <span className="vf-error-text">{errors['applicationCity']}</span>}
       </div>
       <div className="vf-upload-area" onClick={() => fileInputRef.current?.click()}>
         {passportPreview === 'pdf' ? (
@@ -885,9 +992,11 @@ const UsVisaForm = () => {
           {errors['personalInfo.maritalStatus'] && <span className="vf-error-text">{errors['personalInfo.maritalStatus']}</span>}
         </div>
         <div className="vf-form-group">
-          <label>مدينة الميلاد</label>
+          <label>مدينة الميلاد <span className="vf-required">*</span></label>
           <input type="text" value={formData.personalInfo.birthCity}
-            onChange={e => updateField('personalInfo', 'birthCity', e.target.value)} placeholder="مدينة الميلاد" />
+            onChange={e => updateField('personalInfo', 'birthCity', e.target.value)} placeholder="مدينة الميلاد"
+            className={errors['personalInfo.birthCity'] ? 'vf-error' : ''} />
+          {errors['personalInfo.birthCity'] && <span className="vf-error-text">{errors['personalInfo.birthCity']}</span>}
         </div>
       </div>
       <div className="vf-form-row">
@@ -1008,6 +1117,56 @@ const UsVisaForm = () => {
         <textarea value={formData.contactInfo.previousPhonesEmails}
           onChange={e => updateField('contactInfo', 'previousPhonesEmails', e.target.value)}
           placeholder="اختياري - أرقام هاتف أو بريد إلكتروني سابقة خلال الخمس سنوات الماضية" rows={2} />
+      </div>
+
+      <div className="vf-section-title" style={{ marginTop: 24 }}>لغة المقابلة</div>
+      <div className="vf-form-group">
+        <label>لغة المقابلة المفضلة <span className="vf-required">*</span></label>
+        <select value={formData.interviewSocialMedia.interviewLanguage}
+          onChange={e => updateField('interviewSocialMedia', 'interviewLanguage', e.target.value)}
+          className={errors['interviewSocialMedia.interviewLanguage'] ? 'vf-error' : ''}>
+          <option value="">اختر...</option>
+          {INTERVIEW_LANG_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+        </select>
+        {errors['interviewSocialMedia.interviewLanguage'] && <span className="vf-error-text">{errors['interviewSocialMedia.interviewLanguage']}</span>}
+      </div>
+
+      <div className="vf-section-title" style={{ marginTop: 24 }}>حسابات التواصل الاجتماعي (اختياري)</div>
+      <div className="vf-form-row">
+        <div className="vf-form-group">
+          <label>Facebook</label>
+          <input type="text" value={formData.interviewSocialMedia.socialFacebook}
+            onChange={e => updateField('interviewSocialMedia', 'socialFacebook', e.target.value)} placeholder="اسم المستخدم أو الرابط" dir="ltr" />
+        </div>
+        <div className="vf-form-group">
+          <label>Instagram</label>
+          <input type="text" value={formData.interviewSocialMedia.socialInstagram}
+            onChange={e => updateField('interviewSocialMedia', 'socialInstagram', e.target.value)} placeholder="@username" dir="ltr" />
+        </div>
+      </div>
+      <div className="vf-form-row">
+        <div className="vf-form-group">
+          <label>X (Twitter)</label>
+          <input type="text" value={formData.interviewSocialMedia.socialTwitter}
+            onChange={e => updateField('interviewSocialMedia', 'socialTwitter', e.target.value)} placeholder="@username" dir="ltr" />
+        </div>
+        <div className="vf-form-group">
+          <label>LinkedIn</label>
+          <input type="text" value={formData.interviewSocialMedia.socialLinkedin}
+            onChange={e => updateField('interviewSocialMedia', 'socialLinkedin', e.target.value)} placeholder="رابط الملف الشخصي" dir="ltr" />
+        </div>
+      </div>
+      <div className="vf-form-row">
+        <div className="vf-form-group">
+          <label>WhatsApp</label>
+          <input type="text" value={formData.interviewSocialMedia.socialWhatsapp}
+            onChange={e => updateField('interviewSocialMedia', 'socialWhatsapp', e.target.value)} placeholder="رقم الواتساب" dir="ltr" />
+        </div>
+        <div className="vf-form-group">
+          <label>أخرى</label>
+          <input type="text" value={formData.interviewSocialMedia.socialOther}
+            onChange={e => updateField('interviewSocialMedia', 'socialOther', e.target.value)} placeholder="أي حسابات أخرى" />
+        </div>
       </div>
     </div>
   );
@@ -1464,40 +1623,54 @@ const UsVisaForm = () => {
           </div>
           {formData.employmentInfo.hasPreviousJob === true && (
             <div className="vf-conditional">
-              <div className="vf-form-row">
-                <div className="vf-form-group">
-                  <label>اسم جهة العمل السابقة</label>
-                  <input type="text" value={formData.employmentInfo.prevEmployerName}
-                    onChange={e => updateField('employmentInfo', 'prevEmployerName', e.target.value)} placeholder="اسم الجهة" />
+              {formData.employmentInfo.previousJobs.map((job, idx) => (
+                <div key={idx} className="vf-repeatable-item">
+                  <div className="vf-repeatable-item-header">
+                    <span className="vf-repeatable-item-title">عمل سابق {idx + 1}</span>
+                    <button type="button" className="vf-repeatable-remove" onClick={() => removePreviousJob(idx)}>حذف</button>
+                  </div>
+                  <div className="vf-form-row">
+                    <div className="vf-form-group">
+                      <label>اسم جهة العمل السابقة</label>
+                      <input type="text" value={job.employerName}
+                        onChange={e => updatePreviousJob(idx, 'employerName', e.target.value)} placeholder="اسم الجهة" />
+                    </div>
+                    <div className="vf-form-group">
+                      <label>المسمى الوظيفي السابق</label>
+                      <input type="text" value={job.jobTitle}
+                        onChange={e => updatePreviousJob(idx, 'jobTitle', e.target.value)} placeholder="المسمى" />
+                    </div>
+                  </div>
+                  <div className="vf-form-group">
+                    <label>عنوان جهة العمل السابقة</label>
+                    <input type="text" value={job.employerAddress}
+                      onChange={e => updatePreviousJob(idx, 'employerAddress', e.target.value)} placeholder="العنوان" />
+                  </div>
+                  <div className="vf-form-row">
+                    <div className="vf-form-group">
+                      <label>تاريخ البدء <span className="vf-required">*</span></label>
+                      <input type="date" value={job.startDate}
+                        onChange={e => updatePreviousJob(idx, 'startDate', e.target.value)}
+                        className={errors[`employmentInfo.previousJobs.${idx}.startDate`] ? 'vf-error' : ''} />
+                      {errors[`employmentInfo.previousJobs.${idx}.startDate`] && <span className="vf-error-text">{errors[`employmentInfo.previousJobs.${idx}.startDate`]}</span>}
+                    </div>
+                    <div className="vf-form-group">
+                      <label>تاريخ الانتهاء <span className="vf-required">*</span></label>
+                      <input type="date" value={job.endDate}
+                        onChange={e => updatePreviousJob(idx, 'endDate', e.target.value)}
+                        className={errors[`employmentInfo.previousJobs.${idx}.endDate`] ? 'vf-error' : ''} />
+                      {errors[`employmentInfo.previousJobs.${idx}.endDate`] && <span className="vf-error-text">{errors[`employmentInfo.previousJobs.${idx}.endDate`]}</span>}
+                    </div>
+                  </div>
+                  <div className="vf-form-group">
+                    <label>اسم المدير المباشر</label>
+                    <input type="text" value={job.managerName}
+                      onChange={e => updatePreviousJob(idx, 'managerName', e.target.value)} placeholder="اسم المدير" />
+                  </div>
                 </div>
-                <div className="vf-form-group">
-                  <label>المسمى الوظيفي السابق</label>
-                  <input type="text" value={formData.employmentInfo.prevJobTitle}
-                    onChange={e => updateField('employmentInfo', 'prevJobTitle', e.target.value)} placeholder="المسمى" />
-                </div>
-              </div>
-              <div className="vf-form-group">
-                <label>عنوان جهة العمل السابقة</label>
-                <input type="text" value={formData.employmentInfo.prevEmployerAddress}
-                  onChange={e => updateField('employmentInfo', 'prevEmployerAddress', e.target.value)} placeholder="العنوان" />
-              </div>
-              <div className="vf-form-row">
-                <div className="vf-form-group">
-                  <label>تاريخ البدء</label>
-                  <input type="date" value={formData.employmentInfo.prevJobStartDate}
-                    onChange={e => updateField('employmentInfo', 'prevJobStartDate', e.target.value)} />
-                </div>
-                <div className="vf-form-group">
-                  <label>تاريخ الانتهاء</label>
-                  <input type="date" value={formData.employmentInfo.prevJobEndDate}
-                    onChange={e => updateField('employmentInfo', 'prevJobEndDate', e.target.value)} />
-                </div>
-              </div>
-              <div className="vf-form-group">
-                <label>اسم المدير المباشر</label>
-                <input type="text" value={formData.employmentInfo.prevManagerName}
-                  onChange={e => updateField('employmentInfo', 'prevManagerName', e.target.value)} placeholder="اسم المدير" />
-              </div>
+              ))}
+              {errors['employmentInfo.previousJobs'] && <span className="vf-error-text">{errors['employmentInfo.previousJobs']}</span>}
+              <button type="button" className="vf-add-item-btn" onClick={addPreviousJob}>+ إضافة عمل سابق</button>
             </div>
           )}
         </div>
@@ -1510,42 +1683,67 @@ const UsVisaForm = () => {
       </div>
       {formData.educationInfo.hasEducation === true && (
         <div className="vf-conditional">
-          <div className="vf-form-row">
-            <div className="vf-form-group">
-              <label>اسم الجامعة / الكلية</label>
-              <input type="text" value={formData.educationInfo.universityName}
-                onChange={e => updateField('educationInfo', 'universityName', e.target.value)} placeholder="اسم الجامعة" />
+          {formData.educationInfo.records.map((rec, idx) => (
+            <div key={idx} className="vf-repeatable-item">
+              <div className="vf-repeatable-item-header">
+                <span className="vf-repeatable-item-title">ملف دراسي {idx + 1}</span>
+                <button type="button" className="vf-repeatable-remove" onClick={() => removeEducationRecord(idx)}>حذف</button>
+              </div>
+              <div className="vf-form-row">
+                <div className="vf-form-group">
+                  <label>اسم الجامعة / الكلية <span className="vf-required">*</span></label>
+                  <input type="text" value={rec.universityName}
+                    onChange={e => updateEducationRecord(idx, 'universityName', e.target.value)} placeholder="اسم الجامعة"
+                    className={errors[`educationInfo.records.${idx}.universityName`] ? 'vf-error' : ''} />
+                  {errors[`educationInfo.records.${idx}.universityName`] && <span className="vf-error-text">{errors[`educationInfo.records.${idx}.universityName`]}</span>}
+                </div>
+                <div className="vf-form-group">
+                  <label>التخصص <span className="vf-required">*</span></label>
+                  <input type="text" value={rec.major}
+                    onChange={e => updateEducationRecord(idx, 'major', e.target.value)} placeholder="التخصص الدراسي"
+                    className={errors[`educationInfo.records.${idx}.major`] ? 'vf-error' : ''} />
+                  {errors[`educationInfo.records.${idx}.major`] && <span className="vf-error-text">{errors[`educationInfo.records.${idx}.major`]}</span>}
+                </div>
+              </div>
+              <div className="vf-form-row">
+                <div className="vf-form-group">
+                  <label>المدينة <span className="vf-required">*</span></label>
+                  <input type="text" value={rec.universityCity}
+                    onChange={e => updateEducationRecord(idx, 'universityCity', e.target.value)} placeholder="مدينة الجامعة"
+                    className={errors[`educationInfo.records.${idx}.universityCity`] ? 'vf-error' : ''} />
+                  {errors[`educationInfo.records.${idx}.universityCity`] && <span className="vf-error-text">{errors[`educationInfo.records.${idx}.universityCity`]}</span>}
+                </div>
+                <div className="vf-form-group">
+                  <label>الدولة التي درست فيها</label>
+                  <input type="text" value={rec.country}
+                    onChange={e => updateEducationRecord(idx, 'country', e.target.value)} placeholder="الدولة" />
+                </div>
+              </div>
+              <div className="vf-form-group">
+                <label>العنوان</label>
+                <input type="text" value={rec.universityAddress}
+                  onChange={e => updateEducationRecord(idx, 'universityAddress', e.target.value)} placeholder="الحي - الشارع" />
+              </div>
+              <div className="vf-form-row">
+                <div className="vf-form-group">
+                  <label>تاريخ بدء الدراسة <span className="vf-required">*</span></label>
+                  <input type="date" value={rec.studyStartDate}
+                    onChange={e => updateEducationRecord(idx, 'studyStartDate', e.target.value)}
+                    className={errors[`educationInfo.records.${idx}.studyStartDate`] ? 'vf-error' : ''} />
+                  {errors[`educationInfo.records.${idx}.studyStartDate`] && <span className="vf-error-text">{errors[`educationInfo.records.${idx}.studyStartDate`]}</span>}
+                </div>
+                <div className="vf-form-group">
+                  <label>تاريخ التخرج <span className="vf-required">*</span></label>
+                  <input type="date" value={rec.graduationDate}
+                    onChange={e => updateEducationRecord(idx, 'graduationDate', e.target.value)}
+                    className={errors[`educationInfo.records.${idx}.graduationDate`] ? 'vf-error' : ''} />
+                  {errors[`educationInfo.records.${idx}.graduationDate`] && <span className="vf-error-text">{errors[`educationInfo.records.${idx}.graduationDate`]}</span>}
+                </div>
+              </div>
             </div>
-            <div className="vf-form-group">
-              <label>التخصص</label>
-              <input type="text" value={formData.educationInfo.major}
-                onChange={e => updateField('educationInfo', 'major', e.target.value)} placeholder="التخصص الدراسي" />
-            </div>
-          </div>
-          <div className="vf-form-row">
-            <div className="vf-form-group">
-              <label>المدينة</label>
-              <input type="text" value={formData.educationInfo.universityCity}
-                onChange={e => updateField('educationInfo', 'universityCity', e.target.value)} placeholder="مدينة الجامعة" />
-            </div>
-            <div className="vf-form-group">
-              <label>العنوان</label>
-              <input type="text" value={formData.educationInfo.universityAddress}
-                onChange={e => updateField('educationInfo', 'universityAddress', e.target.value)} placeholder="الحي - الشارع" />
-            </div>
-          </div>
-          <div className="vf-form-row">
-            <div className="vf-form-group">
-              <label>تاريخ بدء الدراسة</label>
-              <input type="date" value={formData.educationInfo.studyStartDate}
-                onChange={e => updateField('educationInfo', 'studyStartDate', e.target.value)} />
-            </div>
-            <div className="vf-form-group">
-              <label>تاريخ التخرج</label>
-              <input type="date" value={formData.educationInfo.graduationDate}
-                onChange={e => updateField('educationInfo', 'graduationDate', e.target.value)} />
-            </div>
-          </div>
+          ))}
+          {errors['educationInfo.records'] && <span className="vf-error-text">{errors['educationInfo.records']}</span>}
+          <button type="button" className="vf-add-item-btn" onClick={addEducationRecord}>+ إضافة ملف دراسي</button>
         </div>
       )}
     </div>
@@ -1556,18 +1754,27 @@ const UsVisaForm = () => {
     <div className="vf-step-content">
       <div className="vf-step-header"><h2>تاريخ السفر والخدمة العسكرية</h2></div>
 
-      <div className="vf-section-title">الدول التي زرتها خلال آخر 5 سنوات (اختياري)</div>
-      {formData.travelHistoryMilitary.visitedCountries.map((country, idx) => (
-        <div key={idx} className="vf-form-row" style={{ alignItems: 'flex-end', marginBottom: 8 }}>
-          <div className="vf-form-group" style={{ flex: 1 }}>
-            <label>دولة {idx + 1}</label>
-            <input type="text" value={country}
-              onChange={e => updateVisitedCountry(idx, e.target.value)} placeholder="اسم الدولة" />
-          </div>
-          <button type="button" className="vf-repeatable-remove" style={{ marginBottom: 8 }} onClick={() => removeVisitedCountry(idx)}>حذف</button>
+      <div className="vf-section-title">السفر خلال آخر 5 سنوات</div>
+      <div className="vf-form-group">
+        <label>هل زرت أي دولة خلال آخر 5 سنوات؟ <span className="vf-required">*</span></label>
+        {renderToggle('travelHistoryMilitary', 'hasVisitedCountries', formData.travelHistoryMilitary.hasVisitedCountries)}
+        {errors['travelHistoryMilitary.hasVisitedCountries'] && <span className="vf-error-text">{errors['travelHistoryMilitary.hasVisitedCountries']}</span>}
+      </div>
+      {formData.travelHistoryMilitary.hasVisitedCountries === true && (
+        <div className="vf-conditional">
+          {formData.travelHistoryMilitary.visitedCountries.map((country, idx) => (
+            <div key={idx} className="vf-form-row" style={{ alignItems: 'flex-end', marginBottom: 8 }}>
+              <div className="vf-form-group" style={{ flex: 1 }}>
+                <label>دولة {idx + 1}</label>
+                <input type="text" value={country}
+                  onChange={e => updateVisitedCountry(idx, e.target.value)} placeholder="اسم الدولة" />
+              </div>
+              <button type="button" className="vf-repeatable-remove" style={{ marginBottom: 8 }} onClick={() => removeVisitedCountry(idx)}>حذف</button>
+            </div>
+          ))}
+          <button type="button" className="vf-add-item-btn" onClick={addVisitedCountry}>+ إضافة دولة</button>
         </div>
-      ))}
-      <button type="button" className="vf-add-item-btn" onClick={addVisitedCountry}>+ إضافة دولة</button>
+      )}
 
       <div className="vf-section-title" style={{ marginTop: 24 }}>الخدمة العسكرية</div>
       <div className="vf-form-group">
@@ -1643,64 +1850,8 @@ const UsVisaForm = () => {
     </div>
   );
 
-  // Step 9: Interview & Social Media
+  // Step 9: Personal Photo
   const renderStep9 = () => (
-    <div className="vf-step-content">
-      <div className="vf-step-header">
-        <h2>المقابلة والتواصل الاجتماعي</h2>
-      </div>
-      <div className="vf-form-group">
-        <label>لغة المقابلة المفضلة <span className="vf-required">*</span></label>
-        <select value={formData.interviewSocialMedia.interviewLanguage}
-          onChange={e => updateField('interviewSocialMedia', 'interviewLanguage', e.target.value)}
-          className={errors['interviewSocialMedia.interviewLanguage'] ? 'vf-error' : ''}>
-          <option value="">اختر...</option>
-          {INTERVIEW_LANG_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-        </select>
-        {errors['interviewSocialMedia.interviewLanguage'] && <span className="vf-error-text">{errors['interviewSocialMedia.interviewLanguage']}</span>}
-      </div>
-      <div className="vf-section-title" style={{ marginTop: 24 }}>حسابات التواصل الاجتماعي (اختياري)</div>
-      <div className="vf-form-row">
-        <div className="vf-form-group">
-          <label>Facebook</label>
-          <input type="text" value={formData.interviewSocialMedia.socialFacebook}
-            onChange={e => updateField('interviewSocialMedia', 'socialFacebook', e.target.value)} placeholder="اسم المستخدم أو الرابط" dir="ltr" />
-        </div>
-        <div className="vf-form-group">
-          <label>Instagram</label>
-          <input type="text" value={formData.interviewSocialMedia.socialInstagram}
-            onChange={e => updateField('interviewSocialMedia', 'socialInstagram', e.target.value)} placeholder="@username" dir="ltr" />
-        </div>
-      </div>
-      <div className="vf-form-row">
-        <div className="vf-form-group">
-          <label>X (Twitter)</label>
-          <input type="text" value={formData.interviewSocialMedia.socialTwitter}
-            onChange={e => updateField('interviewSocialMedia', 'socialTwitter', e.target.value)} placeholder="@username" dir="ltr" />
-        </div>
-        <div className="vf-form-group">
-          <label>LinkedIn</label>
-          <input type="text" value={formData.interviewSocialMedia.socialLinkedin}
-            onChange={e => updateField('interviewSocialMedia', 'socialLinkedin', e.target.value)} placeholder="رابط الملف الشخصي" dir="ltr" />
-        </div>
-      </div>
-      <div className="vf-form-row">
-        <div className="vf-form-group">
-          <label>WhatsApp</label>
-          <input type="text" value={formData.interviewSocialMedia.socialWhatsapp}
-            onChange={e => updateField('interviewSocialMedia', 'socialWhatsapp', e.target.value)} placeholder="رقم الواتساب" dir="ltr" />
-        </div>
-        <div className="vf-form-group">
-          <label>أخرى</label>
-          <input type="text" value={formData.interviewSocialMedia.socialOther}
-            onChange={e => updateField('interviewSocialMedia', 'socialOther', e.target.value)} placeholder="أي حسابات أخرى" />
-        </div>
-      </div>
-    </div>
-  );
-
-  // Step 10: Personal Photo
-  const renderStep10 = () => (
     <div className="vf-step-content">
       <div className="vf-step-header">
         <h2>الصورة الشخصية</h2>
@@ -1735,8 +1886,8 @@ const UsVisaForm = () => {
     </div>
   );
 
-  // Step 11: Full Review + Simple Declaration
-  const renderStep11 = () => {
+  // Step 10: Full Review + Declaration
+  const renderStep10 = () => {
     const ReviewSection = ({ title, stepNum, children }) => (
       <div className="vf-review-section">
         <div className="vf-review-section-header">
@@ -1763,6 +1914,7 @@ const UsVisaForm = () => {
 
         <ReviewSection title="بيانات الجواز" stepNum={1}>
           <ReviewItem label="نوع التأشيرة" value={getVisaTypeLabel(formData.visaType)} />
+          <ReviewItem label="مدينة التقديم" value={getCityLabel(formData.applicationCity)} />
           <ReviewItem label="رقم الجواز" value={formData.passportDetails.passportNumber} />
           <ReviewItem label="مكان الإصدار" value={formData.passportDetails.passportIssuePlace} />
           <ReviewItem label="تاريخ الإصدار" value={formData.passportDetails.passportIssueDate} />
@@ -1773,14 +1925,16 @@ const UsVisaForm = () => {
           <ReviewItem label="الاسم" value={formData.personalInfo.fullName} />
           <ReviewItem label="الحالة الاجتماعية" value={getMaritalLabel(formData.personalInfo.maritalStatus)} />
           <ReviewItem label="تاريخ الميلاد" value={formData.personalInfo.dateOfBirth} />
+          <ReviewItem label="مدينة الميلاد" value={formData.personalInfo.birthCity} />
           <ReviewItem label="الجنسية" value={formData.personalInfo.nationality} />
           <ReviewItem label="رقم الهوية" value={formData.personalInfo.nationalId} />
         </ReviewSection>
 
-        <ReviewSection title="معلومات الاتصال" stepNum={3}>
+        <ReviewSection title="معلومات الاتصال والتواصل" stepNum={3}>
           <ReviewItem label="البريد الإلكتروني" value={formData.contactInfo.emails.filter(Boolean).join(' | ')} />
           <ReviewItem label="الجوال" value={formData.contactInfo.phones.filter(Boolean).join(' | ')} />
           <ReviewItem label="العنوان" value={[formData.contactInfo.streetAddress, formData.contactInfo.districtCity].filter(Boolean).join(' - ')} />
+          <ReviewItem label="لغة المقابلة" value={INTERVIEW_LANG_OPTIONS.find(o => o.value === formData.interviewSocialMedia.interviewLanguage)?.label} />
         </ReviewSection>
 
         <ReviewSection title="السفر والإقامة" stepNum={4}>
@@ -1823,21 +1977,24 @@ const UsVisaForm = () => {
               <ReviewItem label="الراتب" value={formData.employmentInfo.monthlySalary} />
             </>
           )}
+          <ReviewItem label="عدد الأعمال السابقة" value={formData.employmentInfo.hasPreviousJob ? String(formData.employmentInfo.previousJobs.length) : 'لا'} />
           {formData.educationInfo.hasEducation && (
             <>
-              <ReviewItem label="الجامعة" value={formData.educationInfo.universityName} />
-              <ReviewItem label="التخصص" value={formData.educationInfo.major} />
+              <ReviewItem label="عدد الملفات الدراسية" value={String(formData.educationInfo.records.length)} />
+              {formData.educationInfo.records[0] && (
+                <>
+                  <ReviewItem label="الجامعة" value={formData.educationInfo.records[0].universityName} />
+                  <ReviewItem label="التخصص" value={formData.educationInfo.records[0].major} />
+                </>
+              )}
             </>
           )}
         </ReviewSection>
 
         <ReviewSection title="السفر والخدمة العسكرية" stepNum={8}>
+          <ReviewItem label="زار دولاً خلال 5 سنوات" value={formData.travelHistoryMilitary.hasVisitedCountries === true ? 'نعم' : formData.travelHistoryMilitary.hasVisitedCountries === false ? 'لا' : ''} />
           <ReviewItem label="الدول المزارة" value={formData.travelHistoryMilitary.visitedCountries.filter(Boolean).join(', ')} />
           <ReviewItem label="خدمة عسكرية" value={formData.travelHistoryMilitary.militaryService === true ? 'نعم' : formData.travelHistoryMilitary.militaryService === false ? 'لا' : ''} />
-        </ReviewSection>
-
-        <ReviewSection title="المقابلة والتواصل" stepNum={9}>
-          <ReviewItem label="لغة المقابلة" value={INTERVIEW_LANG_OPTIONS.find(o => o.value === formData.interviewSocialMedia.interviewLanguage)?.label} />
         </ReviewSection>
 
         {/* Declaration */}
@@ -1870,7 +2027,6 @@ const UsVisaForm = () => {
       case 8: return renderStep8();
       case 9: return renderStep9();
       case 10: return renderStep10();
-      case 11: return renderStep11();
       default: return null;
     }
   };

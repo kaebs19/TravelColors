@@ -42,6 +42,13 @@ const visaApplicationSchema = new mongoose.Schema({
     default: 'tourism'
   },
 
+  // مدينة التقديم (مكان المقابلة)
+  applicationCity: {
+    type: String,
+    enum: ['riyadh', 'jeddah', 'dammam', null],
+    default: null
+  },
+
   // === Section 1: صورة الجواز ===
   passportImage: String,
 
@@ -235,6 +242,16 @@ const visaApplicationSchema = new mongoose.Schema({
       type: Boolean,
       default: null
     },
+    // أعمال سابقة متعددة
+    previousJobs: [{
+      employerName: String,
+      employerAddress: String,
+      jobTitle: String,
+      managerName: String,
+      startDate: Date,
+      endDate: Date
+    }],
+    // حقول قديمة (توافق للخلف مع الطلبات السابقة)
     prevEmployerName: String,
     prevEmployerAddress: String,
     prevJobStartDate: Date,
@@ -249,6 +266,17 @@ const visaApplicationSchema = new mongoose.Schema({
       type: Boolean,
       default: null
     },
+    // ملفات دراسية متعددة
+    records: [{
+      universityName: String,
+      universityCity: String,
+      universityAddress: String,
+      country: String,
+      major: String,
+      studyStartDate: Date,
+      graduationDate: Date
+    }],
+    // حقول قديمة (توافق للخلف مع الطلبات السابقة)
     universityName: String,
     universityCity: String,
     universityAddress: String,
@@ -260,6 +288,10 @@ const visaApplicationSchema = new mongoose.Schema({
   // === Section 14: تاريخ السفر والخدمة العسكرية ===
   travelHistoryMilitary: {
     countriesVisited5Years: String,
+    hasVisitedCountries: {
+      type: Boolean,
+      default: null
+    },
     visitedCountries: [String],
     militaryService: {
       type: Boolean,
