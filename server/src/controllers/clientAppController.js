@@ -1,4 +1,17 @@
 const { VisaApplication } = require('../models');
+const { sendEmailSilent } = require('../utils/sendEmail');
+const { applicationSubmittedEmail } = require('../utils/emailTemplates');
+const WebsiteContent = require('../models/WebsiteContent');
+
+// جلب إعدادات البريد من قاعدة البيانات (تخصيص القوالب من لوحة التحكم)
+const getEmailOverrides = async (templateKey) => {
+  try {
+    const content = await WebsiteContent.getContent();
+    return content.emailSettings?.[templateKey] || {};
+  } catch (e) {
+    return {};
+  }
+};
 
 // الحقول المشتركة التي تُنسخ عند إضافة فرد عائلة
 const SHARED_FIELDS = [
@@ -92,6 +105,29 @@ exports.getMyApplication = async (req, res, next) => {
 exports.createApplication = async (req, res, next) => {
   try {
     const { visaType, copyFrom } = req.body;
+
+    // إعادة استخدام مسودة فارغة موجودة بدل إنشاء واحدة جديدة في كل زيارة
+    // (يمنع تراكم مسودات فارغة عند فتح صفحة الطلب أكثر من مرة)
+    if (!copyFrom) {
+      const emptyDraft = await VisaApplication.findOne({
+        clientId: req.client._id,
+        status: 'draft',
+        'personalInfo.fullName': { $in: [null, ''] },
+        'passportDetails.passportNumber': { $in: [null, ''] }
+      }).sort('-createdAt');
+
+      if (emptyDraft) {
+        if (visaType) {
+          emptyDraft.visaType = visaType;
+          await emptyDraft.save();
+        }
+        return res.status(200).json({
+          success: true,
+          message: 'تم استئناف مسودة موجودة',
+          data: { application: emptyDraft }
+        });
+      }
+    }
 
     let applicationData = {
       clientId: req.client._id,
@@ -299,6 +335,16 @@ exports.submitApplication = async (req, res, next) => {
     application.status = 'submitted';
     application.submittedAt = new Date();
     await application.save();
+
+    // إرسال إشعار بريدي للعميل بتأكيد استلام الطلب
+    const clientEmail = primaryEmail;
+    const clientName = application.personalInfo?.fullName || 'عميل';
+    if (clientEmail) {
+      getEmailOverrides('applicationSubmitted').then(overrides => {
+        const emailData = applicationSubmittedEmail(clientName, application.applicationNumber, 'visa', overrides);
+        sendEmailSilent({ email: clientEmail, subject: emailData.subject, html: emailData.html });
+      });
+    }
 
     res.json({
       success: true,

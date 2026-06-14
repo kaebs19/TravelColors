@@ -250,12 +250,35 @@ const UsVisaForm = () => {
     }
   };
 
+  // تنظيف المصفوفات من القيم الفارغة قبل الإرسال
+  const buildPayload = (stepOverride) => {
+    const payload = { ...formData, currentStep: stepOverride ?? currentStep };
+    payload.contactInfo = {
+      ...formData.contactInfo,
+      emails: formData.contactInfo.emails.map(s => s.trim()).filter(Boolean),
+      phones: formData.contactInfo.phones.map(s => s.trim()).filter(Boolean)
+    };
+    payload.travelHistoryMilitary = {
+      ...formData.travelHistoryMilitary,
+      visitedCountries: formData.travelHistoryMilitary.visitedCountries.map(s => s.trim()).filter(Boolean)
+    };
+    payload.travelCompanions = {
+      ...formData.travelCompanions,
+      companions: formData.travelCompanions.companions.filter(c => (c.companionName || '').trim())
+    };
+    payload.studentAdditionalInfo = {
+      ...formData.studentAdditionalInfo,
+      references: formData.studentAdditionalInfo.references.filter(r => (r.refName || '').trim())
+    };
+    return payload;
+  };
+
   // === Auto-save ===
-  const autoSave = async () => {
+  const autoSave = async (stepOverride) => {
     if (!applicationId) return;
     try {
       setSaving(true);
-      await clientApi.updateApplication(applicationId, { ...formData, currentStep });
+      await clientApi.updateApplication(applicationId, buildPayload(stepOverride));
     } catch (err) { /* silent */ }
     finally { setSaving(false); }
   };
@@ -450,7 +473,18 @@ const UsVisaForm = () => {
         newErrors['contactInfo.emails'] = 'البريد الإلكتروني مطلوب';
       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(primaryEmail)) {
         newErrors['contactInfo.emails'] = 'صيغة البريد الإلكتروني غير صحيحة';
+      } else {
+        // التحقق من صيغة الإيميلات الإضافية غير الفارغة
+        const badEmail = formData.contactInfo.emails.slice(1).some(
+          e => e.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim())
+        );
+        if (badEmail) newErrors['contactInfo.emails'] = 'أحد عناوين البريد الإضافية غير صحيح';
       }
+      // التحقق من صيغة الأرقام الإضافية غير الفارغة
+      const badPhone = formData.contactInfo.phones.slice(1).some(
+        p => p.trim() && !/^[\d+\s()-]{7,15}$/.test(p.trim())
+      );
+      if (badPhone) newErrors['contactInfo.phones'] = 'أحد أرقام الهاتف الإضافية غير صحيح';
     }
 
     if (step === 4) {
@@ -520,8 +554,9 @@ const UsVisaForm = () => {
   const goNext = async () => {
     if (saving) return;
     if (!validateStep(currentStep)) return;
-    await autoSave();
-    setCurrentStep(prev => Math.min(prev + 1, STEPS.length));
+    const nextStep = Math.min(currentStep + 1, STEPS.length);
+    await autoSave(nextStep);
+    setCurrentStep(nextStep);
     window.scrollTo(0, 0);
   };
 
@@ -534,6 +569,14 @@ const UsVisaForm = () => {
   const handlePassportUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // فحص الحجم في الواجهة قبل الرفع (الحد الأقصى 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'حجم الملف كبير جداً. الحد الأقصى 10 ميجابايت' });
+      setTimeout(() => setMessage({ type: '', text: '' }), 4000);
+      e.target.value = '';
+      return;
+    }
+    const prevPreview = passportPreview;
     if (file.type === 'application/pdf') {
       setPassportPreview('pdf');
     } else {
@@ -570,9 +613,8 @@ const UsVisaForm = () => {
             if (pi.fullName) updateField('personalInfo', 'fullName', pi.fullName);
             if (pi.dateOfBirth) updateField('personalInfo', 'dateOfBirth', pi.dateOfBirth);
             if (pi.nationality) updateField('personalInfo', 'nationality', pi.nationality);
-            if (pi.gender) updateField('personalInfo', 'maritalStatus', formData.personalInfo.maritalStatus); // لا نغير الحالة الاجتماعية
             if (pi.birthPlace) updateField('personalInfo', 'birthCity', pi.birthPlace);
-            if (pi.countryCode) updateField('personalInfo', 'country', pi.countryCode);
+            if (pi.country) updateField('personalInfo', 'country', pi.country);
             setOcrDone(true);
             setMessage({ type: 'success', text: '✅ تم قراءة بيانات الجواز وتعبئتها تلقائياً! راجع البيانات للتأكد' });
             setTimeout(() => setMessage({ type: '', text: '' }), 5000);
@@ -587,13 +629,25 @@ const UsVisaForm = () => {
         }
       }
     } catch (err) {
+      // إلغاء المعاينة عند فشل الرفع حتى لا يظن المستخدم أنها رُفعت
+      setPassportPreview(prevPreview);
+      e.target.value = '';
       setMessage({ type: 'error', text: err.response?.data?.message || 'حدث خطأ في رفع الصورة' });
+      setTimeout(() => setMessage({ type: '', text: '' }), 4000);
     } finally { setUploading(false); }
   };
 
   const handlePhotoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // فحص الحجم في الواجهة قبل الرفع (الحد الأقصى 240KB)
+    if (file.size > 240 * 1024) {
+      setMessage({ type: 'error', text: 'حجم الصورة يجب أن لا يتجاوز 240 كيلوبايت' });
+      setTimeout(() => setMessage({ type: '', text: '' }), 4000);
+      e.target.value = '';
+      return;
+    }
+    const prevPreview = photoPreview;
     const reader = new FileReader();
     reader.onload = (ev) => setPhotoPreview(ev.target.result);
     reader.readAsDataURL(file);
@@ -608,13 +662,18 @@ const UsVisaForm = () => {
         setTimeout(() => setMessage({ type: '', text: '' }), 3000);
       }
     } catch (err) {
+      // إلغاء المعاينة عند فشل الرفع
+      setPhotoPreview(prevPreview);
+      e.target.value = '';
       setMessage({ type: 'error', text: err.response?.data?.message || 'حدث خطأ في رفع الصورة' });
+      setTimeout(() => setMessage({ type: '', text: '' }), 4000);
     } finally { setUploading(false); }
   };
 
   // === Submit ===
   const handleSubmit = async () => {
     if (!applicationId || submitting) return;
+    if (!validateStep(currentStep)) return;
     try {
       setSubmitting(true);
       await autoSave();
@@ -771,6 +830,23 @@ const UsVisaForm = () => {
           {errors['passportDetails.passportExpiryDate'] && <span className="vf-error-text">{errors['passportDetails.passportExpiryDate']}</span>}
         </div>
       </div>
+      {(() => {
+        const exp = formData.passportDetails.passportExpiryDate;
+        if (!exp) return null;
+        const now = new Date();
+        const sixMonths = new Date();
+        sixMonths.setMonth(sixMonths.getMonth() + 6);
+        const expDate = new Date(exp);
+        if (expDate >= now && expDate < sixMonths) {
+          return (
+            <div className="vf-warning-box" style={{ marginTop: 12 }}>
+              تنبيه: تشترط السفارة الأمريكية صلاحية جواز لا تقل عن 6 أشهر. جوازك ينتهي خلال أقل من 6 أشهر — يُفضّل تجديده قبل التقديم.
+            </div>
+          );
+        }
+        return null;
+      })()}
+
       <div className="vf-info-box">
         <strong>تعليمات:</strong>
         <ul>

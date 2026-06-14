@@ -27,7 +27,9 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
   storage,
-  fileFilter
+  fileFilter,
+  // حد أقصى لحجم الملف 10 ميجابايت (يطابق ما هو معلن في الواجهة)
+  limits: { fileSize: 10 * 1024 * 1024 }
 });
 
 module.exports = upload;

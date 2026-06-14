@@ -2,17 +2,15 @@ const express = require('express');
 const router = express.Router();
 const visaController = require('../controllers/visaController');
 const { protect } = require('../middlewares');
+const { clientProtect } = require('../middlewares/clientAuth');
 const upload = require('../middlewares/upload');
-const { createApplicationLimiter, uploadLimiter } = require('../middlewares/rateLimiter');
+const { uploadLimiter } = require('../middlewares/rateLimiter');
 
-// === Public Routes (للعملاء) ===
-router.post('/applications', createApplicationLimiter, visaController.createApplication);
-router.get('/applications/:id', visaController.getApplication);
-router.put('/applications/:id', visaController.updateApplication);
-router.post('/applications/:id/submit', createApplicationLimiter, visaController.submitApplication);
-router.post('/upload-passport', uploadLimiter, upload.single('passport'), visaController.uploadPassport);
-router.post('/upload-photo', uploadLimiter, upload.single('photo'), visaController.uploadPersonalPhoto);
-router.post('/ocr-passport', uploadLimiter, upload.single('passport'), visaController.ocrPassport);
+// === Client Routes (رفع الملفات و OCR — تتطلب تسجيل دخول العميل) ===
+// ملاحظة: إنشاء/تعديل/تقديم الطلبات يتم عبر /api/client/applications (clientAppController)
+router.post('/upload-passport', clientProtect, uploadLimiter, upload.single('passport'), visaController.uploadPassport);
+router.post('/upload-photo', clientProtect, uploadLimiter, upload.single('photo'), visaController.uploadPersonalPhoto);
+router.post('/ocr-passport', clientProtect, uploadLimiter, upload.single('passport'), visaController.ocrPassport);
 
 // === Admin Routes (محمية) ===
 router.get('/applications', protect, visaController.getApplications);

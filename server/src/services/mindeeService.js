@@ -55,6 +55,18 @@ async function parsePassport(filePath) {
   const countryCode = prediction.country?.value || '';
   const nationality = countryMap[countryCode] || countryCode;
 
+  // أسماء الدول بالعربية (لحقل الدولة ومكان الإصدار)
+  const countryNameMap = {
+    SAU: 'المملكة العربية السعودية', ARE: 'الإمارات العربية المتحدة', KWT: 'الكويت',
+    BHR: 'البحرين', OMN: 'عُمان', QAT: 'قطر', EGY: 'مصر', JOR: 'الأردن',
+    LBN: 'لبنان', IRQ: 'العراق', SYR: 'سوريا', YEM: 'اليمن', SDN: 'السودان',
+    LBY: 'ليبيا', TUN: 'تونس', DZA: 'الجزائر', MAR: 'المغرب', PSE: 'فلسطين',
+    USA: 'الولايات المتحدة', GBR: 'بريطانيا', FRA: 'فرنسا', DEU: 'ألمانيا',
+    IND: 'الهند', PAK: 'باكستان', PHL: 'الفلبين', IDN: 'إندونيسيا',
+    BGD: 'بنغلاديش', TUR: 'تركيا',
+  };
+  const countryName = countryNameMap[countryCode] || countryCode;
+
   // بناء كائن البيانات
   const extractedData = {
     // بيانات شخصية
@@ -65,6 +77,7 @@ async function parsePassport(filePath) {
       dateOfBirth: prediction.birthDate?.value || '',
       gender: gender,
       nationality: nationality,
+      country: countryName,
       countryCode: countryCode,
       birthPlace: prediction.birthPlace?.value || '',
     },
@@ -73,7 +86,7 @@ async function parsePassport(filePath) {
       passportNumber: prediction.idNumber?.value || '',
       passportIssueDate: prediction.issuanceDate?.value || '',
       passportExpiryDate: prediction.expiryDate?.value || '',
-      passportIssuePlace: countryCode, // البلد المصدرة
+      passportIssuePlace: countryName, // البلد المصدرة
     },
     // MRZ (للتحقق لاحقاً)
     mrz: {

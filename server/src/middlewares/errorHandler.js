@@ -27,6 +27,14 @@ const errorHandler = (err, req, res, next) => {
     error.statusCode = 400;
   }
 
+  // Multer upload errors
+  if (err.name === 'MulterError') {
+    error.statusCode = 400;
+    error.message = err.code === 'LIMIT_FILE_SIZE'
+      ? 'حجم الملف كبير جداً. الحد الأقصى 10 ميجابايت'
+      : 'حدث خطأ أثناء رفع الملف';
+  }
+
   // JWT errors
   if (err.name === 'JsonWebTokenError') {
     error.message = 'جلسة غير صالحة';
