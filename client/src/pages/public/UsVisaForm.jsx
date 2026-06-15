@@ -18,9 +18,9 @@ const STEPS = [
 ];
 
 const APPLICATION_CITY_OPTIONS = [
-  { value: 'riyadh', label: 'الرياض' },
-  { value: 'jeddah', label: 'جدة' },
-  { value: 'dammam', label: 'الدمام' }
+  { value: 'riyadh', label: 'الرياض', icon: '🏙️' },
+  { value: 'jeddah', label: 'جدة', icon: '⚓' },
+  { value: 'dammam', label: 'الدمام', icon: '🏭' }
 ];
 
 const MARITAL_OPTIONS = [
@@ -39,9 +39,9 @@ const PURPOSE_OPTIONS = [
 ];
 
 const VISA_TYPE_OPTIONS = [
-  { value: 'tourism', label: 'سياحية' },
-  { value: 'medical', label: 'علاج' },
-  { value: 'study', label: 'دراسة' }
+  { value: 'tourism', label: 'سياحية', icon: '✈️' },
+  { value: 'medical', label: 'علاج', icon: '🏥' },
+  { value: 'study', label: 'دراسة', icon: '🎓' }
 ];
 
 const INTERVIEW_LANG_OPTIONS = [
@@ -107,6 +107,10 @@ const UsVisaForm = () => {
   const [uploading, setUploading] = useState(false);
   const [ocrProcessing, setOcrProcessing] = useState(false);
   const [ocrDone, setOcrDone] = useState(false);
+  const [savedAt, setSavedAt] = useState(null);   // مؤشر "تم الحفظ"
+  const [ocrFields, setOcrFields] = useState([]); // الحقول المُعبّأة تلقائياً من الجواز (لإبرازها)
+  const [dragPassport, setDragPassport] = useState(false); // حالة السحب فوق منطقة الجواز
+  const [passportFileName, setPassportFileName] = useState('');
 
   const [formData, setFormData] = useState({
     visaType: searchParams.get('type') || 'tourism',
@@ -282,6 +286,7 @@ const UsVisaForm = () => {
     try {
       setSaving(true);
       await clientApi.updateApplication(applicationId, buildPayload(stepOverride));
+      setSavedAt(Date.now());
     } catch (err) { /* silent */ }
     finally { setSaving(false); }
   };
@@ -644,10 +649,25 @@ const UsVisaForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // التمرير لأول حقل به خطأ بعد فشل التحقق
+  const scrollToFirstError = () => {
+    setTimeout(() => {
+      const el = document.querySelector('.vf-error, .vf-error-text');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const field = el.closest('.vf-form-group');
+        if (field) {
+          field.classList.add('vf-shake');
+          setTimeout(() => field.classList.remove('vf-shake'), 500);
+        }
+      }
+    }, 60);
+  };
+
   // === Navigation ===
   const goNext = async () => {
     if (saving) return;
-    if (!validateStep(currentStep)) return;
+    if (!validateStep(currentStep)) { scrollToFirstError(); return; }
     const nextStep = Math.min(currentStep + 1, STEPS.length);
     await autoSave(nextStep);
     setCurrentStep(nextStep);
@@ -671,6 +691,7 @@ const UsVisaForm = () => {
       return;
     }
     const prevPreview = passportPreview;
+    setPassportFileName(file.name);
     if (file.type === 'application/pdf') {
       setPassportPreview('pdf');
     } else {
@@ -697,17 +718,23 @@ const UsVisaForm = () => {
           const ocrRes = await clientApi.ocrPassport(res.data.path);
           if (ocrRes.success && ocrRes.data) {
             const { personalInfo: pi, passportDetails: pd } = ocrRes.data;
+            const filled = [];
+            const fill = (section, field, value) => {
+              if (value) { updateField(section, field, value); filled.push(`${section}.${field}`); }
+            };
             // تعبئة بيانات الجواز
-            if (pd.passportNumber) updateField('passportDetails', 'passportNumber', pd.passportNumber);
-            if (pd.passportIssueDate) updateField('passportDetails', 'passportIssueDate', pd.passportIssueDate);
-            if (pd.passportExpiryDate) updateField('passportDetails', 'passportExpiryDate', pd.passportExpiryDate);
-            if (pd.passportIssuePlace) updateField('passportDetails', 'passportIssuePlace', pd.passportIssuePlace);
+            fill('passportDetails', 'passportNumber', pd.passportNumber);
+            fill('passportDetails', 'passportIssueDate', pd.passportIssueDate);
+            fill('passportDetails', 'passportExpiryDate', pd.passportExpiryDate);
+            fill('passportDetails', 'passportIssuePlace', pd.passportIssuePlace);
             // تعبئة البيانات الشخصية
-            if (pi.fullName) updateField('personalInfo', 'fullName', pi.fullName);
-            if (pi.dateOfBirth) updateField('personalInfo', 'dateOfBirth', pi.dateOfBirth);
-            if (pi.nationality) updateField('personalInfo', 'nationality', pi.nationality);
-            if (pi.birthPlace) updateField('personalInfo', 'birthCity', pi.birthPlace);
-            if (pi.country) updateField('personalInfo', 'country', pi.country);
+            fill('personalInfo', 'fullName', pi.fullName);
+            fill('personalInfo', 'dateOfBirth', pi.dateOfBirth);
+            fill('personalInfo', 'nationality', pi.nationality);
+            fill('personalInfo', 'birthCity', pi.birthPlace);
+            fill('personalInfo', 'country', pi.country);
+            setOcrFields(filled);
+            setTimeout(() => setOcrFields([]), 6000);
             setOcrDone(true);
             setMessage({ type: 'success', text: '✅ تم قراءة بيانات الجواز وتعبئتها تلقائياً! راجع البيانات للتأكد' });
             setTimeout(() => setMessage({ type: '', text: '' }), 5000);
@@ -728,6 +755,13 @@ const UsVisaForm = () => {
       setMessage({ type: 'error', text: err.response?.data?.message || 'حدث خطأ في رفع الصورة' });
       setTimeout(() => setMessage({ type: '', text: '' }), 4000);
     } finally { setUploading(false); }
+  };
+
+  const handlePassportDrop = (e) => {
+    e.preventDefault();
+    setDragPassport(false);
+    const file = e.dataTransfer?.files?.[0];
+    if (file) handlePassportUpload({ target: { files: [file], value: '' } });
   };
 
   const handlePhotoUpload = async (e) => {
@@ -766,7 +800,7 @@ const UsVisaForm = () => {
   // === Submit ===
   const handleSubmit = async () => {
     if (!applicationId || submitting) return;
-    if (!validateStep(currentStep)) return;
+    if (!validateStep(currentStep)) { scrollToFirstError(); return; }
     try {
       setSubmitting(true);
       await autoSave();
@@ -785,6 +819,8 @@ const UsVisaForm = () => {
   const getPurposeLabel = (val) => PURPOSE_OPTIONS.find(o => o.value === val)?.label || val;
   const getVisaTypeLabel = (val) => VISA_TYPE_OPTIONS.find(o => o.value === val)?.label || val;
   const getCityLabel = (val) => APPLICATION_CITY_OPTIONS.find(o => o.value === val)?.label || val;
+  // class إبراز الحقول المُعبّأة تلقائياً من الجواز
+  const ocrCls = (key) => ocrFields.includes(key) ? ' vf-ocr-filled' : '';
   const getStateLabel = (val) => US_STATES.find(s => s.value === val)?.label || val;
   const getDurationTypeLabel = (val) => STAY_DURATION_TYPES.find(t => t.value === val)?.label || val;
 
@@ -847,6 +883,10 @@ const UsVisaForm = () => {
         <h2>صورة الجواز وبياناته</h2>
         <p>ارفع صورة واضحة لصفحة بيانات الجواز وأدخل بيانات الجواز</p>
       </div>
+      <div className="vf-time-note">
+        <span className="vf-time-note-icon">⏱️</span>
+        <span>يستغرق إكمال الطلب حوالي 10 دقائق. بياناتك تُحفظ تلقائياً ويمكنك المتابعة لاحقاً من حيث توقفت.</span>
+      </div>
       <div className="vf-form-group">
         <label>نوع التأشيرة</label>
         <div className="vf-radio-group">
@@ -854,6 +894,7 @@ const UsVisaForm = () => {
             <label key={opt.value} className={`vf-radio-card ${formData.visaType === opt.value ? 'active' : ''}`}>
               <input type="radio" name="visaType" value={opt.value} checked={formData.visaType === opt.value}
                 onChange={() => updateSimpleField('visaType', opt.value)} />
+              <span className="vf-radio-icon">{opt.icon}</span>
               <span>{opt.label}</span>
             </label>
           ))}
@@ -866,28 +907,35 @@ const UsVisaForm = () => {
             <label key={opt.value} className={`vf-radio-card ${formData.applicationCity === opt.value ? 'active' : ''}`}>
               <input type="radio" name="applicationCity" value={opt.value} checked={formData.applicationCity === opt.value}
                 onChange={() => { updateSimpleField('applicationCity', opt.value); if (errors['applicationCity']) setErrors(prev => { const u = { ...prev }; delete u['applicationCity']; return u; }); }} />
+              <span className="vf-radio-icon">{opt.icon}</span>
               <span>{opt.label}</span>
             </label>
           ))}
         </div>
         {errors['applicationCity'] && <span className="vf-error-text">{errors['applicationCity']}</span>}
       </div>
-      <div className="vf-upload-area" onClick={() => fileInputRef.current?.click()}>
+      <div className={`vf-upload-area ${dragPassport ? 'vf-upload-dragover' : ''}`}
+        onClick={() => fileInputRef.current?.click()}
+        onDragOver={e => { e.preventDefault(); setDragPassport(true); }}
+        onDragLeave={() => setDragPassport(false)}
+        onDrop={handlePassportDrop}>
         {passportPreview === 'pdf' ? (
           <div className="vf-upload-preview" style={{ flexDirection: 'column', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: '3rem' }}>&#128196;</span>
             <span>تم رفع ملف PDF</span>
+            {passportFileName && <span className="vf-upload-filename">{passportFileName}</span>}
             <span className="vf-upload-change">تغيير الملف</span>
           </div>
         ) : passportPreview || formData.passportImage ? (
           <div className="vf-upload-preview">
             <img src={passportPreview || formData.passportImage} alt="جواز السفر" />
+            {passportFileName && <span className="vf-upload-filename">{passportFileName}</span>}
             <span className="vf-upload-change">تغيير الصورة</span>
           </div>
         ) : (
           <div className="vf-upload-placeholder">
             <span className="vf-upload-icon">&#128247;</span>
-            <span className="vf-upload-text">اضغط لرفع صورة الجواز</span>
+            <span className="vf-upload-text">اضغط لرفع صورة الجواز أو اسحب الملف هنا</span>
             <span className="vf-upload-hint">JPG, PNG, PDF - حد أقصى 10MB</span>
           </div>
         )}
@@ -910,15 +958,16 @@ const UsVisaForm = () => {
       <div className="vf-form-row">
         <div className="vf-form-group">
           <label>رقم الجواز <span className="vf-required">*</span></label>
-          <input type="text" value={formData.passportDetails.passportNumber}
-            onChange={e => updateField('passportDetails', 'passportNumber', e.target.value)} placeholder="رقم الجواز"
-            className={errors['passportDetails.passportNumber'] ? 'vf-error' : ''} />
+          <input type="text" inputMode="latin" value={formData.passportDetails.passportNumber}
+            onChange={e => updateField('passportDetails', 'passportNumber', e.target.value)} placeholder="رقم الجواز" dir="ltr"
+            className={`${errors['passportDetails.passportNumber'] ? 'vf-error' : ''}${ocrCls('passportDetails.passportNumber')}`} />
           {errors['passportDetails.passportNumber'] && <span className="vf-error-text">{errors['passportDetails.passportNumber']}</span>}
         </div>
         <div className="vf-form-group">
           <label>مكان الإصدار</label>
           <input type="text" value={formData.passportDetails.passportIssuePlace}
-            onChange={e => updateField('passportDetails', 'passportIssuePlace', e.target.value)} placeholder="مكان إصدار الجواز" />
+            onChange={e => updateField('passportDetails', 'passportIssuePlace', e.target.value)} placeholder="مكان إصدار الجواز"
+            className={ocrCls('passportDetails.passportIssuePlace').trim()} />
         </div>
       </div>
       <div className="vf-form-row">
@@ -926,14 +975,14 @@ const UsVisaForm = () => {
           <label>تاريخ الإصدار <span className="vf-required">*</span></label>
           <input type="date" value={formData.passportDetails.passportIssueDate}
             onChange={e => updateField('passportDetails', 'passportIssueDate', e.target.value)}
-            className={errors['passportDetails.passportIssueDate'] ? 'vf-error' : ''} />
+            className={`${errors['passportDetails.passportIssueDate'] ? 'vf-error' : ''}${ocrCls('passportDetails.passportIssueDate')}`} />
           {errors['passportDetails.passportIssueDate'] && <span className="vf-error-text">{errors['passportDetails.passportIssueDate']}</span>}
         </div>
         <div className="vf-form-group">
           <label>تاريخ الانتهاء <span className="vf-required">*</span></label>
           <input type="date" value={formData.passportDetails.passportExpiryDate}
             onChange={e => updateField('passportDetails', 'passportExpiryDate', e.target.value)}
-            className={errors['passportDetails.passportExpiryDate'] ? 'vf-error' : ''} />
+            className={`${errors['passportDetails.passportExpiryDate'] ? 'vf-error' : ''}${ocrCls('passportDetails.passportExpiryDate')}`} />
           {errors['passportDetails.passportExpiryDate'] && <span className="vf-error-text">{errors['passportDetails.passportExpiryDate']}</span>}
         </div>
       </div>
@@ -974,10 +1023,10 @@ const UsVisaForm = () => {
       </div>
       <div className="vf-form-group">
         <label>الاسم الرباعي حسب الجواز <span className="vf-required">*</span></label>
-        <input type="text" value={formData.personalInfo.fullName}
+        <input type="text" autoComplete="name" value={formData.personalInfo.fullName}
           onChange={e => updateField('personalInfo', 'fullName', e.target.value)}
           placeholder="الاسم كما هو مكتوب في الجواز"
-          className={errors['personalInfo.fullName'] ? 'vf-error' : ''} />
+          className={`${errors['personalInfo.fullName'] ? 'vf-error' : ''}${ocrCls('personalInfo.fullName')}`} />
         {errors['personalInfo.fullName'] && <span className="vf-error-text">{errors['personalInfo.fullName']}</span>}
       </div>
       <div className="vf-form-row">
@@ -995,7 +1044,7 @@ const UsVisaForm = () => {
           <label>مدينة الميلاد <span className="vf-required">*</span></label>
           <input type="text" value={formData.personalInfo.birthCity}
             onChange={e => updateField('personalInfo', 'birthCity', e.target.value)} placeholder="مدينة الميلاد"
-            className={errors['personalInfo.birthCity'] ? 'vf-error' : ''} />
+            className={`${errors['personalInfo.birthCity'] ? 'vf-error' : ''}${ocrCls('personalInfo.birthCity')}`} />
           {errors['personalInfo.birthCity'] && <span className="vf-error-text">{errors['personalInfo.birthCity']}</span>}
         </div>
       </div>
@@ -1004,13 +1053,14 @@ const UsVisaForm = () => {
           <label>تاريخ الميلاد <span className="vf-required">*</span></label>
           <input type="date" value={formData.personalInfo.dateOfBirth}
             onChange={e => updateField('personalInfo', 'dateOfBirth', e.target.value)}
-            className={errors['personalInfo.dateOfBirth'] ? 'vf-error' : ''} />
+            className={`${errors['personalInfo.dateOfBirth'] ? 'vf-error' : ''}${ocrCls('personalInfo.dateOfBirth')}`} />
           {errors['personalInfo.dateOfBirth'] && <span className="vf-error-text">{errors['personalInfo.dateOfBirth']}</span>}
         </div>
         <div className="vf-form-group">
           <label>الدولة</label>
           <input type="text" value={formData.personalInfo.country}
-            onChange={e => updateField('personalInfo', 'country', e.target.value)} placeholder="المملكة العربية السعودية" />
+            onChange={e => updateField('personalInfo', 'country', e.target.value)} placeholder="المملكة العربية السعودية"
+            className={ocrCls('personalInfo.country').trim()} />
         </div>
       </div>
       <div className="vf-form-row">
@@ -1018,13 +1068,13 @@ const UsVisaForm = () => {
           <label>الجنسية <span className="vf-required">*</span></label>
           <input type="text" value={formData.personalInfo.nationality}
             onChange={e => updateField('personalInfo', 'nationality', e.target.value)} placeholder="سعودي"
-            className={errors['personalInfo.nationality'] ? 'vf-error' : ''} />
+            className={`${errors['personalInfo.nationality'] ? 'vf-error' : ''}${ocrCls('personalInfo.nationality')}`} />
           {errors['personalInfo.nationality'] && <span className="vf-error-text">{errors['personalInfo.nationality']}</span>}
         </div>
         <div className="vf-form-group">
           <label>رقم الهوية <span className="vf-required">*</span></label>
-          <input type="text" value={formData.personalInfo.nationalId}
-            onChange={e => updateField('personalInfo', 'nationalId', e.target.value)} placeholder="رقم الهوية الوطنية"
+          <input type="text" inputMode="numeric" value={formData.personalInfo.nationalId}
+            onChange={e => updateField('personalInfo', 'nationalId', e.target.value)} placeholder="رقم الهوية الوطنية" dir="ltr"
             className={errors['personalInfo.nationalId'] ? 'vf-error' : ''} />
           {errors['personalInfo.nationalId'] && <span className="vf-error-text">{errors['personalInfo.nationalId']}</span>}
         </div>
@@ -1076,7 +1126,7 @@ const UsVisaForm = () => {
         <div key={idx} className="vf-form-row" style={{ alignItems: 'flex-end' }}>
           <div className="vf-form-group" style={{ flex: 1 }}>
             <label>{idx === 0 ? <>بريد إلكتروني <span className="vf-required">*</span></> : `بريد إلكتروني ${idx + 1}`}</label>
-            <input type="email" value={email} onChange={e => updateEmail(idx, e.target.value)}
+            <input type="email" inputMode="email" autoComplete="email" value={email} onChange={e => updateEmail(idx, e.target.value)}
               placeholder="example@email.com" dir="ltr"
               className={idx === 0 && errors['contactInfo.emails'] ? 'vf-error' : ''} />
           </div>
@@ -1093,7 +1143,7 @@ const UsVisaForm = () => {
         <div key={idx} className="vf-form-row" style={{ alignItems: 'flex-end' }}>
           <div className="vf-form-group" style={{ flex: 1 }}>
             <label>{idx === 0 ? <>رقم الجوال <span className="vf-required">*</span></> : `رقم هاتف ${idx + 1}`}</label>
-            <input type="tel" value={phone} onChange={e => updatePhone(idx, e.target.value)}
+            <input type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={e => updatePhone(idx, e.target.value)}
               placeholder="05xxxxxxxx" dir="ltr"
               className={idx === 0 && errors['contactInfo.phones'] ? 'vf-error' : ''} />
           </div>
@@ -1212,28 +1262,32 @@ const UsVisaForm = () => {
         </div>
       </div>
 
-      {/* US Address */}
-      <div className="vf-section-title" style={{ marginTop: 24 }}>العنوان في الولايات المتحدة (اختياري)</div>
-      <div className="vf-form-group">
-        <label>العنوان - الشارع</label>
-        <input type="text" value={formData.travelInfo.usStreetAddress}
-          onChange={e => updateField('travelInfo', 'usStreetAddress', e.target.value)} placeholder="رقم وشارع" />
-      </div>
-      <div className="vf-form-row">
-        <div className="vf-form-group">
-          <label>المدينة</label>
-          <input type="text" value={formData.travelInfo.usCity}
-            onChange={e => updateField('travelInfo', 'usCity', e.target.value)} placeholder="المدينة" />
+      {/* US Address — collapsible (optional) */}
+      <details className="vf-collapsible">
+        <summary className="vf-collapsible-summary">العنوان في الولايات المتحدة (اختياري)</summary>
+        <div className="vf-collapsible-body">
+          <div className="vf-form-group">
+            <label>العنوان - الشارع</label>
+            <input type="text" value={formData.travelInfo.usStreetAddress}
+              onChange={e => updateField('travelInfo', 'usStreetAddress', e.target.value)} placeholder="رقم وشارع" />
+          </div>
+          <div className="vf-form-row">
+            <div className="vf-form-group">
+              <label>المدينة</label>
+              <input type="text" value={formData.travelInfo.usCity}
+                onChange={e => updateField('travelInfo', 'usCity', e.target.value)} placeholder="المدينة" />
+            </div>
+            <div className="vf-form-group">
+              <label>الولاية</label>
+              <select value={formData.travelInfo.usState}
+                onChange={e => updateField('travelInfo', 'usState', e.target.value)}>
+                <option value="">اختر الولاية...</option>
+                {US_STATES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+              </select>
+            </div>
+          </div>
         </div>
-        <div className="vf-form-group">
-          <label>الولاية</label>
-          <select value={formData.travelInfo.usState}
-            onChange={e => updateField('travelInfo', 'usState', e.target.value)}>
-            <option value="">اختر الولاية...</option>
-            {US_STATES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-          </select>
-        </div>
-      </div>
+      </details>
 
       {/* Financial Info */}
       <div className="vf-section-title" style={{ marginTop: 24 }}>المعلومات المالية</div>
@@ -1275,33 +1329,37 @@ const UsVisaForm = () => {
         </div>
       )}
 
-      {/* Host Info */}
-      <div className="vf-section-title" style={{ marginTop: 24 }}>معلومات الاستضافة (اختياري)</div>
-      <div className="vf-info-box" style={{ marginBottom: 16 }}>
-        بيانات الشخص أو الجهة المستضيفة - يمكنك كتابة اسم الفندق وعنوانه
-      </div>
-      <div className="vf-form-group">
-        <label>اسم المضيف (شخص / شركة / فندق)</label>
-        <input type="text" value={formData.hostInfo.hostName}
-          onChange={e => updateField('hostInfo', 'hostName', e.target.value)} placeholder="اسم المضيف أو الفندق" />
-      </div>
-      <div className="vf-form-group">
-        <label>عنوان المضيف</label>
-        <input type="text" value={formData.hostInfo.hostAddress}
-          onChange={e => updateField('hostInfo', 'hostAddress', e.target.value)} placeholder="العنوان الكامل في أمريكا" />
-      </div>
-      <div className="vf-form-row">
-        <div className="vf-form-group">
-          <label>رقم هاتف المضيف</label>
-          <input type="tel" value={formData.hostInfo.hostPhone}
-            onChange={e => updateField('hostInfo', 'hostPhone', e.target.value)} placeholder="رقم الهاتف" dir="ltr" />
+      {/* Host Info — collapsible (optional) */}
+      <details className="vf-collapsible">
+        <summary className="vf-collapsible-summary">معلومات الاستضافة (اختياري)</summary>
+        <div className="vf-collapsible-body">
+          <div className="vf-info-box" style={{ marginBottom: 16 }}>
+            بيانات الشخص أو الجهة المستضيفة - يمكنك كتابة اسم الفندق وعنوانه
+          </div>
+          <div className="vf-form-group">
+            <label>اسم المضيف (شخص / شركة / فندق)</label>
+            <input type="text" value={formData.hostInfo.hostName}
+              onChange={e => updateField('hostInfo', 'hostName', e.target.value)} placeholder="اسم المضيف أو الفندق" />
+          </div>
+          <div className="vf-form-group">
+            <label>عنوان المضيف</label>
+            <input type="text" value={formData.hostInfo.hostAddress}
+              onChange={e => updateField('hostInfo', 'hostAddress', e.target.value)} placeholder="العنوان الكامل في أمريكا" />
+          </div>
+          <div className="vf-form-row">
+            <div className="vf-form-group">
+              <label>رقم هاتف المضيف</label>
+              <input type="tel" value={formData.hostInfo.hostPhone}
+                onChange={e => updateField('hostInfo', 'hostPhone', e.target.value)} placeholder="رقم الهاتف" dir="ltr" />
+            </div>
+            <div className="vf-form-group">
+              <label>بريد المضيف الإلكتروني</label>
+              <input type="email" value={formData.hostInfo.hostEmail}
+                onChange={e => updateField('hostInfo', 'hostEmail', e.target.value)} placeholder="email@example.com" dir="ltr" />
+            </div>
+          </div>
         </div>
-        <div className="vf-form-group">
-          <label>بريد المضيف الإلكتروني</label>
-          <input type="email" value={formData.hostInfo.hostEmail}
-            onChange={e => updateField('hostInfo', 'hostEmail', e.target.value)} placeholder="email@example.com" dir="ltr" />
-        </div>
-      </div>
+      </details>
 
       {/* Travel Companions */}
       <div className="vf-section-title" style={{ marginTop: 24 }}>مرافقو السفر</div>
@@ -1886,8 +1944,38 @@ const UsVisaForm = () => {
     </div>
   );
 
+  // حساب الحقول الإجبارية الناقصة (لملخص المراجعة)
+  const getMissingFields = () => {
+    const fd = formData;
+    const m = [];
+    if (!fd.applicationCity) m.push({ label: 'مدينة التقديم', step: 1 });
+    if (!fd.passportDetails.passportNumber) m.push({ label: 'رقم الجواز', step: 1 });
+    if (!fd.passportDetails.passportIssueDate) m.push({ label: 'تاريخ إصدار الجواز', step: 1 });
+    if (!fd.passportDetails.passportExpiryDate) m.push({ label: 'تاريخ انتهاء الجواز', step: 1 });
+    if (!fd.personalInfo.fullName) m.push({ label: 'الاسم', step: 2 });
+    if (!fd.personalInfo.maritalStatus) m.push({ label: 'الحالة الاجتماعية', step: 2 });
+    if (!fd.personalInfo.dateOfBirth) m.push({ label: 'تاريخ الميلاد', step: 2 });
+    if (!fd.personalInfo.birthCity) m.push({ label: 'مدينة الميلاد', step: 2 });
+    if (!fd.personalInfo.nationality) m.push({ label: 'الجنسية', step: 2 });
+    if (!fd.personalInfo.nationalId) m.push({ label: 'رقم الهوية', step: 2 });
+    if (!fd.contactInfo.phones[0]) m.push({ label: 'رقم الجوال', step: 3 });
+    if (!fd.contactInfo.emails[0]) m.push({ label: 'البريد الإلكتروني', step: 3 });
+    if (!fd.interviewSocialMedia.interviewLanguage) m.push({ label: 'لغة المقابلة', step: 3 });
+    if (!fd.travelInfo.expectedArrivalDate) m.push({ label: 'تاريخ الوصول', step: 4 });
+    if (!fd.travelInfo.stayDurationNumber) m.push({ label: 'فترة الإقامة', step: 4 });
+    if (fd.travelCompanions.hasCompanions === null) m.push({ label: 'سؤال المرافقين', step: 4 });
+    if (fd.previousUSTravel.beenToUS === null) m.push({ label: 'سؤال السفر السابق', step: 5 });
+    if (!fd.familyInfo.fatherFirstName || !fd.familyInfo.fatherLastName) m.push({ label: 'اسم الأب', step: 6 });
+    if (!fd.familyInfo.motherFirstName || !fd.familyInfo.motherLastName) m.push({ label: 'اسم الأم', step: 6 });
+    if (fd.personalInfo.maritalStatus === 'married' && !fd.spouseInfo.spouseFullName) m.push({ label: 'بيانات الزوج/ة', step: 6 });
+    if (fd.travelHistoryMilitary.hasVisitedCountries === null) m.push({ label: 'سؤال الدول المزارة', step: 8 });
+    if (fd.travelHistoryMilitary.militaryService === null) m.push({ label: 'سؤال الخدمة العسكرية', step: 8 });
+    return m;
+  };
+
   // Step 10: Full Review + Declaration
   const renderStep10 = () => {
+    const missing = getMissingFields();
     const ReviewSection = ({ title, stepNum, children }) => (
       <div className="vf-review-section">
         <div className="vf-review-section-header">
@@ -1911,6 +1999,19 @@ const UsVisaForm = () => {
           <h2>المراجعة والإقرار</h2>
           <p>راجع جميع بياناتك قبل التقديم</p>
         </div>
+
+        {missing.length > 0 && (
+          <div className="vf-missing-box">
+            <div className="vf-missing-title">⚠️ يوجد {missing.length} حقل إجباري ناقص — أكملها قبل التقديم:</div>
+            <div className="vf-missing-chips">
+              {missing.map((item, i) => (
+                <button key={i} type="button" className="vf-missing-chip" onClick={() => setCurrentStep(item.step)}>
+                  {item.label} <span className="vf-missing-chip-go">إكمال ↗</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <ReviewSection title="بيانات الجواز" stepNum={1}>
           <ReviewItem label="نوع التأشيرة" value={getVisaTypeLabel(formData.visaType)} />
@@ -2039,7 +2140,9 @@ const UsVisaForm = () => {
         <div className="vf-header-container">
           <button className="vf-back-btn" onClick={() => navigate('/us-visa')}>العودة</button>
           <div className="vf-header-title"><h1>طلب تأشيرة أمريكية</h1></div>
-          {saving && <span className="vf-saving-badge">جاري الحفظ...</span>}
+          {saving
+            ? <span className="vf-saving-badge">جاري الحفظ...</span>
+            : savedAt && <span className="vf-saving-badge vf-saved-badge">&#10003; تم الحفظ</span>}
         </div>
       </div>
 
@@ -2049,9 +2152,15 @@ const UsVisaForm = () => {
           <span className="vf-segmented-percentage">
             {Math.round(((currentStep - 1) / (STEPS.length - 1)) * 100)}%
           </span>
-          <span className="vf-segmented-step-name">
-            {currentStep > 1 && <span className="vf-segmented-check">&#10003;</span>}
-            {STEPS[currentStep - 1].title}
+          <span className="vf-segmented-step-block">
+            <span className="vf-segmented-step-name">
+              {currentStep > 1 && <span className="vf-segmented-check">&#10003;</span>}
+              {STEPS[currentStep - 1].title}
+            </span>
+            <span className="vf-segmented-step-count">
+              خطوة {currentStep} من {STEPS.length}
+              {currentStep < STEPS.length && ` · التالي: ${STEPS[currentStep].title}`}
+            </span>
           </span>
         </div>
         <div className="vf-segmented-track">
