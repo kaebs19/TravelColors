@@ -92,13 +92,13 @@ exports.uploadPersonalPhoto = async (req, res, next) => {
   }
 };
 
-// @desc    قراءة بيانات الجواز بـ OCR (Mindee)
+// @desc    قراءة بيانات الجواز بـ OCR (Mindee V2)
 // @route   POST /api/visa/ocr-passport
-// @access  Public
+// @access  Private (Client)
 exports.ocrPassport = async (req, res, next) => {
   try {
-    // التحقق من وجود مفتاح Mindee
-    if (!process.env.MINDEE_API_KEY) {
+    // التحقق من إعدادات Mindee V2 (المفتاح + معرّف النموذج)
+    if (!process.env.MINDEE_API_KEY || !process.env.MINDEE_MODEL_ID) {
       return res.status(503).json({
         success: false,
         message: 'خدمة قراءة الجواز غير مفعّلة حالياً'

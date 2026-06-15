@@ -1,6 +1,10 @@
 /**
- * Mindee Passport OCR Service
- * يقرأ بيانات جواز السفر من صورة أو PDF باستخدام Mindee API
+ * Mindee Passport OCR Service (Mindee V2 API)
+ * يقرأ بيانات جواز السفر من صورة أو PDF باستخدام Mindee V2 (نموذج عبر modelId)
+ *
+ * متطلبات البيئة:
+ *   MINDEE_API_KEY   مفتاح Mindee (يبدأ بـ md_)
+ *   MINDEE_MODEL_ID  معرّف النموذج في منصة Mindee
  */
 const mindee = require('mindee');
 
@@ -9,101 +13,132 @@ const getClient = () => {
   if (!process.env.MINDEE_API_KEY) {
     throw new Error('MINDEE_API_KEY غير معرّف في ملف .env');
   }
+  if (!process.env.MINDEE_MODEL_ID) {
+    throw new Error('MINDEE_MODEL_ID غير معرّف في ملف .env');
+  }
   return new mindee.Client({ apiKey: process.env.MINDEE_API_KEY });
 };
 
+// تحويل حاوية الحقول (Map أو كائن) إلى مصفوفة [اسم, حقل]
+const fieldEntries = (container) => {
+  if (!container) return [];
+  if (typeof container.entries === 'function') return [...container.entries()];
+  return Object.entries(container);
+};
+
+// تجميع كل الحقول البسيطة (مع الحقول المتداخلة) في كائن مسطّح: اسم مُطبّع → قيمة
+const collectSimpleFields = (container, out) => {
+  for (const [name, field] of fieldEntries(container)) {
+    if (!field || typeof name !== 'string') continue;
+    const v = field.value;
+    if (v !== undefined && v !== null && (typeof v !== 'object' || v instanceof Date)) {
+      out[name.toLowerCase().replace(/[_\s-]/g, '')] = v;
+    }
+    // حقول كائن متداخلة
+    if (field.fields) collectSimpleFields(field.fields, out);
+    // عناصر قوائم
+    if (Array.isArray(field.items)) {
+      field.items.forEach(item => { if (item && item.fields) collectSimpleFields(item.fields, out); });
+    }
+  }
+};
+
+// تطبيع التاريخ إلى YYYY-MM-DD
+const normalizeDate = (v) => {
+  if (!v) return '';
+  if (v instanceof Date) return v.toISOString().slice(0, 10);
+  const s = String(v).trim();
+  return s.length >= 10 ? s.slice(0, 10) : s;
+};
+
+const countryMap = {
+  SAU: 'سعودي', ARE: 'إماراتي', KWT: 'كويتي', BHR: 'بحريني',
+  OMN: 'عماني', QAT: 'قطري', EGY: 'مصري', JOR: 'أردني',
+  LBN: 'لبناني', IRQ: 'عراقي', SYR: 'سوري', YEM: 'يمني',
+  SDN: 'سوداني', LBY: 'ليبي', TUN: 'تونسي', DZA: 'جزائري',
+  MAR: 'مغربي', PSE: 'فلسطيني', USA: 'أمريكي', GBR: 'بريطاني',
+  FRA: 'فرنسي', DEU: 'ألماني', IND: 'هندي', PAK: 'باكستاني',
+  PHL: 'فلبيني', IDN: 'إندونيسي', BGD: 'بنغلاديشي', TUR: 'تركي',
+};
+
+const countryNameMap = {
+  SAU: 'المملكة العربية السعودية', ARE: 'الإمارات العربية المتحدة', KWT: 'الكويت',
+  BHR: 'البحرين', OMN: 'عُمان', QAT: 'قطر', EGY: 'مصر', JOR: 'الأردن',
+  LBN: 'لبنان', IRQ: 'العراق', SYR: 'سوريا', YEM: 'اليمن', SDN: 'السودان',
+  LBY: 'ليبيا', TUN: 'تونس', DZA: 'الجزائر', MAR: 'المغرب', PSE: 'فلسطين',
+  USA: 'الولايات المتحدة', GBR: 'بريطانيا', FRA: 'فرنسا', DEU: 'ألمانيا',
+  IND: 'الهند', PAK: 'باكستان', PHL: 'الفلبين', IDN: 'إندونيسيا',
+  BGD: 'بنغلاديش', TUR: 'تركيا',
+};
+
+// هل القيمة رمز دولة من 3 أحرف؟
+const isCode = (s) => typeof s === 'string' && /^[A-Z]{3}$/.test(s.trim());
+const toNationality = (v) => (isCode(v) ? (countryMap[v] || v) : (v || ''));
+const toCountryName = (v) => (isCode(v) ? (countryNameMap[v] || v) : (v || ''));
+
 /**
- * استخراج بيانات الجواز من ملف
+ * استخراج بيانات الجواز من ملف عبر Mindee V2
  * @param {string} filePath - المسار الكامل للملف
  * @returns {Object} البيانات المستخرجة
  */
 async function parsePassport(filePath) {
   const client = getClient();
+  const inputSource = new mindee.PathInput({ inputPath: filePath });
 
-  // قراءة الملف من المسار المحلي
-  const inputSource = client.docFromPath(filePath);
+  // منتج الاستخراج العام لـ V2
+  const Product = mindee.product.Extraction;
+  if (!Product) {
+    throw new Error('mindee.product.Extraction غير متاح — المنتجات المتاحة: ' + Object.keys(mindee.product || {}).join(', '));
+  }
 
-  // إرسال للتحليل
-  const apiResponse = await client.parse(
-    mindee.product.PassportV1,
-    inputSource
+  const response = await client.enqueueAndGetResult(
+    Product,
+    inputSource,
+    { modelId: process.env.MINDEE_MODEL_ID }
   );
 
-  const prediction = apiResponse.document.inference.prediction;
+  // بنية V2: response.inference.result.fields
+  const result = response?.inference?.result || response?.document?.inference?.result;
+  const fields = result?.fields;
 
-  // تجميع الأسماء
-  const givenNames = prediction.givenNames
-    ? prediction.givenNames.map(n => n.value).filter(Boolean).join(' ')
-    : '';
-  const surname = prediction.surname?.value || '';
-  const fullName = [givenNames, surname].filter(Boolean).join(' ');
+  const flat = {};
+  collectSimpleFields(fields, flat);
+  // مفيد لتشخيص أسماء الحقول في سجل السيرفر إن لم تُطابَق
+  console.log('Mindee V2 detected fields:', Object.keys(flat));
 
-  // تحويل الجنس
-  const genderMap = { M: 'male', F: 'female' };
-  const gender = genderMap[prediction.gender?.value] || '';
-
-  // تحويل رمز الدولة لاسم عربي (أشهر الجنسيات)
-  const countryMap = {
-    SAU: 'سعودي', ARE: 'إماراتي', KWT: 'كويتي', BHR: 'بحريني',
-    OMN: 'عماني', QAT: 'قطري', EGY: 'مصري', JOR: 'أردني',
-    LBN: 'لبناني', IRQ: 'عراقي', SYR: 'سوري', YEM: 'يمني',
-    SDN: 'سوداني', LBY: 'ليبي', TUN: 'تونسي', DZA: 'جزائري',
-    MAR: 'مغربي', PSE: 'فلسطيني', USA: 'أمريكي', GBR: 'بريطاني',
-    FRA: 'فرنسي', DEU: 'ألماني', IND: 'هندي', PAK: 'باكستاني',
-    PHL: 'فلبيني', IDN: 'إندونيسي', BGD: 'بنغلاديشي', TUR: 'تركي',
+  // اختيار أول حقل يحتوي اسمه (بعد التطبيع) على إحدى الكلمات المفتاحية
+  const pick = (...keywords) => {
+    for (const key of Object.keys(flat)) {
+      if (keywords.some(k => key.includes(k))) return flat[key];
+    }
+    return '';
   };
-  const countryCode = prediction.country?.value || '';
-  const nationality = countryMap[countryCode] || countryCode;
 
-  // أسماء الدول بالعربية (لحقل الدولة ومكان الإصدار)
-  const countryNameMap = {
-    SAU: 'المملكة العربية السعودية', ARE: 'الإمارات العربية المتحدة', KWT: 'الكويت',
-    BHR: 'البحرين', OMN: 'عُمان', QAT: 'قطر', EGY: 'مصر', JOR: 'الأردن',
-    LBN: 'لبنان', IRQ: 'العراق', SYR: 'سوريا', YEM: 'اليمن', SDN: 'السودان',
-    LBY: 'ليبيا', TUN: 'تونس', DZA: 'الجزائر', MAR: 'المغرب', PSE: 'فلسطين',
-    USA: 'الولايات المتحدة', GBR: 'بريطانيا', FRA: 'فرنسا', DEU: 'ألمانيا',
-    IND: 'الهند', PAK: 'باكستان', PHL: 'الفلبين', IDN: 'إندونيسيا',
-    BGD: 'بنغلاديش', TUR: 'تركيا',
-  };
-  const countryName = countryNameMap[countryCode] || countryCode;
+  const surname = pick('surname', 'lastname', 'familyname');
+  const given = pick('givennames', 'givenname', 'firstname', 'forename');
+  const explicitFull = pick('fullname', 'holdername');
+  const fullName = explicitFull || [given, surname].filter(Boolean).join(' ');
 
-  // بناء كائن البيانات
+  const nationalityRaw = pick('nationality');
+  const countryRaw = pick('countryofissue', 'issuingcountry', 'issuingstate', 'country');
+
   const extractedData = {
-    // بيانات شخصية
     personalInfo: {
       fullName: fullName,
-      firstName: givenNames,
+      firstName: given,
       lastName: surname,
-      dateOfBirth: prediction.birthDate?.value || '',
-      gender: gender,
-      nationality: nationality,
-      country: countryName,
-      countryCode: countryCode,
-      birthPlace: prediction.birthPlace?.value || '',
+      dateOfBirth: normalizeDate(pick('dateofbirth', 'birthdate', 'dob')),
+      gender: ({ M: 'male', F: 'female' })[pick('gender', 'sex')] || '',
+      nationality: toNationality(nationalityRaw) || toNationality(countryRaw),
+      country: toCountryName(countryRaw),
+      birthPlace: pick('placeofbirth', 'birthplace'),
     },
-    // بيانات الجواز
     passportDetails: {
-      passportNumber: prediction.idNumber?.value || '',
-      passportIssueDate: prediction.issuanceDate?.value || '',
-      passportExpiryDate: prediction.expiryDate?.value || '',
-      passportIssuePlace: countryName, // البلد المصدرة
+      passportNumber: pick('passportnumber', 'documentnumber', 'idnumber'),
+      passportIssueDate: normalizeDate(pick('dateofissue', 'issuedate', 'issuancedate')),
+      passportExpiryDate: normalizeDate(pick('dateofexpiry', 'expirydate', 'expirationdate', 'expiry')),
+      passportIssuePlace: toCountryName(countryRaw),
     },
-    // MRZ (للتحقق لاحقاً)
-    mrz: {
-      line1: prediction.mrz1?.value || '',
-      line2: prediction.mrz2?.value || '',
-    },
-    // درجة الثقة
-    confidence: {
-      fullName: Math.min(
-        ...(prediction.givenNames?.map(n => n.confidence) || [0]),
-        prediction.surname?.confidence || 0
-      ),
-      passportNumber: prediction.idNumber?.confidence || 0,
-      dateOfBirth: prediction.birthDate?.confidence || 0,
-      expiryDate: prediction.expiryDate?.confidence || 0,
-      overall: apiResponse.document.inference.prediction.givenNames?.[0]?.confidence || 0
-    }
   };
 
   return extractedData;
