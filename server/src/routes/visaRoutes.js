@@ -14,6 +14,7 @@ router.post('/ocr-passport', clientProtect, uploadLimiter, upload.single('passpo
 
 // === Admin Routes (محمية) ===
 router.get('/applications', protect, visaController.getApplications);
+router.get('/applications/:id', protect, visaController.getApplication);
 router.put('/applications/:id/status', protect, visaController.updateStatus);
 router.delete('/applications/:id', protect, visaController.deleteApplication);
 router.put('/applications/:id/link-customer', protect, visaController.linkCustomer);

@@ -176,6 +176,29 @@ exports.ocrPassport = async (req, res, next) => {
 
 // ==================== Admin Endpoints ====================
 
+// @desc    عرض طلب واحد (للإدارة)
+// @route   GET /api/visa/applications/:id
+// @access  Private (Admin/Employee)
+exports.getApplication = async (req, res, next) => {
+  try {
+    const application = await VisaApplication.findById(req.params.id);
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: 'الطلب غير موجود'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: { application }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    قائمة كل الطلبات (مع فلترة)
 // @route   GET /api/visa/applications
 // @access  Private (Admin/Employee)
