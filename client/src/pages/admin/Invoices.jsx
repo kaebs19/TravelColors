@@ -5,6 +5,7 @@ import { Card, Button, Loader, Modal, NumberInput, PhoneInput } from '../../comp
 import { CustomerSearch } from '../../components/admin';
 import { parseArabicNumber, arabicToEnglishNumbers } from '../../utils/formatters';
 import { printContent, formatInvoiceForPrint } from '../../utils/printUtils';
+import { shareInvoiceToWhatsApp, generateInvoicePdf } from '../../utils/invoicePdf';
 import { useToast } from '../../context';
 import './Invoices.css';
 
@@ -185,6 +186,13 @@ const Invoices = () => {
     setInvoiceForm({ ...invoiceForm, items: newItems });
   };
 
+  // عمود «العدد» الموحّد: يحدّث الكمية والأشخاص معاً (الحساب على يحدد المسمّى فقط)
+  const updateItemCount = (index, value) => {
+    const newItems = [...invoiceForm.items];
+    newItems[index] = { ...newItems[index], quantity: value, persons: value };
+    setInvoiceForm({ ...invoiceForm, items: newItems });
+  };
+
   // مبلغ العنصر = (الأشخاص أو الكمية حسب الاختيار) × السعر — الافتراضي الأشخاص
   const getItemAmount = (item) => {
     const basis = item.unitType === 'quantity' ? (item.quantity || 1) : (item.persons || 1);
@@ -240,6 +248,37 @@ const Invoices = () => {
     } catch (error) {
       console.error('Error adding payment:', error);
       showToast(error.response?.data?.message || 'حدث خطأ', 'error');
+    }
+  };
+
+  const [sendingWa, setSendingWa] = useState(null);
+
+  const handleSendWhatsApp = async (inv) => {
+    try {
+      setSendingWa(inv._id);
+      // جلب الفاتورة كاملة لضمان توفر كل البيانات
+      const res = await invoicesApi.getInvoice(inv._id);
+      const fullInvoice = res.data?.data?.invoice || inv;
+      const result = await shareInvoiceToWhatsApp(fullInvoice, settings);
+      if (result.method === 'download_and_whatsapp') {
+        showToast('تم تنزيل ملف PDF — أرفقه في محادثة واتساب', 'success');
+      }
+    } catch (error) {
+      console.error('Error sending invoice to WhatsApp:', error);
+      showToast('تعذّر إرسال الفاتورة عبر واتساب', 'error');
+    } finally {
+      setSendingWa(null);
+    }
+  };
+
+  const handleDownloadPdf = async (inv) => {
+    try {
+      const res = await invoicesApi.getInvoice(inv._id);
+      const fullInvoice = res.data?.data?.invoice || inv;
+      await generateInvoicePdf(fullInvoice, settings);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      showToast('تعذّر إنشاء ملف PDF', 'error');
     }
   };
 
@@ -496,17 +535,28 @@ const Invoices = () => {
                 </td>
                 <td>
                   <div className="actions-cell">
-                    <button className="action-btn" onClick={() => viewInvoice(inv)} title="عرض">
+                    <button className="action-btn act-view" onClick={() => viewInvoice(inv)} title="عرض">
                       👁️
                     </button>
+                    <button
+                      className="action-btn act-whatsapp"
+                      onClick={() => handleSendWhatsApp(inv)}
+                      disabled={sendingWa === inv._id}
+                      title="إرسال عبر واتساب (PDF)"
+                    >
+                      {sendingWa === inv._id ? '⏳' : '💬'}
+                    </button>
+                    <button className="action-btn act-pdf" onClick={() => handleDownloadPdf(inv)} title="تحميل PDF">
+                      📄
+                    </button>
                     {inv.type === 'quote' && inv.status !== 'sent' && (
-                      <button className="action-btn" onClick={() => handleConvertToInvoice(inv._id)} title="تحويل لفاتورة">
+                      <button className="action-btn act-convert" onClick={() => handleConvertToInvoice(inv._id)} title="تحويل لفاتورة">
                         🔄
                       </button>
                     )}
                     {inv.status !== 'paid' && inv.status !== 'cancelled' && inv.type !== 'quote' && (
                       <button
-                        className="action-btn"
+                        className="action-btn act-pay"
                         onClick={() => {
                           setSelectedInvoice(inv);
                           setPaymentForm({...paymentForm, amount: inv.remainingAmount});
@@ -517,7 +567,7 @@ const Invoices = () => {
                         💵
                       </button>
                     )}
-                    <button className="action-btn" onClick={() => {
+                    <button className="action-btn act-print" onClick={() => {
                       const content = formatInvoiceForPrint(inv, settings);
                       const typeLabels = { invoice: 'فاتورة', quote: 'عرض سعر', receipt: 'إيصال' };
                       printContent(content, `${typeLabels[inv.type] || 'فاتورة'} - ${inv.invoiceNumber}`);
@@ -631,8 +681,7 @@ const Invoices = () => {
                 <tr>
                   <th>المنتج</th>
                   <th>الوصف</th>
-                  <th>الكمية</th>
-                  <th>الأشخاص</th>
+                  <th>العدد</th>
                   <th>الحساب على</th>
                   <th>السعر</th>
                   <th>المبلغ</th>
@@ -665,20 +714,11 @@ const Invoices = () => {
                     </td>
                     <td>
                       <NumberInput
-                        value={item.quantity}
-                        onChange={(e) => updateItem(index, 'quantity', parseArabicNumber(e.target.value) || 1)}
+                        value={item.unitType === 'quantity' ? item.quantity : item.persons}
+                        onChange={(e) => updateItemCount(index, parseArabicNumber(e.target.value) || 1)}
                         min={1}
                         allowDecimal={false}
-                        style={{width: '60px'}}
-                      />
-                    </td>
-                    <td>
-                      <NumberInput
-                        value={item.persons}
-                        onChange={(e) => updateItem(index, 'persons', parseArabicNumber(e.target.value) || 1)}
-                        min={1}
-                        allowDecimal={false}
-                        style={{width: '60px'}}
+                        style={{width: '70px'}}
                       />
                     </td>
                     <td>
@@ -930,7 +970,13 @@ const Invoices = () => {
                 const typeLabels = { invoice: 'فاتورة', quote: 'عرض سعر', receipt: 'إيصال' };
                 printContent(content, `${typeLabels[selectedInvoice.type] || 'فاتورة'} - ${selectedInvoice.invoiceNumber}`);
               }}>
-                طباعة
+                🖨️ طباعة
+              </Button>
+              <Button variant="outline" onClick={() => handleSendWhatsApp(selectedInvoice)}>
+                💬 إرسال واتساب
+              </Button>
+              <Button variant="outline" onClick={() => handleDownloadPdf(selectedInvoice)}>
+                📄 تحميل PDF
               </Button>
               {selectedInvoice.status !== 'paid' && selectedInvoice.type !== 'quote' && (
                 <Button onClick={() => {
