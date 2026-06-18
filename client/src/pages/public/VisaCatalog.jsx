@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getPublicVisas } from '../../api/visaCatalogApi';
 import { websiteApi } from '../../api';
+import DeveloperCredit from '../../components/common/DeveloperCredit';
 import { useClientAuth } from '../../context/ClientAuthContext';
 import '../../styles/public-shared.css';
 import './VisaCatalog.css';
@@ -288,6 +289,7 @@ const VisaCatalog = () => {
             </div>
           )}
           <p className="vcat-footer-copy">© {new Date().getFullYear()} Travel Colors - ألوان المسافر. جميع الحقوق محفوظة</p>
+          <DeveloperCredit style={{ textAlign: 'center' }} />
         </div>
       </footer>
 

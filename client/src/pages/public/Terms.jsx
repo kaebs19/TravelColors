@@ -2,6 +2,7 @@ import { getIconSvg } from '../../utils/icons';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { websiteApi } from '../../api';
+import DeveloperCredit from '../../components/common/DeveloperCredit';
 import '../../styles/public-shared.css';
 import './LegalPage.css';
 
@@ -272,6 +273,7 @@ const Terms = () => {
           <span onClick={() => navigate('/ContactUs')}>تواصل معنا</span>
         </nav>
         <p>&copy; {new Date().getFullYear()} Travel Colors - ألوان المسافر. جميع الحقوق محفوظة</p>
+        <DeveloperCredit />
         <div className="public-footer-links">
           <span onClick={() => navigate('/privacy')}>سياسة الخصوصية</span>
           <span className="public-footer-sep">|</span>

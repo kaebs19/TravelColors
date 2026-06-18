@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { websiteApi } from '../../api';
+import DeveloperCredit from '../../components/common/DeveloperCredit';
 import visaCatalogApi from '../../api/visaCatalogApi';
 import { useClientAuth } from '../../context/ClientAuthContext';
 import { getIconSvg } from '../../utils/icons';
@@ -761,6 +762,7 @@ const Home = () => {
                 <Link to="/privacy">سياسة الخصوصية</Link>
                 <Link to="/terms">الشروط والأحكام</Link>
               </div>
+              <DeveloperCredit />
             </div>
           </div>
         </div>

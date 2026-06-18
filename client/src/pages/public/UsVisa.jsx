@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { websiteApi } from '../../api';
+import DeveloperCredit from '../../components/common/DeveloperCredit';
 import '../../styles/public-shared.css';
 import './UsVisa.css';
 
@@ -333,6 +334,7 @@ const UsVisa = () => {
             <Link to="/ContactUs">تواصل معنا</Link>
           </div>
           <p className="usvisa-footer-copy">© {new Date().getFullYear()} Travel Colors - ألوان المسافر. جميع الحقوق محفوظة</p>
+          <DeveloperCredit style={{ textAlign: 'center' }} />
         </div>
       </footer>
 
