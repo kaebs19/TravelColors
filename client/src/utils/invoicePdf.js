@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import { code39Svg } from './barcode';
 
 const typeLabels = { invoice: 'فاتورة', quote: 'عرض سعر', receipt: 'إيصال' };
 const statusLabels = {
@@ -57,6 +58,7 @@ const buildInvoiceHTML = (invoice, settings = {}) => {
     </div>`;
 
   const isQuote = invoice.type === 'quote';
+  const barcode = code39Svg(invoice.invoiceNumber, { height: 44, narrow: 2, wide: 5, color: C.primary });
 
   return `
     <div style="background:#ffffff;border-radius:14px;overflow:hidden;font-family:'Tajawal',sans-serif;border:1px solid ${C.border};">
@@ -141,6 +143,8 @@ const buildInvoiceHTML = (invoice, settings = {}) => {
             </div>` : ''}
         </div>
       </div>
+
+      ${barcode ? `<div style="text-align:center;padding:6px 22px 14px;">${barcode}</div>` : ''}
 
       ${(invoice.notes || invoice.terms) ? `
       <div style="background:${C.soft};padding:12px 22px;border-top:2px solid ${C.accent};">

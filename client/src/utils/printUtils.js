@@ -1,3 +1,5 @@
+import { code39Svg } from './barcode';
+
 // دالة لطباعة محتوى HTML في نافذة جديدة
 export const printContent = (content, title = 'طباعة') => {
   const printWindow = window.open('', '_blank', 'width=800,height=600');
@@ -410,6 +412,7 @@ export const formatInvoiceForPrint = (invoice, settings = {}) => {
     ` : ''}
 
     <div class="print-footer">
+      ${code39Svg(invoice.invoiceNumber, { height: 44, narrow: 2, wide: 5, color: '#1f2937' })}
       <p>شكراً لتعاملكم معنا</p>
     </div>
   `;
