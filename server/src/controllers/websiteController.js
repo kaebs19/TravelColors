@@ -1,6 +1,7 @@
 const { WebsiteContent } = require('../models');
 const fs = require('fs');
 const path = require('path');
+const { normalizeMapEmbed } = require('../utils/mapEmbed');
 
 // الحصول على محتوى الموقع - عام بدون auth
 exports.getPublicContent = async (req, res) => {
@@ -46,6 +47,11 @@ exports.updateContent = async (req, res) => {
     delete updates.key;
     delete updates.createdAt;
     delete updates.updatedAt;
+
+    // تحويل رابط الخريطة إلى رابط قابل للتضمين (embed) قبل الحفظ
+    if (typeof updates.mapEmbed === 'string' && updates.mapEmbed.trim()) {
+      updates.mapEmbed = await normalizeMapEmbed(updates.mapEmbed);
+    }
 
     const content = await WebsiteContent.findOneAndUpdate(
       { key: 'main' },

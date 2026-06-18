@@ -8,6 +8,12 @@ const {
   getOrCreateCashRegister
 } = require('../utils/financialUtils');
 
+// حساب مبلغ العنصر حسب أساس التسعير: عدد الأشخاص أو الكمية (الافتراضي الأشخاص)
+const calcItemTotal = (item) => {
+  const basis = item.unitType === 'quantity' ? (item.quantity || 1) : (item.persons || 1);
+  return basis * (item.unitPrice || 0);
+};
+
 // @desc    الحصول على جميع الفواتير
 // @route   GET /api/invoices
 // @access  Private
@@ -133,12 +139,34 @@ exports.createInvoice = async (req, res, next) => {
         customerAddress: req.body.customerAddress || '',
         customerCity: req.body.customerCity || ''
       };
+
+      // حفظ العميل الجديد في قائمة العملاء لإعادة استخدامه لاحقاً (بحث بالاسم/الرقم)
+      if (req.body.customerPhone) {
+        try {
+          let existingCustomer = await Customer.findOne({ phone: req.body.customerPhone });
+          if (!existingCustomer) {
+            existingCustomer = await Customer.create({
+              name: req.body.customerName,
+              phone: req.body.customerPhone,
+              address: {
+                city: req.body.customerCity || 'الرياض',
+                street: req.body.customerAddress || ''
+              },
+              source: 'walk_in',
+              createdBy: req.user.id
+            });
+          }
+          customerData.customer = existingCustomer._id;
+        } catch (customerError) {
+          console.error('Error saving customer from invoice:', customerError);
+        }
+      }
     }
 
     // حساب المجاميع
     const processedItems = items.map(item => ({
       ...item,
-      total: item.quantity * item.unitPrice
+      total: calcItemTotal(item)
     }));
 
     const subtotal = processedItems.reduce((sum, item) => sum + item.total, 0);
@@ -146,6 +174,9 @@ exports.createInvoice = async (req, res, next) => {
     const taxAmount = (subtotal * taxRate) / 100;
     const discount = req.body.discount || 0;
     const total = subtotal + taxAmount - discount;
+
+    // معرف العميل النهائي (موجود مسبقاً أو تم إنشاؤه من بيانات الفاتورة)
+    const resolvedCustomerId = customerData.customer || customerId;
 
     // إنشاء رقم الفاتورة
     const invoiceNumber = await Invoice.generateInvoiceNumber(type);
@@ -196,14 +227,14 @@ exports.createInvoice = async (req, res, next) => {
         category: 'invoice_payment',
         paymentMethod,
         invoice: invoice._id,
-        customer: customerId,
+        customer: resolvedCustomerId,
         createdBy: req.user.id
       });
     }
 
     // تحديث إجمالي الصرف للعميل
-    if (customerId && paidAmount > 0) {
-      await Customer.findByIdAndUpdate(customerId, {
+    if (resolvedCustomerId && paidAmount > 0) {
+      await Customer.findByIdAndUpdate(resolvedCustomerId, {
         $inc: { totalSpent: paidAmount }
       });
     }
@@ -266,7 +297,7 @@ exports.updateInvoice = async (req, res, next) => {
     if (items) {
       invoice.items = items.map(item => ({
         ...item,
-        total: item.quantity * item.unitPrice
+        total: calcItemTotal(item)
       }));
     }
 

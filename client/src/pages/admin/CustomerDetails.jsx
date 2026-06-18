@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { customersApi, appointmentsApi, bookingsApi } from '../../api';
+import { customersApi, appointmentsApi, bookingsApi, invoicesApi } from '../../api';
 import { useToast } from '../../context';
 import { Card, Loader, Button, Modal } from '../../components/common';
 import { formatCurrency, formatDate } from '../../utils';
@@ -13,6 +13,7 @@ const CustomerDetails = () => {
   const [customer, setCustomer] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
@@ -36,11 +37,12 @@ const CustomerDetails = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [customerRes, appointmentsRes, bookingsRes, applicationsRes] = await Promise.all([
+      const [customerRes, appointmentsRes, bookingsRes, applicationsRes, invoicesRes] = await Promise.all([
         customersApi.getCustomer(id),
         appointmentsApi.getAppointments({ customer: id }),
         bookingsApi.getBookings({ customer: id }).catch(() => ({ data: { bookings: [] } })),
-        customersApi.getCustomerApplications(id).catch(() => ({ data: { visaApplications: [], licenseApplications: [], visaServiceApplications: [] } }))
+        customersApi.getCustomerApplications(id).catch(() => ({ data: { visaApplications: [], licenseApplications: [], visaServiceApplications: [] } })),
+        invoicesApi.getInvoices({ customer: id, limit: 100 }).catch(() => ({ data: { data: { invoices: [] } } }))
       ]);
 
       const customerData = customerRes.data?.customer || customerRes.data?.data?.customer || customerRes.data;
@@ -60,6 +62,9 @@ const CustomerDetails = () => {
 
       const bks = bookingsRes.data?.data?.bookings || bookingsRes.data?.bookings || [];
       setBookings(bks);
+
+      const invs = invoicesRes.data?.data?.invoices || invoicesRes.data?.invoices || [];
+      setInvoices(invs);
 
       const appsData = applicationsRes.data?.data || applicationsRes.data || {};
       setApplications({
@@ -234,6 +239,18 @@ const CustomerDetails = () => {
       draft: { label: 'مسودة', class: 'type-draft' }
     };
     return typeMap[type] || { label: type, class: '' };
+  };
+
+  const getInvoiceStatusLabel = (status) => {
+    const labels = {
+      draft: 'مسودة',
+      sent: 'مرسل',
+      paid: 'مدفوع',
+      partial: 'مدفوع جزئياً',
+      cancelled: 'ملغي',
+      expired: 'منتهي'
+    };
+    return labels[status] || status;
   };
 
   const formatDateDisplay = (dateStr, includeYear = true) => {
@@ -524,6 +541,56 @@ const CustomerDetails = () => {
               </div>
             ))}
           </div>
+        )}
+      </Card>
+
+      {/* الفواتير وعروض الأسعار */}
+      <Card className="section-card">
+        <div className="section-header">
+          <h3>🧾 الفواتير وعروض الأسعار</h3>
+          <Button
+            size="small"
+            onClick={() => navigate('/control/invoices')}
+          >
+            + فاتورة جديدة
+          </Button>
+        </div>
+        {invoices.length === 0 ? (
+          <div className="empty-state">
+            <span className="empty-icon">🧾</span>
+            <p>لا توجد فواتير</p>
+          </div>
+        ) : (
+          <table className="invoices-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th style={{ textAlign: 'right', padding: '8px' }}>الرقم</th>
+                <th style={{ textAlign: 'right', padding: '8px' }}>النوع</th>
+                <th style={{ textAlign: 'right', padding: '8px' }}>التاريخ</th>
+                <th style={{ textAlign: 'right', padding: '8px' }}>الإجمالي</th>
+                <th style={{ textAlign: 'right', padding: '8px' }}>المدفوع</th>
+                <th style={{ textAlign: 'right', padding: '8px' }}>المتبقي</th>
+                <th style={{ textAlign: 'right', padding: '8px' }}>الحالة</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invoices.map(inv => (
+                <tr
+                  key={inv._id}
+                  onClick={() => navigate(`/control/invoices?view=${inv._id}`)}
+                  style={{ cursor: 'pointer', borderTop: '1px solid var(--border-color, #e5e7eb)' }}
+                >
+                  <td style={{ padding: '8px', fontWeight: 600, color: 'var(--primary-color)' }}>{inv.invoiceNumber}</td>
+                  <td style={{ padding: '8px' }}>{inv.type === 'quote' ? 'عرض سعر' : 'فاتورة'}</td>
+                  <td style={{ padding: '8px' }}>{formatDate(inv.issueDate)}</td>
+                  <td style={{ padding: '8px' }}>{formatCurrency(inv.total)}</td>
+                  <td style={{ padding: '8px' }}>{formatCurrency(inv.paidAmount)}</td>
+                  <td style={{ padding: '8px' }} className={inv.remainingAmount > 0 ? 'remaining-warning' : ''}>{formatCurrency(inv.remainingAmount)}</td>
+                  <td style={{ padding: '8px' }}>{getInvoiceStatusLabel(inv.status)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </Card>
 

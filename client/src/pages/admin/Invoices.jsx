@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { invoicesApi, customersApi, settingsApi } from '../../api';
+import { invoicesApi, settingsApi } from '../../api';
 import { Card, Button, Loader, Modal, NumberInput, PhoneInput } from '../../components/common';
+import { CustomerSearch } from '../../components/admin';
 import { parseArabicNumber, arabicToEnglishNumbers } from '../../utils/formatters';
 import { printContent, formatInvoiceForPrint } from '../../utils/printUtils';
 import { useToast } from '../../context';
@@ -46,7 +47,6 @@ const Invoices = () => {
   const [loading, setLoading] = useState(true);
   const [invoices, setInvoices] = useState([]);
   const [stats, setStats] = useState({});
-  const [customers, setCustomers] = useState([]);
   const [settings, setSettings] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
@@ -69,7 +69,7 @@ const Invoices = () => {
     customerPhone: '',
     customerAddress: '',
     customerCity: '',
-    items: [{ product: '', description: '', quantity: 1, persons: 1, unitPrice: 0 }],
+    items: [{ product: '', description: '', quantity: 1, persons: 1, unitType: 'persons', unitPrice: 0 }],
     discount: 0,
     discountType: 'fixed', // 'fixed' أو 'percent'
     paymentMethod: 'cash',
@@ -105,9 +105,8 @@ const Invoices = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [invoicesRes, customersRes, settingsRes] = await Promise.all([
+      const [invoicesRes, settingsRes] = await Promise.all([
         invoicesApi.getInvoices({ ...filters, limit: 50 }),
-        customersApi.getCustomers({ limit: 100 }),
         settingsApi.getSettings()
       ]);
 
@@ -115,12 +114,6 @@ const Invoices = () => {
       const invoicesData = invoicesRes.data?.data || invoicesRes.data || {};
       setInvoices(invoicesData.invoices || []);
       setStats(invoicesData.stats || {});
-
-      // customersApi يرجع response.data مباشرة من axios
-      // الـ API يرجع { success: true, customers: [...], data: { customers: [...] } }
-      const customersList = customersRes.customers || customersRes.data?.customers || [];
-      console.log('Customers loaded:', customersList.length, customersList);
-      setCustomers(customersList);
 
       // settingsApi
       setSettings(settingsRes.data?.data || settingsRes.data || settingsRes);
@@ -141,9 +134,10 @@ const Invoices = () => {
     }
   };
 
-  const handleCustomerSelect = (customerId) => {
-    if (!customerId) {
-      // إعادة تعيين البيانات عند إلغاء التحديد
+  // اختيار عميل من قائمة العملاء (بحث بالاسم أو الرقم)
+  const handleCustomerSelect = (customer) => {
+    if (!customer) {
+      // إلغاء الربط بالعميل المختار وإعادة تعيين البيانات
       setInvoiceForm({
         ...invoiceForm,
         customer: '',
@@ -154,31 +148,29 @@ const Invoices = () => {
       });
       return;
     }
-    const customer = customers.find(c => c._id === customerId);
-    if (customer) {
-      // العنوان قد يكون object أو string
-      const addressStr = typeof customer.address === 'object'
-        ? [customer.address?.street, customer.address?.area, customer.address?.building].filter(Boolean).join(', ')
-        : (customer.address || '');
-      const cityStr = typeof customer.address === 'object'
-        ? (customer.address?.city || customer.city || '')
-        : (customer.city || '');
 
-      setInvoiceForm({
-        ...invoiceForm,
-        customer: customerId,
-        customerName: customer.name || '',
-        customerPhone: customer.phone || '',
-        customerAddress: addressStr || settings?.address || '',
-        customerCity: cityStr || 'الرياض'
-      });
-    }
+    // العنوان قد يكون object أو string
+    const addressStr = typeof customer.address === 'object'
+      ? [customer.address?.street, customer.address?.area, customer.address?.building].filter(Boolean).join(', ')
+      : (customer.address || '');
+    const cityStr = typeof customer.address === 'object'
+      ? (customer.address?.city || customer.city || '')
+      : (customer.city || '');
+
+    setInvoiceForm({
+      ...invoiceForm,
+      customer: customer._id,
+      customerName: customer.name || '',
+      customerPhone: customer.phone || '',
+      customerAddress: addressStr || settings?.address || '',
+      customerCity: cityStr || 'الرياض'
+    });
   };
 
   const addItem = () => {
     setInvoiceForm({
       ...invoiceForm,
-      items: [...invoiceForm.items, { product: '', description: '', quantity: 1, persons: 1, unitPrice: 0 }]
+      items: [...invoiceForm.items, { product: '', description: '', quantity: 1, persons: 1, unitType: 'persons', unitPrice: 0 }]
     });
   };
 
@@ -193,9 +185,15 @@ const Invoices = () => {
     setInvoiceForm({ ...invoiceForm, items: newItems });
   };
 
+  // مبلغ العنصر = (الأشخاص أو الكمية حسب الاختيار) × السعر — الافتراضي الأشخاص
+  const getItemAmount = (item) => {
+    const basis = item.unitType === 'quantity' ? (item.quantity || 1) : (item.persons || 1);
+    return basis * (item.unitPrice || 0);
+  };
+
   const calculateTotals = () => {
     const subtotal = invoiceForm.items.reduce((sum, item) =>
-      sum + (item.quantity * item.unitPrice), 0);
+      sum + getItemAmount(item), 0);
     const taxRate = settings?.tax?.enabled ? settings.tax.rate : 0;
     const taxAmount = (subtotal * taxRate) / 100;
     // حساب الخصم حسب النوع (ثابت أو نسبة مئوية)
@@ -263,7 +261,7 @@ const Invoices = () => {
       customerPhone: '',
       customerAddress: settings?.address || '',
       customerCity: 'الرياض',
-      items: [{ product: '', description: '', quantity: 1, persons: 1, unitPrice: 0 }],
+      items: [{ product: '', description: '', quantity: 1, persons: 1, unitType: 'persons', unitPrice: 0 }],
       discount: 0,
       discountType: 'fixed',
       paymentMethod: 'cash',
@@ -574,16 +572,16 @@ const Invoices = () => {
             <h4>بيانات العميل</h4>
             <div className="form-row">
               <div className="form-group">
-                <label>اختر عميل موجود</label>
-                <select
-                  value={invoiceForm.customer}
-                  onChange={(e) => handleCustomerSelect(e.target.value)}
-                >
-                  <option value="">-- اختر عميل --</option>
-                  {customers.map(c => (
-                    <option key={c._id} value={c._id}>{c.name} - {c.phone}</option>
-                  ))}
-                </select>
+                <label>اختر عميل موجود (بحث بالاسم أو رقم الهاتف)</label>
+                <CustomerSearch
+                  currentCustomer={invoiceForm.customer ? {
+                    _id: invoiceForm.customer,
+                    name: invoiceForm.customerName,
+                    phone: invoiceForm.customerPhone
+                  } : null}
+                  onSelect={(_id, customer) => handleCustomerSelect(customer)}
+                  onUnlink={() => handleCustomerSelect(null)}
+                />
               </div>
             </div>
             <div className="form-row">
@@ -635,6 +633,7 @@ const Invoices = () => {
                   <th>الوصف</th>
                   <th>الكمية</th>
                   <th>الأشخاص</th>
+                  <th>الحساب على</th>
                   <th>السعر</th>
                   <th>المبلغ</th>
                   <th></th>
@@ -683,6 +682,16 @@ const Invoices = () => {
                       />
                     </td>
                     <td>
+                      <select
+                        value={item.unitType || 'persons'}
+                        onChange={(e) => updateItem(index, 'unitType', e.target.value)}
+                        style={{width: '90px'}}
+                      >
+                        <option value="persons">الأشخاص</option>
+                        <option value="quantity">الكمية</option>
+                      </select>
+                    </td>
+                    <td>
                       <NumberInput
                         value={item.unitPrice}
                         onChange={(e) => updateItem(index, 'unitPrice', parseArabicNumber(e.target.value) || 0)}
@@ -692,7 +701,7 @@ const Invoices = () => {
                       />
                     </td>
                     <td className="item-total">
-                      {formatCurrency(item.quantity * item.unitPrice)}
+                      {formatCurrency(getItemAmount(item))}
                     </td>
                     <td>
                       {invoiceForm.items.length > 1 && (
@@ -831,6 +840,8 @@ const Invoices = () => {
                 <p>{selectedInvoice.companyInfo?.address}</p>
                 <p>هاتف: {selectedInvoice.companyInfo?.phone}</p>
                 <p>البريد: {selectedInvoice.companyInfo?.email}</p>
+                <p>مرخص من هيئة السياحة رقم: 73104877</p>
+                <p>فئة الترخيص: وكالة سفر وسياحة</p>
               </div>
               <div className="invoice-meta">
                 <p><strong>رقم {getTypeLabel(selectedInvoice.type)}:</strong> {selectedInvoice.invoiceNumber}</p>

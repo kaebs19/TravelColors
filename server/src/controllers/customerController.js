@@ -284,7 +284,7 @@ exports.searchCustomers = async (req, res, next) => {
     const customers = await Customer.find(
       buildSearchQuery(['name', 'phone', 'nationalId'], q)
     )
-      .select('name phone nationalId')
+      .select('name phone nationalId address')
       .limit(10);
 
     res.json({

@@ -20,6 +20,12 @@ const invoiceItemSchema = new mongoose.Schema({
     type: Number,
     default: 1
   },
+  // أساس حساب المبلغ: حسب عدد الأشخاص أو الكمية (الافتراضي الأشخاص)
+  unitType: {
+    type: String,
+    enum: ['persons', 'quantity'],
+    default: 'persons'
+  },
   unitPrice: {
     type: Number,
     required: true,

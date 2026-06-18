@@ -100,6 +100,7 @@ const ContactsManagement = ({ embedded = false }) => {
       } else {
         showToast('خطأ في الحفظ', 'error');
       }
+      return res;
     } catch (err) {
       showToast('خطأ في الحفظ', 'error');
     } finally {
@@ -201,8 +202,12 @@ const ContactsManagement = ({ embedded = false }) => {
 
   // ---------- Map ----------
 
-  const saveMap = () => {
-    handleSave('mapEmbed', mapEmbed);
+  const saveMap = async () => {
+    const res = await handleSave('mapEmbed', mapEmbed);
+    // مزامنة الرابط بعد تحويله إلى صيغة embed في الخادم لتحديث المعاينة
+    if (res?.success && res.data?.mapEmbed !== undefined) {
+      setMapEmbed(res.data.mapEmbed || '');
+    }
   };
 
   // ---------- Render ----------
@@ -446,11 +451,11 @@ const ContactsManagement = ({ embedded = false }) => {
           <h2>📍 الخريطة</h2>
         </div>
         <div className="cm-form-group">
-          <label>رابط خريطة Google Maps (Embed URL)</label>
+          <label>رابط خريطة Google Maps (أي رابط: مشاركة، رابط مكان، أو embed)</label>
           <textarea
             value={mapEmbed}
             onChange={(e) => setMapEmbed(e.target.value)}
-            placeholder='الصق رابط embed من Google Maps هنا...'
+            placeholder='الصق أي رابط من Google Maps (مثل https://maps.app.goo.gl/...) وسيتم تحويله تلقائياً عند الحفظ'
             rows={4}
             dir="ltr"
           />
