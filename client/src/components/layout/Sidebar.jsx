@@ -4,7 +4,7 @@ import { useAuth } from '../../context';
 import { settingsApi } from '../../api';
 import './Sidebar.css';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
   const { user, hasPermission } = useAuth();
   const location = useLocation();
   const [logoUrl, setLogoUrl] = useState('/favicon.svg');
@@ -52,12 +52,12 @@ const Sidebar = () => {
   };
 
   // فتح القوائم تلقائياً إذا كان المسار الحالي بداخلها
-  useState(() => {
+  useEffect(() => {
     if (isAppointmentsActive) setOpenMenus(prev => ({ ...prev, appointments: true }));
     if (isVisasActive) setOpenMenus(prev => ({ ...prev, visas: true }));
     if (isInvoicesActive) setOpenMenus(prev => ({ ...prev, invoices: true }));
     if (isFinanceActive) setOpenMenus(prev => ({ ...prev, finance: true }));
-  }, [location.pathname]);
+  }, [location.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // لوحة التحكم فقط في الأعلى
   const dashboardItem = { path: '/control/dashboard', label: 'لوحة التحكم', icon: '📊' };
@@ -99,13 +99,21 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-header">
         <img src={logoUrl} alt="Travel Colors Logo" className="sidebar-logo-img" onError={(e) => { e.target.src = '/favicon.svg'; }} />
         <div className="sidebar-brand">
           <h1 className="sidebar-logo">ألوان المسافر</h1>
           <span className="sidebar-subtitle">لوحة التحكم</span>
         </div>
+        <button
+          className="sidebar-close"
+          onClick={onClose}
+          aria-label="إغلاق القائمة"
+          type="button"
+        >
+          ✕
+        </button>
       </div>
 
       <nav className="sidebar-nav">

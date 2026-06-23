@@ -5,7 +5,7 @@ import { appointmentsApi, tasksApi } from '../../api';
 import { NotificationBell } from '../common';
 import './Navbar.css';
 
-const Navbar = ({ notificationProps, taskNotifications = [], onClearTaskNotifications }) => {
+const Navbar = ({ notificationProps, taskNotifications = [], onClearTaskNotifications, onMenuClick }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [todayCount, setTodayCount] = useState(0);
@@ -82,6 +82,16 @@ const Navbar = ({ notificationProps, taskNotifications = [], onClearTaskNotifica
   return (
     <header className="navbar">
       <div className="navbar-start">
+        <button
+          className="navbar-menu-btn"
+          onClick={onMenuClick}
+          aria-label="فتح القائمة"
+          type="button"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
         <h2 className="navbar-title">مرحباً، {user?.name}</h2>
       </div>
 

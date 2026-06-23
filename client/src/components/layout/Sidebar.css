@@ -19,6 +19,27 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* زر إغلاق القائمة (يظهر على الجوال فقط) */
+.sidebar-close {
+  display: none;
+  margin-right: auto;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.sidebar-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 .sidebar-logo-img {
   width: 50px;
   height: 50px;
@@ -215,11 +236,29 @@
 
 @media (max-width: 768px) {
   .sidebar {
+    width: min(85vw, 300px);
     transform: translateX(100%);
-    transition: transform var(--transition);
+    transition: transform var(--transition-slow);
+    box-shadow: -8px 0 30px rgba(0, 0, 0, 0.3);
   }
 
   .sidebar.open {
     transform: translateX(0);
+  }
+
+  .sidebar-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* أهداف لمس أكبر للأصابع على الجوال */
+  .sidebar-link,
+  .sidebar-dropdown-toggle {
+    padding: 14px var(--spacing-md);
+  }
+
+  .sidebar-sublink {
+    padding: 12px var(--spacing-md);
   }
 }
