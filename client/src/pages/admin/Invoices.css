@@ -303,26 +303,164 @@
 .action-btn.act-pay:hover      { background: #fef3c7; border-color: #fbbf24; }
 .action-btn.act-print:hover    { background: #f1f5f9; border-color: #cbd5e1; }
 
-/* نموذج الفاتورة */
+/* ============================================
+   نموذج الفاتورة — نافذة بترويسة وفوتر ثابتين
+   ============================================ */
+
+/* النافذة نفسها لا تُمرَّر — منطقة المحتوى فقط هي التي تُمرَّر،
+   حتى يبقى زر «إنشاء الفاتورة» ظاهراً دائماً بلا تمرير */
+.modal-content.invoice-create-modal {
+  display: flex;
+  flex-direction: column;
+  max-height: 92vh;
+  overflow: hidden;
+}
+
+.invoice-create-modal .modal-header {
+  flex-shrink: 0;
+}
+
+.invoice-create-modal .modal-body {
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .invoice-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  flex: 1;
+  min-height: 0;
 }
 
-.form-section {
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 1.5rem;
+.invoice-form-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: #f8fafc;
 }
 
-.form-section:last-of-type {
-  border-bottom: none;
+/* شريط الإجراءات الثابت */
+.invoice-form-footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.5rem;
+  background: #ffffff;
+  border-top: 1px solid var(--border-color, #e5e7eb);
+  box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.07);
 }
 
-.form-section h4 {
-  margin: 0 0 1rem;
-  font-size: var(--font-base);
-  color: var(--text-color);
+.footer-total {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.footer-total-label {
+  font-size: 0.72rem;
+  color: var(--text-secondary, #64748b);
+  font-weight: 500;
+}
+
+.footer-total-value {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--primary-color, #2563eb);
+}
+
+.footer-buttons {
+  display: flex;
+  gap: 0.6rem;
+}
+
+/* تنبيه استرجاع المسودة */
+.draft-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.9rem;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: #92400e;
+}
+
+.draft-banner-icon { font-size: 1rem; }
+.draft-banner-text { flex: 1; font-weight: 500; }
+
+.draft-banner-btn {
+  border: 1px solid #f59e0b;
+  background: #ffffff;
+  color: #b45309;
+  border-radius: 7px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.draft-banner-btn:hover { background: #f59e0b; color: #ffffff; }
+
+/* بطاقات أقسام النموذج */
+.fsection {
+  background: #ffffff;
+  border: 1px solid #e8edf3;
+  border-radius: 12px;
+  padding: 1rem 1.1rem 1.1rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.fsection-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.fsection-icon {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.fsection-head h4 {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-color, #1f2937);
+}
+
+.fsection-count {
+  margin-right: auto;
+  background: #eef2ff;
+  color: #4338ca;
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .form-row {
@@ -334,129 +472,235 @@
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .form-group label {
-  font-size: var(--font-sm);
-  font-weight: 500;
-  color: var(--text-color);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
 }
+
+.form-group label .req { color: #ef4444; }
 
 .invoice-form input,
 .invoice-form select,
 .invoice-form textarea {
-  padding: 0.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius);
-  font-size: var(--font-base);
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #dfe6ee;
+  border-radius: 9px;
+  font-size: 0.9rem;
   font-family: inherit;
+  background: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .invoice-form input:focus,
 .invoice-form select:focus,
 .invoice-form textarea:focus {
   outline: none;
-  border-color: var(--primary-color);
+  border-color: var(--primary-color, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
-/* نوع الوثيقة */
+.invoice-form select:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* نوع الوثيقة — بطاقات اختيار */
 .type-selector {
-  display: flex;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
 }
 
-.type-selector label {
+.type-option {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius);
+  gap: 0.65rem;
+  padding: 0.75rem 0.9rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 11px;
+  background: #ffffff;
   cursor: pointer;
-  transition: all var(--transition);
+  text-align: right;
+  font-family: inherit;
+  transition: all 0.18s ease;
 }
 
-.type-selector label:hover {
-  border-color: var(--primary-color);
+.type-option:hover { border-color: #bfdbfe; background: #f8fbff; }
+
+.type-option.selected {
+  border-color: var(--primary-color, #2563eb);
+  background: #eff6ff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
 }
 
-.type-selector label.selected {
-  border-color: var(--primary-color);
-  background: #dbeafe;
+.type-option-icon { font-size: 1.25rem; }
+
+.type-option-body { display: flex; flex-direction: column; gap: 2px; }
+
+.type-option-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-color, #1f2937);
 }
 
-.type-selector input {
-  display: none;
+.type-option-hint {
+  font-size: 0.72rem;
+  color: var(--text-secondary, #64748b);
 }
+
+/* حالة الدفع — بطاقات اختيار */
+.status-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+
+.status-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 0.75rem 0.5rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 11px;
+  background: #ffffff;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  transition: all 0.18s ease;
+}
+
+.status-option:hover { border-color: #cbd5e1; }
+
+.status-option-icon { font-size: 1.05rem; }
+
+.status-option-title {
+  font-size: 0.83rem;
+  font-weight: 700;
+  color: var(--text-color, #1f2937);
+}
+
+.status-option-hint {
+  font-size: 0.68rem;
+  color: var(--text-secondary, #64748b);
+  line-height: 1.35;
+}
+
+.status-option-paid.selected    { border-color: #10b981; background: #ecfdf5; }
+.status-option-partial.selected { border-color: #f59e0b; background: #fffbeb; }
+.status-option-draft.selected   { border-color: #64748b; background: #f1f5f9; }
 
 /* جدول العناصر */
+.items-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e8edf3;
+  border-radius: 10px;
+}
+
 .items-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 1rem;
+  min-width: 620px;
 }
 
 .items-table th,
 .items-table td {
-  padding: 0.5rem;
+  padding: 0.5rem 0.6rem;
   text-align: right;
-  border: 1px solid var(--border-color);
+  border-bottom: 1px solid #f1f5f9;
 }
 
+.items-table tbody tr:last-child td { border-bottom: none; }
+
 .items-table th {
-  background: var(--bg-color);
-  font-size: var(--font-sm);
+  background: #f8fafc;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-secondary, #64748b);
+  white-space: nowrap;
 }
 
 .items-table input,
 .items-table select {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius);
-  font-size: var(--font-sm);
+  padding: 0.45rem 0.55rem;
+  border: 1px solid #dfe6ee;
+  border-radius: 8px;
+  font-size: 0.83rem;
 }
 
 .item-total {
-  font-weight: 600;
+  font-weight: 700;
   text-align: center !important;
+  white-space: nowrap;
+  color: var(--primary-color, #2563eb);
 }
 
 .remove-btn {
-  padding: 0.25rem 0.5rem;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   background: #fee2e2;
   color: #991b1b;
-  border-radius: var(--radius);
+  border-radius: 8px;
   cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.15s ease;
 }
+
+.remove-btn:hover { background: #fecaca; }
+
+.add-item-btn {
+  align-self: flex-start;
+  border: 1px dashed var(--primary-color, #2563eb);
+  background: #f5f9ff;
+  color: var(--primary-color, #2563eb);
+  border-radius: 9px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.add-item-btn:hover { background: var(--primary-color, #2563eb); color: #ffffff; }
 
 /* المجاميع */
 .totals-section {
-  background: var(--bg-color);
-  padding: 1rem;
-  border-radius: var(--radius);
+  background: #ffffff;
 }
 
 .totals-grid {
-  max-width: 300px;
+  max-width: 340px;
   margin-right: auto;
+  width: 100%;
 }
 
 .total-row {
   display: flex;
   justify-content: space-between;
-  padding: 0.5rem 0;
-  border-bottom: 1px dashed var(--border-color);
+  align-items: center;
+  padding: 0.45rem 0;
+  border-bottom: 1px dashed #eef2f7;
+  font-size: 0.86rem;
 }
 
 .total-row.grand-total {
   border-bottom: none;
-  border-top: 2px solid var(--text-color);
-  padding-top: 0.75rem;
-  font-weight: 700;
-  font-size: var(--font-lg);
+  border-top: 2px solid var(--text-color, #1f2937);
+  margin-top: 0.35rem;
+  padding-top: 0.65rem;
+  font-weight: 800;
+  font-size: 1.02rem;
 }
 
 /* خصم بنسبة أو ثابت */
@@ -505,19 +749,109 @@
   white-space: nowrap;
 }
 
+/* شريط إجراءات النماذج الأخرى (الدفعة) */
 .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
-  /* شريط إجراءات ثابت أسفل النافذة حتى يبقى زر الإنشاء ظاهراً دائماً دون تمرير */
-  position: sticky;
-  bottom: 0;
+  padding-top: 0.5rem;
+}
+
+/* ============================================
+   نافذة ما بعد الإنشاء
+   ============================================ */
+.created-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  text-align: center;
+}
+
+.created-check {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #ecfdf5;
+  color: #10b981;
+  font-size: 1.5rem;
+  font-weight: 700;
+  border: 2px solid #a7f3d0;
+}
+
+.created-title {
+  margin: 0.4rem 0 0;
+  font-size: 0.95rem;
+  color: var(--text-color, #1f2937);
+}
+
+.created-sub {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #64748b);
+}
+
+.created-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.created-action {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
   background: #ffffff;
-  padding: 1rem 1.5rem;
-  margin: 0.5rem -1.5rem -1.5rem;
-  border-top: 1px solid var(--border-color);
-  box-shadow: 0 -4px 12px rgba(15, 23, 42, 0.06);
-  z-index: 5;
+  cursor: pointer;
+  text-align: right;
+  font-family: inherit;
+  transition: all 0.16s ease;
+}
+
+.created-action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+.created-action:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.created-action-icon { font-size: 1.15rem; }
+
+.created-action-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+.created-action-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text-color, #1f2937);
+}
+
+.created-action-hint {
+  font-size: 0.72rem;
+  color: var(--text-secondary, #64748b);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.created-action-wa:hover    { background: #f0fdf4; border-color: #86efac; }
+.created-action-pdf:hover   { background: #fef2f2; border-color: #fca5a5; }
+.created-action-print:hover { background: #f1f5f9; border-color: #cbd5e1; }
+
+.created-footer {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1.1rem;
+  width: 100%;
 }
 
 /* معاينة الفاتورة */
@@ -659,6 +993,37 @@
     grid-template-columns: 1fr;
   }
 
+  .type-selector {
+    grid-template-columns: 1fr;
+  }
+
+  .status-selector {
+    grid-template-columns: 1fr;
+  }
+
+  .status-option {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    text-align: right;
+  }
+
+  .invoice-form-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+  }
+
+  .footer-total {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .footer-buttons .btn {
+    flex: 1;
+  }
+
   .invoices-table {
     display: block;
     overflow-x: auto;
@@ -683,6 +1048,8 @@
   .header-actions-row,
   .page-breadcrumb,
   .form-actions,
+  .invoice-form-footer,
+  .draft-banner,
   .modal-header,
   .modal-footer,
   .print-btn,

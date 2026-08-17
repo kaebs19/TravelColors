@@ -42,6 +42,16 @@ const formatAddress = (address, city) => {
   return city || '';
 };
 
+// مفتاح حفظ مسودة النموذج محلياً (حتى لا تضيع البيانات عند الخروج)
+const DRAFT_KEY = 'trcolors_invoice_form_draft';
+
+// هل تحتوي المسودة على بيانات تستحق الاسترجاع؟
+const draftHasData = (form) => {
+  if (!form) return false;
+  if (form.customerName?.trim() || form.customerPhone?.trim() || form.notes?.trim()) return true;
+  return (form.items || []).some(it => it.product || it.description || it.unitPrice > 0);
+};
+
 const Invoices = () => {
   const { showToast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -54,6 +64,10 @@ const Invoices = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
+  const [saving, setSaving] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
+  const [createdInvoice, setCreatedInvoice] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const [filters, setFilters] = useState({
     type: '',
@@ -74,6 +88,8 @@ const Invoices = () => {
     discount: 0,
     discountType: 'fixed', // 'fixed' أو 'percent'
     paymentMethod: 'cash',
+    // حالة الفاتورة: مدفوعة بالكامل (الافتراضي) / مدفوعة جزئياً / مسودة
+    paymentStatus: 'paid',
     paidAmount: 0,
     notes: '',
     dueDate: '',
@@ -102,6 +118,60 @@ const Invoices = () => {
       }
     }
   }, [searchParams, invoices]);
+
+  // حفظ تلقائي للمسودة أثناء الكتابة — حتى لو أُغلقت النافذة أو الصفحة لا تضيع البيانات
+  useEffect(() => {
+    if (!showCreateModal) return;
+    const timer = setTimeout(() => {
+      try {
+        if (draftHasData(invoiceForm)) {
+          localStorage.setItem(DRAFT_KEY, JSON.stringify(invoiceForm));
+        } else {
+          localStorage.removeItem(DRAFT_KEY);
+        }
+      } catch (e) { /* تجاهل امتلاء التخزين */ }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [invoiceForm, showCreateModal]);
+
+  const clearDraft = () => {
+    try { localStorage.removeItem(DRAFT_KEY); } catch (e) { /* تجاهل */ }
+    setDraftRestored(false);
+  };
+
+  // فتح نافذة الإنشاء مع استرجاع المسودة المحفوظة إن وُجدت
+  const openCreateModal = (type) => {
+    let restored = false;
+    try {
+      const saved = localStorage.getItem(DRAFT_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (draftHasData(parsed)) {
+          setInvoiceForm({ ...parsed, type });
+          restored = true;
+        }
+      }
+    } catch (e) { /* مسودة تالفة — نتجاهلها */ }
+
+    if (!restored) resetForm(type);
+    setDraftRestored(restored);
+    setShowCreateModal(true);
+  };
+
+  // إغلاق النافذة مع الإبقاء على المسودة المحفوظة
+  const closeCreateModal = () => {
+    setShowCreateModal(false);
+    setDraftRestored(false);
+    if (draftHasData(invoiceForm)) {
+      showToast('تم حفظ البيانات كمسودة — ستُسترجع عند فتح النموذج مجدداً', 'success');
+    }
+  };
+
+  // تجاهل المسودة المسترجعة والبدء من نموذج فارغ
+  const discardDraft = () => {
+    clearDraft();
+    resetForm(invoiceForm.type);
+  };
 
   const fetchData = async () => {
     try {
@@ -212,13 +282,24 @@ const Invoices = () => {
     return { subtotal, taxRate, taxAmount, discountValue, total };
   };
 
+  // المبلغ المدفوع الفعلي حسب حالة الفاتورة المختارة
+  const resolvePaidAmount = (total) => {
+    if (invoiceForm.type === 'quote') return 0;
+    if (invoiceForm.paymentStatus === 'paid') return total;
+    if (invoiceForm.paymentStatus === 'partial') return Math.min(invoiceForm.paidAmount || 0, total);
+    return 0; // مسودة / غير مدفوعة
+  };
+
   const handleCreateInvoice = async (e) => {
     e.preventDefault();
+    if (saving) return;
     try {
+      setSaving(true);
       const { subtotal, taxRate, taxAmount, discountValue, total } = calculateTotals();
 
-      await invoicesApi.createInvoice({
+      const res = await invoicesApi.createInvoice({
         ...invoiceForm,
+        paidAmount: resolvePaidAmount(total),
         discount: discountValue,
         subtotal,
         taxRate,
@@ -226,12 +307,25 @@ const Invoices = () => {
         total
       });
 
+      const newInvoice = res.data?.data?.invoice || null;
+
       setShowCreateModal(false);
+      clearDraft();
       resetForm();
       fetchData();
+
+      // نافذة ما بعد الإنشاء: إرسال للعميل / PDF / طباعة
+      if (newInvoice) {
+        setCreatedInvoice(newInvoice);
+        setShowSuccessModal(true);
+      } else {
+        showToast('تم الإنشاء بنجاح', 'success');
+      }
     } catch (error) {
       console.error('Error creating invoice:', error);
       showToast(error.response?.data?.message || 'حدث خطأ', 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -282,6 +376,12 @@ const Invoices = () => {
     }
   };
 
+  const handlePrintInvoice = (inv) => {
+    const content = formatInvoiceForPrint(inv, settings);
+    const typeLabels = { invoice: 'فاتورة', quote: 'عرض سعر', receipt: 'إيصال' };
+    printContent(content, `${typeLabels[inv.type] || 'فاتورة'} - ${inv.invoiceNumber}`);
+  };
+
   const handleConvertToInvoice = async (quoteId) => {
     try {
       await invoicesApi.convertToInvoice(quoteId);
@@ -292,9 +392,9 @@ const Invoices = () => {
     }
   };
 
-  const resetForm = () => {
+  const resetForm = (type = 'invoice') => {
     setInvoiceForm({
-      type: 'invoice',
+      type,
       customer: '',
       customerName: '',
       customerPhone: '',
@@ -304,6 +404,7 @@ const Invoices = () => {
       discount: 0,
       discountType: 'fixed',
       paymentMethod: 'cash',
+      paymentStatus: 'paid',
       paidAmount: 0,
       notes: '',
       dueDate: '',
@@ -381,10 +482,10 @@ const Invoices = () => {
         <h1>الفواتير وعروض الأسعار</h1>
       </div>
       <div className="header-actions-row">
-        <Button variant="outline" onClick={() => { resetForm(); setInvoiceForm(prev => ({...prev, type: 'quote'})); setShowCreateModal(true); }}>
+        <Button variant="outline" onClick={() => openCreateModal('quote')}>
           📝 عرض سعر جديد
         </Button>
-        <Button variant="success" onClick={() => { resetForm(); setInvoiceForm(prev => ({...prev, type: 'invoice'})); setShowCreateModal(true); }}>
+        <Button variant="success" onClick={() => openCreateModal('invoice')}>
           ➕ فاتورة جديدة
         </Button>
       </div>
@@ -567,11 +668,7 @@ const Invoices = () => {
                         💵
                       </button>
                     )}
-                    <button className="action-btn act-print" onClick={() => {
-                      const content = formatInvoiceForPrint(inv, settings);
-                      const typeLabels = { invoice: 'فاتورة', quote: 'عرض سعر', receipt: 'إيصال' };
-                      printContent(content, `${typeLabels[inv.type] || 'فاتورة'} - ${inv.invoiceNumber}`);
-                    }} title="طباعة">
+                    <button className="action-btn act-print" onClick={() => handlePrintInvoice(inv)} title="طباعة">
                       🖨️
                     </button>
                   </div>
@@ -585,42 +682,63 @@ const Invoices = () => {
       {/* Modal إنشاء فاتورة */}
       <Modal
         isOpen={showCreateModal}
-        onClose={() => { setShowCreateModal(false); resetForm(); }}
+        onClose={closeCreateModal}
         title={invoiceForm.type === 'quote' ? 'عرض سعر جديد' : 'فاتورة جديدة'}
         size="large"
+        className="invoice-create-modal"
       >
         <form onSubmit={handleCreateInvoice} className="invoice-form">
-          {/* نوع الوثيقة */}
-          <div className="form-section">
-            <h4>نوع الوثيقة</h4>
-            <div className="type-selector">
-              <label className={invoiceForm.type === 'invoice' ? 'selected' : ''}>
-                <input
-                  type="radio"
-                  name="type"
-                  value="invoice"
-                  checked={invoiceForm.type === 'invoice'}
-                  onChange={(e) => setInvoiceForm({...invoiceForm, type: e.target.value})}
-                />
-                فاتورة
-              </label>
-              <label className={invoiceForm.type === 'quote' ? 'selected' : ''}>
-                <input
-                  type="radio"
-                  name="type"
-                  value="quote"
-                  checked={invoiceForm.type === 'quote'}
-                  onChange={(e) => setInvoiceForm({...invoiceForm, type: e.target.value})}
-                />
-                عرض سعر
-              </label>
-            </div>
-          </div>
+          {/* منطقة التمرير — الفوتر يبقى ثابتاً أسفلها */}
+          <div className="invoice-form-scroll">
+            {/* تنبيه استرجاع المسودة المحفوظة */}
+            {draftRestored && (
+              <div className="draft-banner">
+                <span className="draft-banner-icon">💾</span>
+                <span className="draft-banner-text">تم استرجاع مسودة محفوظة من آخر مرة</span>
+                <button type="button" className="draft-banner-btn" onClick={discardDraft}>
+                  بدء نموذج فارغ
+                </button>
+              </div>
+            )}
 
-          {/* بيانات العميل */}
-          <div className="form-section">
-            <h4>بيانات العميل</h4>
-            <div className="form-row">
+            {/* نوع الوثيقة */}
+            <div className="fsection">
+              <div className="fsection-head">
+                <span className="fsection-icon">🧾</span>
+                <h4>نوع الوثيقة</h4>
+              </div>
+              <div className="type-selector">
+                <button
+                  type="button"
+                  className={`type-option ${invoiceForm.type === 'invoice' ? 'selected' : ''}`}
+                  onClick={() => setInvoiceForm({ ...invoiceForm, type: 'invoice' })}
+                >
+                  <span className="type-option-icon">📄</span>
+                  <span className="type-option-body">
+                    <span className="type-option-title">فاتورة</span>
+                    <span className="type-option-hint">مستند بيع نهائي</span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={`type-option ${invoiceForm.type === 'quote' ? 'selected' : ''}`}
+                  onClick={() => setInvoiceForm({ ...invoiceForm, type: 'quote' })}
+                >
+                  <span className="type-option-icon">📝</span>
+                  <span className="type-option-body">
+                    <span className="type-option-title">عرض سعر</span>
+                    <span className="type-option-hint">قابل للتحويل لفاتورة</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* بيانات العميل */}
+            <div className="fsection">
+              <div className="fsection-head">
+                <span className="fsection-icon">👤</span>
+                <h4>بيانات العميل</h4>
+              </div>
               <div className="form-group">
                 <label>اختر عميل موجود (بحث بالاسم أو رقم الهاتف)</label>
                 <CustomerSearch
@@ -633,234 +751,280 @@ const Invoices = () => {
                   onUnlink={() => handleCustomerSelect(null)}
                 />
               </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>اسم العميل {invoiceForm.type === 'invoice' ? '*' : ''}</label>
-                <input
-                  type="text"
-                  value={invoiceForm.customerName}
-                  onChange={(e) => setInvoiceForm({...invoiceForm, customerName: e.target.value})}
-                  required={invoiceForm.type === 'invoice'}
-                  placeholder={invoiceForm.type === 'quote' ? 'اختياري - يمكن إضافته لاحقاً' : 'اسم العميل'}
-                />
-              </div>
-              <div className="form-group">
-                <label>الهاتف</label>
-                <PhoneInput
-                  value={invoiceForm.customerPhone}
-                  onChange={(e) => setInvoiceForm({...invoiceForm, customerPhone: e.target.value})}
-                />
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>العنوان</label>
-                <input
-                  type="text"
-                  value={invoiceForm.customerAddress}
-                  onChange={(e) => setInvoiceForm({...invoiceForm, customerAddress: e.target.value})}
-                />
-              </div>
-              <div className="form-group">
-                <label>المدينة</label>
-                <input
-                  type="text"
-                  value={invoiceForm.customerCity}
-                  onChange={(e) => setInvoiceForm({...invoiceForm, customerCity: e.target.value})}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* عناصر الفاتورة */}
-          <div className="form-section">
-            <h4>عناصر {invoiceForm.type === 'quote' ? 'العرض' : 'الفاتورة'}</h4>
-            <table className="items-table">
-              <thead>
-                <tr>
-                  <th>المنتج</th>
-                  <th>الوصف</th>
-                  <th>العدد</th>
-                  <th>الحساب على</th>
-                  <th>السعر</th>
-                  <th>المبلغ</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoiceForm.items.map((item, index) => (
-                  <tr key={index}>
-                    <td>
-                      <select
-                        value={item.product}
-                        onChange={(e) => updateItem(index, 'product', e.target.value)}
-                        required
-                      >
-                        <option value="">اختر</option>
-                        {settings?.products?.map(p => (
-                          <option key={p.id} value={p.name}>{p.name}</option>
-                        ))}
-                        <option value="other">أخرى</option>
-                      </select>
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        value={item.description}
-                        onChange={(e) => updateItem(index, 'description', e.target.value)}
-                        placeholder="الوصف"
-                      />
-                    </td>
-                    <td>
-                      <NumberInput
-                        value={item.unitType === 'quantity' ? item.quantity : item.persons}
-                        onChange={(e) => updateItemCount(index, parseArabicNumber(e.target.value) || 1)}
-                        min={1}
-                        allowDecimal={false}
-                        style={{width: '70px'}}
-                      />
-                    </td>
-                    <td>
-                      <select
-                        value={item.unitType || 'persons'}
-                        onChange={(e) => updateItem(index, 'unitType', e.target.value)}
-                        style={{width: '90px'}}
-                      >
-                        <option value="persons">الأشخاص</option>
-                        <option value="quantity">الكمية</option>
-                      </select>
-                    </td>
-                    <td>
-                      <NumberInput
-                        value={item.unitPrice}
-                        onChange={(e) => updateItem(index, 'unitPrice', parseArabicNumber(e.target.value) || 0)}
-                        min={0}
-                        allowDecimal={true}
-                        style={{width: '100px'}}
-                      />
-                    </td>
-                    <td className="item-total">
-                      {formatCurrency(getItemAmount(item))}
-                    </td>
-                    <td>
-                      {invoiceForm.items.length > 1 && (
-                        <button type="button" className="remove-btn" onClick={() => removeItem(index)}>
-                          ✕
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <Button type="button" variant="outline" size="small" onClick={addItem}>
-              + إضافة عنصر
-            </Button>
-          </div>
-
-          {/* المجاميع */}
-          <div className="form-section totals-section">
-            <div className="totals-grid">
-              <div className="total-row">
-                <span>المجموع الجزئي:</span>
-                <span>{formatCurrency(subtotal)}</span>
-              </div>
-              {settings?.tax?.enabled && (
-                <div className="total-row">
-                  <span>الضريبة ({taxRate}%):</span>
-                  <span>{formatCurrency(taxAmount)}</span>
-                </div>
-              )}
-              <div className="total-row discount-row">
-                <span>الخصم:</span>
-                <div className="discount-input-group">
-                  <NumberInput
-                    value={invoiceForm.discount}
-                    onChange={(e) => setInvoiceForm({...invoiceForm, discount: parseArabicNumber(e.target.value) || 0})}
-                    min={0}
-                    max={invoiceForm.discountType === 'percent' ? 100 : undefined}
-                    allowDecimal={true}
-                    style={{width: '80px'}}
+              <div className="form-row">
+                <div className="form-group">
+                  <label>اسم العميل {invoiceForm.type === 'invoice' ? <span className="req">*</span> : ''}</label>
+                  <input
+                    type="text"
+                    value={invoiceForm.customerName}
+                    onChange={(e) => setInvoiceForm({...invoiceForm, customerName: e.target.value})}
+                    required={invoiceForm.type === 'invoice'}
+                    placeholder={invoiceForm.type === 'quote' ? 'اختياري - يمكن إضافته لاحقاً' : 'اسم العميل'}
                   />
-                  <div className="discount-type-toggle">
-                    <button
-                      type="button"
-                      className={`discount-type-btn ${invoiceForm.discountType === 'fixed' ? 'active' : ''}`}
-                      onClick={() => setInvoiceForm({...invoiceForm, discountType: 'fixed', discount: 0})}
-                    >
-                      ر.س
-                    </button>
-                    <button
-                      type="button"
-                      className={`discount-type-btn ${invoiceForm.discountType === 'percent' ? 'active' : ''}`}
-                      onClick={() => setInvoiceForm({...invoiceForm, discountType: 'percent', discount: 0})}
-                    >
-                      %
-                    </button>
+                </div>
+                <div className="form-group">
+                  <label>الهاتف</label>
+                  <PhoneInput
+                    value={invoiceForm.customerPhone}
+                    onChange={(e) => setInvoiceForm({...invoiceForm, customerPhone: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>العنوان</label>
+                  <input
+                    type="text"
+                    value={invoiceForm.customerAddress}
+                    onChange={(e) => setInvoiceForm({...invoiceForm, customerAddress: e.target.value})}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>المدينة</label>
+                  <input
+                    type="text"
+                    value={invoiceForm.customerCity}
+                    onChange={(e) => setInvoiceForm({...invoiceForm, customerCity: e.target.value})}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* عناصر الفاتورة */}
+            <div className="fsection">
+              <div className="fsection-head">
+                <span className="fsection-icon">📦</span>
+                <h4>عناصر {invoiceForm.type === 'quote' ? 'العرض' : 'الفاتورة'}</h4>
+                <span className="fsection-count">{invoiceForm.items.length}</span>
+              </div>
+              <div className="items-table-wrap">
+                <table className="items-table">
+                  <thead>
+                    <tr>
+                      <th>المنتج</th>
+                      <th>الوصف</th>
+                      <th>العدد</th>
+                      <th>الحساب على</th>
+                      <th>السعر</th>
+                      <th>المبلغ</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invoiceForm.items.map((item, index) => (
+                      <tr key={index}>
+                        <td>
+                          <select
+                            value={item.product}
+                            onChange={(e) => updateItem(index, 'product', e.target.value)}
+                            required
+                          >
+                            <option value="">اختر</option>
+                            {settings?.products?.map(p => (
+                              <option key={p.id} value={p.name}>{p.name}</option>
+                            ))}
+                            <option value="other">أخرى</option>
+                          </select>
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            value={item.description}
+                            onChange={(e) => updateItem(index, 'description', e.target.value)}
+                            placeholder="الوصف"
+                          />
+                        </td>
+                        <td>
+                          <NumberInput
+                            value={item.unitType === 'quantity' ? item.quantity : item.persons}
+                            onChange={(e) => updateItemCount(index, parseArabicNumber(e.target.value) || 1)}
+                            min={1}
+                            allowDecimal={false}
+                            style={{width: '70px'}}
+                          />
+                        </td>
+                        <td>
+                          <select
+                            value={item.unitType || 'persons'}
+                            onChange={(e) => updateItem(index, 'unitType', e.target.value)}
+                            style={{width: '90px'}}
+                          >
+                            <option value="persons">الأشخاص</option>
+                            <option value="quantity">الكمية</option>
+                          </select>
+                        </td>
+                        <td>
+                          <NumberInput
+                            value={item.unitPrice}
+                            onChange={(e) => updateItem(index, 'unitPrice', parseArabicNumber(e.target.value) || 0)}
+                            min={0}
+                            allowDecimal={true}
+                            style={{width: '100px'}}
+                          />
+                        </td>
+                        <td className="item-total">
+                          {formatCurrency(getItemAmount(item))}
+                        </td>
+                        <td>
+                          {invoiceForm.items.length > 1 && (
+                            <button type="button" className="remove-btn" onClick={() => removeItem(index)} title="حذف العنصر">
+                              ✕
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <button type="button" className="add-item-btn" onClick={addItem}>
+                + إضافة عنصر
+              </button>
+            </div>
+
+            {/* المجاميع */}
+            <div className="fsection totals-section">
+              <div className="totals-grid">
+                <div className="total-row">
+                  <span>المجموع الجزئي:</span>
+                  <span>{formatCurrency(subtotal)}</span>
+                </div>
+                {settings?.tax?.enabled && (
+                  <div className="total-row">
+                    <span>الضريبة ({taxRate}%):</span>
+                    <span>{formatCurrency(taxAmount)}</span>
                   </div>
-                  {invoiceForm.discountType === 'percent' && invoiceForm.discount > 0 && (
-                    <span className="discount-amount-preview">= {formatCurrency(discountValue)}</span>
+                )}
+                <div className="total-row discount-row">
+                  <span>الخصم:</span>
+                  <div className="discount-input-group">
+                    <NumberInput
+                      value={invoiceForm.discount}
+                      onChange={(e) => setInvoiceForm({...invoiceForm, discount: parseArabicNumber(e.target.value) || 0})}
+                      min={0}
+                      max={invoiceForm.discountType === 'percent' ? 100 : undefined}
+                      allowDecimal={true}
+                      style={{width: '80px'}}
+                    />
+                    <div className="discount-type-toggle">
+                      <button
+                        type="button"
+                        className={`discount-type-btn ${invoiceForm.discountType === 'fixed' ? 'active' : ''}`}
+                        onClick={() => setInvoiceForm({...invoiceForm, discountType: 'fixed', discount: 0})}
+                      >
+                        ر.س
+                      </button>
+                      <button
+                        type="button"
+                        className={`discount-type-btn ${invoiceForm.discountType === 'percent' ? 'active' : ''}`}
+                        onClick={() => setInvoiceForm({...invoiceForm, discountType: 'percent', discount: 0})}
+                      >
+                        %
+                      </button>
+                    </div>
+                    {invoiceForm.discountType === 'percent' && invoiceForm.discount > 0 && (
+                      <span className="discount-amount-preview">= {formatCurrency(discountValue)}</span>
+                    )}
+                  </div>
+                </div>
+                <div className="total-row grand-total">
+                  <span>الإجمالي:</span>
+                  <span>{formatCurrency(total)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* حالة الدفع */}
+            {invoiceForm.type !== 'quote' && (
+              <div className="fsection">
+                <div className="fsection-head">
+                  <span className="fsection-icon">💳</span>
+                  <h4>حالة الدفع</h4>
+                </div>
+                <div className="status-selector">
+                  {[
+                    { value: 'paid', icon: '✅', label: 'مدفوعة', hint: 'استُلم المبلغ كاملاً' },
+                    { value: 'partial', icon: '🟡', label: 'مدفوعة جزئياً', hint: 'حدّد المبلغ المستلم' },
+                    { value: 'draft', icon: '📝', label: 'مسودة', hint: 'غير مدفوعة — تُحصَّل لاحقاً' }
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      className={`status-option status-option-${opt.value} ${invoiceForm.paymentStatus === opt.value ? 'selected' : ''}`}
+                      onClick={() => setInvoiceForm({
+                        ...invoiceForm,
+                        paymentStatus: opt.value,
+                        paidAmount: opt.value === 'paid' ? total : (opt.value === 'draft' ? 0 : invoiceForm.paidAmount)
+                      })}
+                    >
+                      <span className="status-option-icon">{opt.icon}</span>
+                      <span className="status-option-title">{opt.label}</span>
+                      <span className="status-option-hint">{opt.hint}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="form-row" style={{ marginTop: '1rem' }}>
+                  <div className="form-group">
+                    <label>طريقة الدفع</label>
+                    <select
+                      value={invoiceForm.paymentMethod}
+                      onChange={(e) => setInvoiceForm({...invoiceForm, paymentMethod: e.target.value})}
+                      disabled={invoiceForm.paymentStatus === 'draft'}
+                    >
+                      <option value="cash">نقدي</option>
+                      <option value="card">شبكة</option>
+                      <option value="transfer">تحويل</option>
+                    </select>
+                  </div>
+                  {invoiceForm.paymentStatus === 'partial' && (
+                    <div className="form-group">
+                      <label>المبلغ المدفوع</label>
+                      <NumberInput
+                        value={invoiceForm.paidAmount}
+                        onChange={(e) => setInvoiceForm({...invoiceForm, paidAmount: parseArabicNumber(e.target.value) || 0})}
+                        min={0}
+                        max={total}
+                        allowDecimal={true}
+                        suffix="SAR"
+                      />
+                    </div>
                   )}
                 </div>
               </div>
-              <div className="total-row grand-total">
-                <span>الإجمالي:</span>
-                <span>{formatCurrency(total)}</span>
+            )}
+
+            {/* ملاحظات */}
+            <div className="fsection">
+              <div className="fsection-head">
+                <span className="fsection-icon">🗒️</span>
+                <h4>ملاحظات</h4>
+              </div>
+              <div className="form-group">
+                <textarea
+                  value={invoiceForm.notes}
+                  onChange={(e) => setInvoiceForm({...invoiceForm, notes: e.target.value})}
+                  rows="2"
+                  placeholder="ملاحظات تظهر في الفاتورة (اختياري)"
+                />
               </div>
             </div>
           </div>
 
-          {/* الدفع */}
-          {invoiceForm.type !== 'quote' && (
-            <div className="form-section">
-              <h4>الدفع</h4>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>طريقة الدفع</label>
-                  <select
-                    value={invoiceForm.paymentMethod}
-                    onChange={(e) => setInvoiceForm({...invoiceForm, paymentMethod: e.target.value})}
-                  >
-                    <option value="cash">نقدي</option>
-                    <option value="card">شبكة</option>
-                    <option value="transfer">تحويل</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>المبلغ المدفوع</label>
-                  <NumberInput
-                    value={invoiceForm.paidAmount}
-                    onChange={(e) => setInvoiceForm({...invoiceForm, paidAmount: parseArabicNumber(e.target.value) || 0})}
-                    min={0}
-                    max={total}
-                    allowDecimal={true}
-                    suffix="SAR"
-                  />
-                </div>
-              </div>
+          {/* شريط ثابت أسفل النموذج — زر الإنشاء ظاهر دائماً بدون تمرير */}
+          <div className="invoice-form-footer">
+            <div className="footer-total">
+              <span className="footer-total-label">الإجمالي</span>
+              <span className="footer-total-value">{formatCurrency(total)}</span>
             </div>
-          )}
-
-          {/* ملاحظات */}
-          <div className="form-section">
-            <div className="form-group">
-              <label>ملاحظات</label>
-              <textarea
-                value={invoiceForm.notes}
-                onChange={(e) => setInvoiceForm({...invoiceForm, notes: e.target.value})}
-                rows="2"
-              />
+            <div className="footer-buttons">
+              <Button type="button" variant="outline" onClick={closeCreateModal}>
+                إلغاء
+              </Button>
+              <Button type="submit" variant="success" loading={saving}>
+                {invoiceForm.type === 'quote' ? 'إنشاء عرض السعر' : 'إنشاء الفاتورة'}
+              </Button>
             </div>
-          </div>
-
-          <div className="form-actions">
-            <Button type="button" variant="outline" onClick={() => { setShowCreateModal(false); resetForm(); }}>
-              إلغاء
-            </Button>
-            <Button type="submit">
-              {invoiceForm.type === 'quote' ? 'إنشاء عرض السعر' : 'إنشاء الفاتورة'}
-            </Button>
           </div>
         </form>
       </Modal>
@@ -965,11 +1129,7 @@ const Invoices = () => {
             )}
 
             <div className="preview-actions">
-              <Button variant="outline" onClick={() => {
-                const content = formatInvoiceForPrint(selectedInvoice, settings);
-                const typeLabels = { invoice: 'فاتورة', quote: 'عرض سعر', receipt: 'إيصال' };
-                printContent(content, `${typeLabels[selectedInvoice.type] || 'فاتورة'} - ${selectedInvoice.invoiceNumber}`);
-              }}>
+              <Button variant="outline" onClick={() => handlePrintInvoice(selectedInvoice)}>
                 🖨️ طباعة
               </Button>
               <Button variant="outline" onClick={() => handleSendWhatsApp(selectedInvoice)}>
@@ -1046,6 +1206,74 @@ const Invoices = () => {
             <Button type="submit">تسجيل الدفعة</Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Modal ما بعد الإنشاء — إرسال / PDF / طباعة */}
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title="تم الإنشاء بنجاح"
+        size="small"
+      >
+        {createdInvoice && (
+          <div className="created-panel">
+            <div className="created-check">✓</div>
+            <p className="created-title">
+              تم إنشاء {getTypeLabel(createdInvoice.type)} رقم <strong>{createdInvoice.invoiceNumber}</strong>
+            </p>
+            <p className="created-sub">
+              {createdInvoice.customerName || 'بدون عميل'} · {formatCurrency(createdInvoice.total)}
+            </p>
+
+            <div className="created-actions">
+              <button
+                type="button"
+                className="created-action created-action-wa"
+                onClick={() => handleSendWhatsApp(createdInvoice)}
+                disabled={sendingWa === createdInvoice._id}
+              >
+                <span className="created-action-icon">{sendingWa === createdInvoice._id ? '⏳' : '💬'}</span>
+                <span className="created-action-body">
+                  <span className="created-action-title">إرسال للعميل عبر واتساب</span>
+                  <span className="created-action-hint">
+                    {createdInvoice.customerPhone || 'لم يُسجَّل رقم — سيُفتح واتساب لاختيار المستلم'}
+                  </span>
+                </span>
+              </button>
+
+              <button
+                type="button"
+                className="created-action created-action-pdf"
+                onClick={() => handleDownloadPdf(createdInvoice)}
+              >
+                <span className="created-action-icon">📄</span>
+                <span className="created-action-body">
+                  <span className="created-action-title">حفظ كملف PDF</span>
+                  <span className="created-action-hint">تنزيل نسخة على الجهاز</span>
+                </span>
+              </button>
+
+              <button
+                type="button"
+                className="created-action created-action-print"
+                onClick={() => handlePrintInvoice(createdInvoice)}
+              >
+                <span className="created-action-icon">🖨️</span>
+                <span className="created-action-body">
+                  <span className="created-action-title">طباعة</span>
+                  <span className="created-action-hint">فتح نافذة الطباعة</span>
+                </span>
+              </button>
+            </div>
+
+            <div className="created-footer">
+              <Button variant="outline" onClick={() => setShowSuccessModal(false)}>إغلاق</Button>
+              <Button onClick={() => { setShowSuccessModal(false); viewInvoice(createdInvoice); }}>
+                عرض الفاتورة
+              </Button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

@@ -7,7 +7,8 @@ const Modal = ({
   title,
   children,
   size = 'medium',
-  showCloseButton = true
+  showCloseButton = true,
+  className = ''
 }) => {
   useEffect(() => {
     if (isOpen) {
@@ -42,7 +43,7 @@ const Modal = ({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
-        className={`modal-content modal-${size}`}
+        className={`modal-content modal-${size} ${className}`.trim()}
         onClick={e => e.stopPropagation()}
       >
         {(title || showCloseButton) && (
