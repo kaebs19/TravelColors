@@ -66,7 +66,7 @@ const Login = () => {
       <div className="login-form-section">
         <div className="login-form-container">
           <h1 className="login-title">تسجيل الدخول</h1>
-          <p className="login-subtitle">نظام إدارة شركة ألوان المسافر للسفر والسياحة</p>
+          <p className="login-subtitle">نظام إدارة شركة ألوان السفر للسفر والسياحة</p>
 
           {displayError && (
             <div className="login-error">
@@ -137,7 +137,7 @@ const Login = () => {
           </form>
 
           <div className="login-footer">
-            <p>© 2026 Travel Colors - ألوان المسافر</p>
+            <p>© 2026 Travel Colors - ألوان السفر</p>
             <p className="footer-subtitle">جميع الحقوق محفوظة</p>
           </div>
         </div>
@@ -149,7 +149,7 @@ const Login = () => {
           <div className="logo-container">
             <img src="/favicon.svg" alt="Travel Colors Logo" className="main-logo" />
           </div>
-          <h2 className="branding-title">لوحة تحكم ألوان المسافر</h2>
+          <h2 className="branding-title">لوحة تحكم ألوان السفر</h2>
           <p className="branding-subtitle">نظام متكامل لإدارة المواعيد والحجوزات</p>
         </div>
       </div>

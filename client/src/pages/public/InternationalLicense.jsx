@@ -6,11 +6,12 @@ import { useClientAuth } from '../../context/ClientAuthContext';
 import '../../styles/public-shared.css';
 import './InternationalLicense.css';
 
+import OfficialCredentials from '../../components/common/OfficialCredentials';
 const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5002/api';
 const baseUrl = apiUrl.replace('/api', '');
 
 const InternationalLicense = () => {
-  const [contact, setContact] = useState({ whatsapp: '966559229597' });
+  const [contact, setContact] = useState({ whatsapp: '966558741741' });
   const [licenseData, setLicenseData] = useState({
     price: '200', currency: 'ريال', offerEnabled: false, offerPrice: '', description: ''
   });
@@ -91,10 +92,10 @@ const InternationalLicense = () => {
         <div className="license-nav-container">
           <div className="license-nav-brand" onClick={() => navigate('/')}>
             {logo ? (
-              <img src={getImageUrl(logo)} alt="ألوان المسافر" className="license-nav-logo" />
+              <img src={getImageUrl(logo)} alt="ألوان السفر" className="license-nav-logo" />
             ) : (
               <>
-                <span className="license-nav-ar">ألوان المسافر</span>
+                <span className="license-nav-ar">ألوان السفر</span>
                 <span className="license-nav-en">TRAVEL COLORS</span>
               </>
             )}
@@ -349,7 +350,7 @@ const InternationalLicense = () => {
       <footer className="license-footer">
         <div className="license-footer-inner">
           <div className="license-footer-brand">
-            <span className="license-footer-brand-ar">ألوان المسافر</span>
+            <span className="license-footer-brand-ar">ألوان السفر</span>
             <span className="license-footer-brand-en">TRAVEL COLORS</span>
           </div>
           <div className="license-footer-links">
@@ -358,7 +359,8 @@ const InternationalLicense = () => {
             <Link to="/international-license">الرخصة الدولية</Link>
             <Link to="/ContactUs">تواصل معنا</Link>
           </div>
-          <p className="license-footer-copy">© {new Date().getFullYear()} Travel Colors - ألوان المسافر. جميع الحقوق محفوظة</p>
+          <OfficialCredentials />
+          <p className="license-footer-copy">© {new Date().getFullYear()} Travel Colors - ألوان السفر. جميع الحقوق محفوظة</p>
           <DeveloperCredit style={{ textAlign: 'center' }} />
         </div>
       </footer>

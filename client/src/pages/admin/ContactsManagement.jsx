@@ -31,7 +31,7 @@ const DEFAULT_DEPARTMENTS = [
   { name: 'استفسارات عامة', phone: '055 874 1741', whatsapp: '966558741741', icon: '📞', type: 'whatsapp', order: 0, isActive: true },
   { name: 'تأشيرات - فنادق', phone: '055 715 5472', whatsapp: '966557155472', icon: '🛂', type: 'whatsapp', order: 1, isActive: true },
   { name: 'مختص تأشيرات', phone: '055 279 1800', whatsapp: '966552791800', icon: '📋', type: 'whatsapp', order: 2, isActive: true },
-  { name: 'تأشيرات', phone: '055 922 9597', whatsapp: '966559229597', icon: '✈️', type: 'whatsapp', order: 3, isActive: true },
+  { name: 'تأشيرات', phone: '055 874 1741', whatsapp: '966558741741', icon: '✈️', type: 'whatsapp', order: 3, isActive: true },
   { name: 'حجوزات فنادق - باكجات', phone: '055 834 6483', whatsapp: '966558346483', icon: '🏨', type: 'whatsapp', order: 4, isActive: true },
   { name: 'البريد الإلكتروني', phone: 'info@trcolors.com', whatsapp: '', icon: '✉️', type: 'email', order: 5, isActive: true },
   { name: 'موقعنا', phone: 'الرياض - الصحافة', whatsapp: '', icon: '📍', type: 'location', order: 6, isActive: true }

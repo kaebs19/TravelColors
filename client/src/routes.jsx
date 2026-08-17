@@ -4,6 +4,7 @@ import { useAuth } from './context';
 import { useClientAuth } from './context/ClientAuthContext';
 import { Loader } from './components/common';
 import NotFound from './pages/public/NotFound';
+import PublicLayout from './i18n/PublicLayout';
 
 // Layouts — eager (needed for admin shell)
 import AdminLayout from './components/layout/AdminLayout';
@@ -135,43 +136,36 @@ const ClientPublicRoute = ({ children }) => {
   return children;
 };
 
+// صفحات الموقع العام — تُنشر مرتين: بالعربية على الجذر وبالإنجليزية تحت /en
+const PUBLIC_PAGES = [
+  { path: '/', element: <Home /> },
+  { path: '/us-visa', element: L(UsVisa) },
+  { path: '/privacy', element: L(PrivacyPolicy) },
+  { path: '/terms', element: L(Terms) },
+  { path: '/ContactUs', element: L(ContactUs) },
+  { path: '/visas', element: L(VisaCatalog) },
+  { path: '/visas/:slug', element: L(VisaDetail) },
+  { path: '/international-license', element: L(InternationalLicense) }
+];
+
+const localizedPublicRoutes = PUBLIC_PAGES.flatMap((route) => [
+  route,
+  { ...route, path: route.path === '/' ? '/en' : `/en${route.path}` }
+]);
+
 const router = createBrowserRouter([
-  // Public Routes
+  // Public Routes — بلغتين داخل غلاف يوفّر سياق اللغة
   {
-    path: '/',
-    element: <Home />
-  },
-  {
-    path: '/us-visa',
-    element: L(UsVisa)
+    element: <PublicLayout />,
+    children: [
+      ...localizedPublicRoutes,
+      // 404 داخل الموقع الإنجليزي يبقى بالإنجليزية
+      { path: '/en/*', element: <NotFound /> }
+    ]
   },
   {
     path: '/us-visa/apply',
     element: <Navigate to="/portal/login" replace />
-  },
-  {
-    path: '/privacy',
-    element: L(PrivacyPolicy)
-  },
-  {
-    path: '/terms',
-    element: L(Terms)
-  },
-  {
-    path: '/ContactUs',
-    element: L(ContactUs)
-  },
-  {
-    path: '/visas',
-    element: L(VisaCatalog)
-  },
-  {
-    path: '/visas/:slug',
-    element: L(VisaDetail)
-  },
-  {
-    path: '/international-license',
-    element: L(InternationalLicense)
   },
   {
     path: '/login',

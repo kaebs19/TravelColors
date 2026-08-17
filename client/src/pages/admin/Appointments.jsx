@@ -5,6 +5,7 @@ import { Card, Loader, Modal } from '../../components/common';
 import { useAuth, useToast } from '../../context';
 import { generateAppointmentReceipt, shareReceiptToWhatsApp } from '../../utils/receiptGenerator';
 import { generateAppointmentMessage, generateQuickUpdateMessage } from '../../utils/messageGenerator';
+import '../../styles/DetailModal.css';
 import './Appointments.css';
 
 const UPLOADS_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:5002/api').replace(/\/api\/?$/, '');
@@ -711,7 +712,7 @@ const Appointments = () => {
         departmentTitle: dept?.title || appointment.department?.title || 'غير محدد',
         employeeName: appointment.createdBy?.name || 'موظف النظام',
         logoUrl,
-        companyName: companySettings.companyName || 'ألوان المسافر',
+        companyName: companySettings.companyName || 'ألوان السفر',
         companyNameEn: companySettings.companyNameEn || 'Travel Colors',
         companyPhone: companySettings.phone || '0558741741',
         companyEmail: companySettings.email || 'info@trcolors.com',
@@ -737,7 +738,7 @@ const Appointments = () => {
         departmentTitle: dept?.title || appointment.department?.title || 'غير محدد',
         employeeName: appointment.createdBy?.name || 'موظف النظام',
         logoUrl,
-        companyName: companySettings.companyName || 'ألوان المسافر',
+        companyName: companySettings.companyName || 'ألوان السفر',
         companyNameEn: companySettings.companyNameEn || 'Travel Colors',
         companyPhone: companySettings.phone || '0558741741',
         companyEmail: companySettings.email || 'info@trcolors.com',
@@ -1314,7 +1315,15 @@ const Appointments = () => {
                 }
 
                 return (
-                  <tr key={appointment._id}>
+                  <tr
+                    key={appointment._id}
+                    className="appointment-row"
+                    onClick={(e) => {
+                      // تجاهل النقر على العناصر التفاعلية داخل الصف (روابط، أزرار، قوائم)
+                      if (e.target.closest('button, a, select, input, label')) return;
+                      handleView(appointment);
+                    }}
+                  >
                     {tableColumns.type !== false && (
                       <td>
                         <span className={`type-badge ${typeInfo.class}`}>
@@ -1680,211 +1689,376 @@ const Appointments = () => {
         )}
       </Modal>
 
-      {/* View Modal */}
+      {/* View Modal — تخطيط بعمودين مثل نافذة تفاصيل المهمة */}
       <Modal
         isOpen={!!viewAppointment}
         onClose={() => setViewAppointment(null)}
-        title="تفاصيل الموعد"
-        size="medium"
+        title=""
+        size="xlarge"
       >
-        {viewAppointment && (
-          <div className="appointment-details">
-            <div className="detail-row">
-              <span className="detail-label">نوع الموعد:</span>
-              <span className={`type-badge ${getTypeBadge(viewAppointment).class}`}>
-                {getTypeBadge(viewAppointment).label}
-              </span>
-            </div>
-            <div className="detail-row">
-              <span className="detail-label">اسم العميل:</span>
-              <span className="detail-value">{viewAppointment.customerName}</span>
-            </div>
-            <div className="detail-row">
-              <span className="detail-label">رقم الجوال:</span>
-              <span className="detail-value" dir="ltr">{viewAppointment.phone || '-'}</span>
-            </div>
-            {viewAppointment.type !== 'draft' && (
-              <>
-                <div className="detail-row">
-                  <span className="detail-label">عدد الأشخاص:</span>
-                  <span className="detail-value">{viewAppointment.personsCount}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">القسم:</span>
-                  <span className="detail-value">{viewAppointment.department?.title}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">المدينة:</span>
-                  <span className="detail-value">{viewAppointment.city}</span>
-                </div>
-              </>
-            )}
+        {viewAppointment && (() => {
+          const statusInfo = getStatusBadge(viewAppointment.status);
+          const typeInfo = getTypeBadge(viewAppointment);
+          const isCancelled = viewAppointment.status === 'cancelled';
 
-            {viewAppointment.type === 'confirmed' && (
-              <>
-                <div className="detail-row">
-                  <span className="detail-label">التاريخ:</span>
-                  <span className="detail-value">{formatDateDisplay(viewAppointment.appointmentDate)}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">الوقت:</span>
-                  <span className="detail-value" dir="ltr">{formatTimeDisplay(viewAppointment.appointmentTime)}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">المدة:</span>
-                  <span className="detail-value">{viewAppointment.duration} دقيقة</span>
-                </div>
-              </>
-            )}
-
-            {viewAppointment.type === 'unconfirmed' && (
-              <div className="detail-row">
-                <span className="detail-label">نطاق التاريخ:</span>
-                <span className="detail-value">
-                  {formatDateDisplay(viewAppointment.dateFrom)} - {formatDateDisplay(viewAppointment.dateTo)}
-                </span>
+          return (
+          <div className="detail-modal">
+            {/* ── العمود الرئيسي ── */}
+            <div className="detail-modal-main">
+              <div className="detail-modal-header">
+                <h2>{viewAppointment.customerName}</h2>
+                {viewAppointment.isVIP && <span className="vip-badge-lg">VIP</span>}
+                <span className={`type-badge ${typeInfo.class}`}>{typeInfo.label}</span>
+                {viewAppointment.isSubmission && <span className="submission-badge">📤 تقديم</span>}
               </div>
-            )}
 
-            {viewAppointment.type === 'draft' && (
-              <>
-                <div className="detail-row">
-                  <span className="detail-label">تاريخ التذكير:</span>
-                  <span className="detail-value">{formatDateDisplay(viewAppointment.reminderDate)}</span>
+              {/* تفاصيل الموعد */}
+              <div className="detail-modal-section">
+                <div className="detail-section-title">
+                  <span className="detail-section-icon">📋</span>
+                  <span>تفاصيل الموعد</span>
                 </div>
-                <div className="detail-row">
-                  <span className="detail-label">وقت التذكير:</span>
-                  <span className="detail-value" dir="ltr">{formatTimeDisplay(viewAppointment.reminderTime)}</span>
-                </div>
-              </>
-            )}
-
-            {viewAppointment.isSubmission && (
-              <div className="detail-row">
-                <span className="detail-label">تقديم:</span>
-                <span className="detail-value">نعم</span>
-              </div>
-            )}
-
-            {viewAppointment.notes && (
-              <div className="detail-row notes-row">
-                <span className="detail-label">ملاحظات:</span>
-                <span className="detail-value notes-value">{viewAppointment.notes}</span>
-              </div>
-            )}
-
-            {viewAppointment.createdBy && (
-              <div className="detail-row">
-                <span className="detail-label">مضاف بواسطة:</span>
-                <span className="detail-value created-by">
-                  👤 {viewAppointment.createdBy?.name || 'غير معروف'}
-                </span>
-              </div>
-            )}
-
-            {/* قسم المرفقات */}
-            <div className="detail-divider">📎 المرفقات ({viewAppointment.attachments?.length || 0})</div>
-            {viewAppointment.attachments && viewAppointment.attachments.length > 0 ? (
-              <div className="view-attachments-grid">
-                {viewAppointment.attachments.map((att, i) => (
-                  <div key={att._id || i} className="view-attachment-card">
-                    {att.mimetype?.startsWith('image/') ? (
-                      <img src={`${UPLOADS_BASE}/uploads/${att.filename}`} alt={att.originalName} className="view-attachment-preview" />
-                    ) : (
-                      <div className="view-attachment-preview pdf-preview">📄 PDF</div>
-                    )}
-                    <div className="view-attachment-name">{att.originalName || att.filename}</div>
-                    {att.size && (
-                      <div className="view-attachment-size">
-                        {att.size > 1024 * 1024
-                          ? `${(att.size / (1024 * 1024)).toFixed(1)} MB`
-                          : `${(att.size / 1024).toFixed(0)} KB`}
+                <div className="detail-fields">
+                  {viewAppointment.type !== 'draft' && (
+                    <>
+                      <div className="detail-field-row">
+                        <span className="detail-field-label">القسم:</span>
+                        <span className="detail-field-value">{viewAppointment.department?.title || '-'}</span>
                       </div>
-                    )}
-                    <div className="view-attachment-actions">
-                      <a href={`${UPLOADS_BASE}/uploads/${att.filename}`} target="_blank" rel="noopener noreferrer" className="att-btn view-btn" title="عرض">👁️</a>
-                      <a href={`${UPLOADS_BASE}/uploads/${att.filename}`} download={att.originalName} className="att-btn download-btn" title="تنزيل">⬇️</a>
-                      {hasPermission('appointments.delete') && (
-                        <button className="att-btn delete-btn" onClick={() => handleDeleteAttachment(viewAppointment._id, att._id)} title="حذف">🗑️</button>
-                      )}
+                      <div className="detail-field-row">
+                        <span className="detail-field-label">المدينة:</span>
+                        <span className="detail-field-value">{viewAppointment.city || '-'}</span>
+                      </div>
+                      <div className="detail-field-row">
+                        <span className="detail-field-label">عدد الأشخاص:</span>
+                        <span className="detail-field-value">{viewAppointment.personsCount || 1} شخص</span>
+                      </div>
+                    </>
+                  )}
+                  {viewAppointment.type === 'confirmed' && (
+                    <div className="detail-field-row">
+                      <span className="detail-field-label">مدة الموعد:</span>
+                      <span className="detail-field-value">{viewAppointment.duration} دقيقة</span>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="no-attachments-text">لا توجد مرفقات</p>
-            )}
-            <div className="add-attachment-row">
-              <input
-                type="file"
-                ref={viewAttachmentInputRef}
-                onChange={handleViewAttachmentUpload}
-                accept="image/*,.pdf"
-                multiple
-                style={{ display: 'none' }}
-              />
-              <button
-                type="button"
-                className="add-attachment-btn"
-                onClick={() => viewAttachmentInputRef.current?.click()}
-                disabled={uploadingAttachment}
-              >
-                {uploadingAttachment ? '⏳ جاري الرفع...' : '➕ إضافة مرفقات'}
-              </button>
-            </div>
-
-            <div className="detail-row">
-              <span className="detail-label">حالة الموعد:</span>
-              <span className={`status-badge ${getStatusBadge(viewAppointment.status).class}`}>
-                {getStatusBadge(viewAppointment.status).icon} {getStatusBadge(viewAppointment.status).label}
-              </span>
-            </div>
-
-            {/* بيانات الدفع */}
-            {(viewAppointment.paymentType || viewAppointment.totalAmount > 0) && (
-              <>
-                <div className="detail-divider">💳 بيانات الدفع</div>
-                {viewAppointment.paymentType && (
-                  <div className="detail-row">
-                    <span className="detail-label">طريقة الدفع:</span>
-                    <span className="detail-value">
-                      {viewAppointment.paymentType === 'cash' ? 'نقدي' :
-                       viewAppointment.paymentType === 'card' ? 'شبكة' :
-                       viewAppointment.paymentType === 'transfer' ? 'تحويل' : '-'}
-                    </span>
-                  </div>
-                )}
-                {viewAppointment.totalAmount > 0 && (
-                  <>
-                    <div className="detail-row">
-                      <span className="detail-label">المبلغ الإجمالي:</span>
-                      <span className="detail-value">{viewAppointment.totalAmount} ريال</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">المبلغ المدفوع:</span>
-                      <span className="detail-value">{viewAppointment.paidAmount || 0} ريال</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">المبلغ المتبقي:</span>
-                      <span className={`detail-value ${viewAppointment.remainingAmount > 0 ? 'remaining-warning' : ''}`}>
-                        {viewAppointment.remainingAmount || 0} ريال
+                  )}
+                  {viewAppointment.type === 'unconfirmed' && (
+                    <div className="detail-field-row">
+                      <span className="detail-field-label">الفترة:</span>
+                      <span className="detail-field-value">
+                        {formatDateDisplay(viewAppointment.dateFrom)} - {formatDateDisplay(viewAppointment.dateTo)}
                       </span>
                     </div>
-                    {viewAppointment.remainingAmount > 0 && (
-                      <button
-                        className="add-payment-btn"
-                        onClick={() => {
-                          setPaymentData({ amount: '', paymentType: viewAppointment.paymentType || 'cash' });
-                          setShowPaymentModal(true);
-                        }}
-                      >
-                        💰 إضافة دفعة
-                      </button>
-                    )}
-                  </>
+                  )}
+                  {viewAppointment.isSubmission && (
+                    <div className="detail-field-row">
+                      <span className="detail-field-label">نوع التقديم:</span>
+                      <span className="detail-field-value">
+                        {viewAppointment.department?.submissionType || 'تقديم'}
+                      </span>
+                    </div>
+                  )}
+                  {viewAppointment.notes && (
+                    <div className="detail-field-notes">{viewAppointment.notes}</div>
+                  )}
+                </div>
+              </div>
+
+              {/* حالة الموعد */}
+              <div className="detail-modal-section">
+                <div className="detail-section-title">
+                  <span className="detail-section-icon">✅</span>
+                  <span>حالة الموعد</span>
+                </div>
+                <div className="detail-checklist">
+                  <div className="detail-checklist-item checked">
+                    <span className="detail-check-icon">✓</span>
+                    <span>تم إنشاء الموعد</span>
+                  </div>
+                  <div className={`detail-checklist-item ${['in_progress', 'completed'].includes(viewAppointment.status) ? 'checked' : ''}`}>
+                    <span className="detail-check-icon">
+                      {['in_progress', 'completed'].includes(viewAppointment.status) ? '✓' : '○'}
+                    </span>
+                    <span>بدأ العمل على الموعد</span>
+                  </div>
+                  {isCancelled ? (
+                    <div className="detail-checklist-item cancelled">
+                      <span className="detail-check-icon">✕</span>
+                      <span>تم إلغاء الموعد</span>
+                    </div>
+                  ) : (
+                    <div className={`detail-checklist-item ${viewAppointment.status === 'completed' ? 'checked' : ''}`}>
+                      <span className="detail-check-icon">
+                        {viewAppointment.status === 'completed' ? '✓' : '○'}
+                      </span>
+                      <span>تم إكمال الموعد</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* المرفقات */}
+              <div className="detail-modal-section">
+                <div className="detail-section-title">
+                  <span className="detail-section-icon">📎</span>
+                  <span>المرفقات ({viewAppointment.attachments?.length || 0})</span>
+                </div>
+                {viewAppointment.attachments && viewAppointment.attachments.length > 0 ? (
+                  <div className="view-attachments-grid">
+                    {viewAppointment.attachments.map((att, i) => (
+                      <div key={att._id || i} className="view-attachment-card">
+                        {att.mimetype?.startsWith('image/') ? (
+                          <img src={`${UPLOADS_BASE}/uploads/${att.filename}`} alt={att.originalName} className="view-attachment-preview" />
+                        ) : (
+                          <div className="view-attachment-preview pdf-preview">📄 PDF</div>
+                        )}
+                        <div className="view-attachment-name">{att.originalName || att.filename}</div>
+                        {att.size && (
+                          <div className="view-attachment-size">
+                            {att.size > 1024 * 1024
+                              ? `${(att.size / (1024 * 1024)).toFixed(1)} MB`
+                              : `${(att.size / 1024).toFixed(0)} KB`}
+                          </div>
+                        )}
+                        <div className="view-attachment-actions">
+                          <a href={`${UPLOADS_BASE}/uploads/${att.filename}`} target="_blank" rel="noopener noreferrer" className="att-btn view-btn" title="عرض">👁️</a>
+                          <a href={`${UPLOADS_BASE}/uploads/${att.filename}`} download={att.originalName} className="att-btn download-btn" title="تنزيل">⬇️</a>
+                          {hasPermission('appointments.delete') && (
+                            <button className="att-btn delete-btn" onClick={() => handleDeleteAttachment(viewAppointment._id, att._id)} title="حذف">🗑️</button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="no-attachments-text">لا توجد مرفقات</p>
                 )}
-              </>
-            )}
+                <div className="add-attachment-row">
+                  <input
+                    type="file"
+                    ref={viewAttachmentInputRef}
+                    onChange={handleViewAttachmentUpload}
+                    accept="image/*,.pdf"
+                    multiple
+                    style={{ display: 'none' }}
+                  />
+                  <button
+                    type="button"
+                    className="add-attachment-btn"
+                    onClick={() => viewAttachmentInputRef.current?.click()}
+                    disabled={uploadingAttachment}
+                  >
+                    {uploadingAttachment ? '⏳ جاري الرفع...' : '➕ إضافة مرفقات'}
+                  </button>
+                </div>
+              </div>
+
+              {/* التحديث السريع — للتقديم الإلكتروني فقط */}
+              {viewAppointment.isSubmission && viewAppointment.department?.submissionType === 'إلكتروني' && (
+                <div className="detail-modal-section">
+                  <div className="detail-section-title">
+                    <span className="detail-section-icon">⚡</span>
+                    <span>تحديث سريع</span>
+                  </div>
+                  <div className="quick-update-buttons">
+                    <button className="quick-update-btn accepted" onClick={() => handleQuickUpdateWhatsApp(viewAppointment, 'accepted')}>
+                      🎉 تم القبول
+                    </button>
+                    <button className="quick-update-btn rejected" onClick={() => handleQuickUpdateWhatsApp(viewAppointment, 'rejected')}>
+                      ❌ تم الرفض
+                    </button>
+                    <button className="quick-update-btn docs" onClick={() => handleQuickUpdateWhatsApp(viewAppointment, 'additionalDocs')}>
+                      📎 مستندات إضافية
+                    </button>
+                    <button className="quick-update-btn delay" onClick={() => handleQuickUpdateWhatsApp(viewAppointment, 'processingDelay')}>
+                      ⏳ تأخر في المعالجة
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ── العمود الجانبي ── */}
+            <div className="detail-modal-sidebar">
+              {/* مضاف بواسطة */}
+              <div className="detail-sidebar-section">
+                <h4>مضاف بواسطة</h4>
+                <div className="detail-user">
+                  <div className="detail-user-avatar">
+                    {viewAppointment.createdBy?.name ? viewAppointment.createdBy.name[0] : '؟'}
+                  </div>
+                  <span className="detail-user-name">{viewAppointment.createdBy?.name || 'غير معروف'}</span>
+                </div>
+              </div>
+
+              {/* معلومات العميل */}
+              <div className="detail-sidebar-section">
+                <h4>معلومات العميل</h4>
+                <div className="detail-info-list">
+                  <div className="detail-info-row">
+                    <span className="detail-info-icon">📞</span>
+                    <span className="detail-info-label">الهاتف:</span>
+                    <span className="detail-info-value" dir="ltr">{viewAppointment.phone || '-'}</span>
+                  </div>
+                  {viewAppointment.customer && (
+                    <div className="detail-info-row">
+                      <span className="detail-info-icon">👤</span>
+                      <span className="detail-info-label">الملف:</span>
+                      <button
+                        className="detail-info-link"
+                        onClick={() => { setViewAppointment(null); navigate(`/control/customers/${viewAppointment.customer._id}`); }}
+                      >
+                        فتح ملف العميل
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* التواريخ */}
+              <div className="detail-sidebar-section">
+                <h4>التواريخ</h4>
+                <div className="detail-info-list">
+                  {viewAppointment.type === 'confirmed' && (
+                    <>
+                      <div className="detail-info-row">
+                        <span className="detail-info-icon">📅</span>
+                        <span className="detail-info-label">الموعد:</span>
+                        <span className="detail-info-value">{formatDateDisplay(viewAppointment.appointmentDate)}</span>
+                      </div>
+                      <div className="detail-info-row">
+                        <span className="detail-info-icon">⏰</span>
+                        <span className="detail-info-label">الوقت:</span>
+                        <span className="detail-info-value" dir="ltr">{formatTimeDisplay(viewAppointment.appointmentTime)}</span>
+                      </div>
+                    </>
+                  )}
+                  {viewAppointment.type === 'unconfirmed' && (
+                    <div className="detail-info-row">
+                      <span className="detail-info-icon">📅</span>
+                      <span className="detail-info-label">من - إلى:</span>
+                      <span className="detail-info-value">
+                        {formatDateDisplay(viewAppointment.dateFrom)} - {formatDateDisplay(viewAppointment.dateTo)}
+                      </span>
+                    </div>
+                  )}
+                  {viewAppointment.type === 'draft' && (
+                    <>
+                      <div className="detail-info-row">
+                        <span className="detail-info-icon">🔔</span>
+                        <span className="detail-info-label">التذكير:</span>
+                        <span className="detail-info-value">{formatDateDisplay(viewAppointment.reminderDate)}</span>
+                      </div>
+                      <div className="detail-info-row">
+                        <span className="detail-info-icon">⏰</span>
+                        <span className="detail-info-label">الوقت:</span>
+                        <span className="detail-info-value" dir="ltr">{formatTimeDisplay(viewAppointment.reminderTime)}</span>
+                      </div>
+                    </>
+                  )}
+                  <div className="detail-info-row">
+                    <span className="detail-info-icon">📝</span>
+                    <span className="detail-info-label">الإنشاء:</span>
+                    <span className="detail-info-value">{formatDateDisplay(viewAppointment.createdAt)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* الحالة */}
+              <div className="detail-sidebar-section">
+                <h4>الحالة</h4>
+                <div className="detail-info-list">
+                  <div className="detail-info-row">
+                    <span className="detail-info-icon">🚦</span>
+                    <span className="detail-info-label">الحالة:</span>
+                    <span className={`status-badge ${statusInfo.class}`}>
+                      {statusInfo.icon} {statusInfo.label}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* بيانات الدفع */}
+              {(viewAppointment.paymentType || viewAppointment.totalAmount > 0) && (
+                <div className="detail-sidebar-section">
+                  <h4>💳 بيانات الدفع</h4>
+                  <div className="detail-info-list">
+                    {viewAppointment.paymentType && (
+                      <div className="detail-info-row">
+                        <span className="detail-info-icon">💳</span>
+                        <span className="detail-info-label">الطريقة:</span>
+                        <span className="detail-info-value">
+                          {viewAppointment.paymentType === 'cash' ? 'نقدي' :
+                           viewAppointment.paymentType === 'card' ? 'شبكة' :
+                           viewAppointment.paymentType === 'transfer' ? 'تحويل' : '-'}
+                        </span>
+                      </div>
+                    )}
+                    {viewAppointment.totalAmount > 0 && (
+                      <>
+                        <div className="detail-info-row">
+                          <span className="detail-info-icon">🧮</span>
+                          <span className="detail-info-label">الإجمالي:</span>
+                          <span className="detail-info-value">{viewAppointment.totalAmount} ريال</span>
+                        </div>
+                        <div className="detail-info-row">
+                          <span className="detail-info-icon">✅</span>
+                          <span className="detail-info-label">المدفوع:</span>
+                          <span className="detail-info-value">{viewAppointment.paidAmount || 0} ريال</span>
+                        </div>
+                        <div className="detail-info-row">
+                          <span className="detail-info-icon">⏳</span>
+                          <span className="detail-info-label">المتبقي:</span>
+                          <span className={`detail-info-value ${viewAppointment.remainingAmount > 0 ? 'highlight' : ''}`}>
+                            {viewAppointment.remainingAmount || 0} ريال
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  {viewAppointment.remainingAmount > 0 && (
+                    <button
+                      className="detail-action-btn detail-action-warning"
+                      style={{ marginTop: '8px' }}
+                      onClick={() => {
+                        setPaymentData({ amount: '', paymentType: viewAppointment.paymentType || 'cash' });
+                        setShowPaymentModal(true);
+                      }}
+                    >
+                      <span>💰</span>
+                      <span>إضافة دفعة</span>
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* الإجراءات */}
+              <div className="detail-sidebar-section">
+                <h4>الإجراءات</h4>
+                <div className="detail-action-list">
+                  <button className="detail-action-btn detail-action-neutral" onClick={() => handlePrintReceipt(viewAppointment)}>
+                    <span>🧾</span>
+                    <span>طباعة إيصال</span>
+                  </button>
+                  <button className="detail-action-btn detail-action-success" onClick={() => handleShareReceiptWhatsApp(viewAppointment)}>
+                    <span>📤</span>
+                    <span>إرسال الإيصال</span>
+                  </button>
+                  <button className="detail-action-btn detail-action-success" onClick={() => handleSendWhatsApp(viewAppointment)}>
+                    <span>📱</span>
+                    <span>رسالة واتساب</span>
+                  </button>
+                  {canEdit(viewAppointment) && (
+                    <button
+                      className="detail-action-btn detail-action-primary"
+                      onClick={() => { handleEdit(viewAppointment); setViewAppointment(null); }}
+                    >
+                      <span>✏️</span>
+                      <span>تعديل</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
 
             {/* مودال إضافة دفعة */}
             {showPaymentModal && (
@@ -1930,74 +2104,9 @@ const Appointments = () => {
                 </div>
               </div>
             )}
-
-            {/* أزرار الإجراءات */}
-            <div className="modal-actions-row">
-              <button
-                className="modal-action-btn receipt-btn"
-                onClick={() => handlePrintReceipt(viewAppointment)}
-              >
-                <span>🧾</span>
-                طباعة إيصال
-              </button>
-              <button
-                className="modal-action-btn share-btn"
-                onClick={() => handleShareReceiptWhatsApp(viewAppointment)}
-              >
-                <span>📤</span>
-                إرسال الإيصال
-              </button>
-              <button
-                className="modal-action-btn whatsapp-btn"
-                onClick={() => handleSendWhatsApp(viewAppointment)}
-              >
-                <span>📱</span>
-                رسالة واتساب
-              </button>
-              {canEdit(viewAppointment) && (
-                <button
-                  className="modal-action-btn edit-btn"
-                  onClick={() => { handleEdit(viewAppointment); setViewAppointment(null); }}
-                >
-                  <span>✏️</span>
-                  تعديل
-                </button>
-              )}
-            </div>
-
-            {viewAppointment.isSubmission && viewAppointment.department?.submissionType === 'إلكتروني' && (
-              <div className="quick-update-section">
-                <div className="quick-update-label">⚡ تحديث سريع</div>
-                <div className="quick-update-buttons">
-                  <button
-                    className="quick-update-btn accepted"
-                    onClick={() => handleQuickUpdateWhatsApp(viewAppointment, 'accepted')}
-                  >
-                    🎉 تم القبول
-                  </button>
-                  <button
-                    className="quick-update-btn rejected"
-                    onClick={() => handleQuickUpdateWhatsApp(viewAppointment, 'rejected')}
-                  >
-                    ❌ تم الرفض
-                  </button>
-                  <button
-                    className="quick-update-btn docs"
-                    onClick={() => handleQuickUpdateWhatsApp(viewAppointment, 'additionalDocs')}
-                  >
-                    📎 مستندات إضافية
-                  </button>
-                  <button
-                    className="quick-update-btn delay"
-                    onClick={() => handleQuickUpdateWhatsApp(viewAppointment, 'processingDelay')}
-                  >
-                    ⏳ تأخر في المعالجة
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
-        )}
+          );
+        })()}
       </Modal>
 
       {/* Convert to Confirmed Modal */}

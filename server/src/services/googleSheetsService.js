@@ -526,7 +526,7 @@ const syncStatsSheet = async (sheets, spreadsheet, appointments, monthGroups) =>
     const statsRows = [];
 
     // عنوان
-    statsRows.push(['', 'احصائيات المواعيد - ألوان المسافر', '', '', '', '', '']);
+    statsRows.push(['', 'احصائيات المواعيد - ألوان السفر', '', '', '', '', '']);
     statsRows.push(['']); // فاصل
 
     // === جدول 1: إحصائيات شهرية ===

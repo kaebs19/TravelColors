@@ -9,7 +9,7 @@ const buildReceiptHTML = (appointmentData, options = {}) => {
     departmentTitle = 'غير محدد',
     employeeName = 'موظف النظام',
     logoUrl = '/logo512.png',
-    companyName = 'ألوان المسافر',
+    companyName = 'ألوان السفر',
     companyNameEn = 'Travel Colors',
     companyPhone = '0558741741',
     companyEmail = 'info@trcolors.com',
@@ -353,7 +353,7 @@ export const shareReceiptToWhatsApp = async (appointmentData, options = {}) => {
 
       const phone = appointmentData.phone?.replace(/[^0-9]/g, '');
       const phoneNumber = phone?.startsWith('0') ? '966' + phone.slice(1) : phone;
-      const companyName = options.companyName || 'ألوان المسافر';
+      const companyName = options.companyName || 'ألوان السفر';
       const message = `مرحباً ${appointmentData.customerName}،\n\nمرفق إيصال موعدكم في ${companyName}.\n\nيرجى الاحتفاظ بهذا الإيصال.\n\nشكراً لاختياركم ${companyName}`;
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = phoneNumber

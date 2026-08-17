@@ -50,16 +50,35 @@ const Customers = () => {
     fetchCustomers();
   }, []);
 
+  // الصفحة تفلتر وتفرز وتحسب الإحصائيات محلياً، لذا تحتاج القائمة كاملة.
+  // الخادم يحدّ الاستجابة بـ 50 افتراضياً و5000 كحد أقصى، فنمرّ على الصفحات
+  // حتى نجمع كل العملاء بدل الاكتفاء بأول دفعة.
+  const PAGE_SIZE = 1000;
+
   const fetchCustomers = async () => {
     try {
-      const response = await customersApi.getCustomers();
-      // customersApi يرجع response.data مباشرة من axios
-      // الـ API يرجع { success: true, customers: [...], data: { customers: [...] } }
-      const customersList = response.customers || response.data?.customers || [];
-      console.log('Customers loaded:', customersList.length, customersList);
-      setCustomers(customersList);
+      const all = [];
+      let page = 1;
+      let totalPages = 1;
+
+      do {
+        const response = await customersApi.getCustomers({ page, limit: PAGE_SIZE });
+        // الـ API يرجع { success, customers: [...], data: { customers, pagination } }
+        const batch = response.customers || response.data?.customers || [];
+        all.push(...batch);
+
+        const pagination = response.data?.pagination;
+        totalPages = pagination?.pages || 1;
+        page += 1;
+
+        // حماية من حلقة لا تنتهي إذا رجعت الاستجابة فارغة
+        if (batch.length === 0) break;
+      } while (page <= totalPages);
+
+      setCustomers(all);
     } catch (error) {
       console.error('Error fetching customers:', error);
+      showToast('تعذّر تحميل قائمة العملاء', 'error');
     } finally {
       setLoading(false);
     }
@@ -160,7 +179,7 @@ const Customers = () => {
   const handleSendWhatsApp = (customer) => {
     const phone = customer.phone?.replace(/[^0-9]/g, '');
     const phoneNumber = phone?.startsWith('0') ? '966' + phone.slice(1) : phone;
-    const message = `مرحباً ${customer.name}،\n\nنشكرك على تواصلك مع ألوان المسافر للسفر والسياحة.\n\nكيف يمكننا مساعدتك؟`;
+    const message = `مرحباً ${customer.name}،\n\nنشكرك على تواصلك مع ألوان السفر للسفر والسياحة.\n\nكيف يمكننا مساعدتك؟`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = phoneNumber
       ? `https://wa.me/${phoneNumber}?text=${encodedMessage}`

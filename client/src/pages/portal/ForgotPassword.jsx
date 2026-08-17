@@ -38,7 +38,7 @@ const ForgotPassword = () => {
         <div className="portal-auth-card">
           <div className="portal-auth-header">
             <h1 className="portal-auth-brand">
-              <span className="portal-nav-name-ar">ألوان المسافر</span>
+              <span className="portal-nav-name-ar">ألوان السفر</span>
               <span className="portal-nav-name-en">Travel Colors</span>
             </h1>
           </div>

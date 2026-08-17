@@ -9,7 +9,7 @@ const websiteContentSchema = new mongoose.Schema({
 
   // البانر الرئيسي
   hero: {
-    title: { type: String, default: 'دعنا نسافر مع ألوان المسافر' },
+    title: { type: String, default: 'دعنا نسافر مع ألوان السفر' },
     subtitle: { type: String, default: 'شركة سياحية مرخصة' },
     description: { type: String, default: 'خدمات تأشيرات احترافية، رحلات مخصصة، وتجارب سفر لا تُنسى' },
     backgroundImage: { type: String, default: '' }
@@ -25,7 +25,7 @@ const websiteContentSchema = new mongoose.Schema({
   // من نحن
   aboutUs: {
     title: { type: String, default: 'من نحن' },
-    description: { type: String, default: 'شركة ألوان المسافر متخصصون في استخراج تأشيرة الشنقن في وقت قصير. حجز طيران - حجوزات فندقيه حول العالم - برامج شهر العسل للعرسان - رخص دولية / مرخص من هيئة السياحة رقم : 73104877' },
+    description: { type: String, default: 'شركة ألوان السفر متخصصون في استخراج تأشيرة الشنقن في وقت قصير. حجز طيران - حجوزات فندقيه حول العالم - برامج شهر العسل للعرسان - رخص دولية / مرخص من هيئة السياحة رقم : 73104877' },
     features: [{
       title: { type: String, required: true },
       description: { type: String, default: '' },
@@ -50,9 +50,9 @@ const websiteContentSchema = new mongoose.Schema({
 
   // معلومات التواصل
   contact: {
-    phone: { type: String, default: '+966 55 922 9597' },
+    phone: { type: String, default: '+966 55 874 1741' },
     email: { type: String, default: 'info@trcolors.com' },
-    whatsapp: { type: String, default: '966559229597' },
+    whatsapp: { type: String, default: '966558741741' },
     address: { type: String, default: 'المملكة العربية السعودية' },
     mapLink: { type: String, default: '' }
   },
@@ -89,12 +89,12 @@ const websiteContentSchema = new mongoose.Schema({
 
   // التذييل
   footer: {
-    copyrightText: { type: String, default: '© {year} Travel Colors - ألوان المسافر. جميع الحقوق محفوظة' }
+    copyrightText: { type: String, default: '© {year} Travel Colors - ألوان السفر. جميع الحقوق محفوظة' }
   },
 
   // إعدادات عامة للموقع
   general: {
-    siteName: { type: String, default: 'ألوان المسافر' },
+    siteName: { type: String, default: 'ألوان السفر' },
     siteNameEn: { type: String, default: 'Travel Colors' },
     siteDescription: { type: String, default: 'شركة سياحية مرخصة - خدمات تأشيرات احترافية' },
     logo: { type: String, default: '' }
@@ -189,7 +189,7 @@ const DEFAULT_CONTACT_DEPARTMENTS = [
   { name: 'استفسارات عامة', phone: '055 874 1741', whatsapp: '966558741741', icon: '📞', type: 'whatsapp', order: 0, isActive: true },
   { name: 'تأشيرات - فنادق', phone: '055 715 5472', whatsapp: '966557155472', icon: '🛂', type: 'whatsapp', order: 1, isActive: true },
   { name: 'مختص تأشيرات', phone: '055 279 1800', whatsapp: '966552791800', icon: '📋', type: 'whatsapp', order: 2, isActive: true },
-  { name: 'تأشيرات', phone: '055 922 9597', whatsapp: '966559229597', icon: '✈️', type: 'whatsapp', order: 3, isActive: true },
+  { name: 'تأشيرات', phone: '055 874 1741', whatsapp: '966558741741', icon: '✈️', type: 'whatsapp', order: 3, isActive: true },
   { name: 'حجوزات فنادق - باكجات', phone: '055 834 6483', whatsapp: '966558346483', icon: '🏨', type: 'whatsapp', order: 4, isActive: true },
   { name: 'البريد الإلكتروني', phone: 'info@trcolors.com', icon: '✉️', type: 'email', order: 5, isActive: true },
   { name: 'موقعنا', phone: 'الرياض - الصحافة', icon: '📍', type: 'location', order: 6, isActive: true }
@@ -227,7 +227,7 @@ websiteContentSchema.statics.getContent = async function() {
       ],
       aboutUs: {
         title: 'من نحن',
-        description: 'شركة ألوان المسافر متخصصون في استخراج تأشيرة الشنقن في وقت قصير. حجز طيران - حجوزات فندقيه حول العالم - برامج شهر العسل للعرسان - رخص دولية / مرخص من هيئة السياحة رقم : 73104877',
+        description: 'شركة ألوان السفر متخصصون في استخراج تأشيرة الشنقن في وقت قصير. حجز طيران - حجوزات فندقيه حول العالم - برامج شهر العسل للعرسان - رخص دولية / مرخص من هيئة السياحة رقم : 73104877',
         features: [
           { title: 'خبرة واسعة', description: 'سنوات من الخبرة في مجال السياحة والسفر', icon: '⭐' },
           { title: 'أسعار تنافسية', description: 'نقدم أفضل الأسعار مع جودة عالية في الخدمة', icon: '💰' },

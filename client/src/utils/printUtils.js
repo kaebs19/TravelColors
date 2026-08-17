@@ -319,7 +319,7 @@ export const formatInvoiceForPrint = (invoice, settings = {}) => {
       <div class="company-brand">
         <img src="${typeof window !== 'undefined' ? window.location.origin : ''}/logo512.png" alt="Logo" class="company-logo" onerror="this.style.display='none'" />
         <div class="company-info">
-          <h2>${invoice.companyInfo?.name || settings.companyName || 'ألوان المسافر'}</h2>
+          <h2>${invoice.companyInfo?.name || settings.companyName || 'ألوان السفر'}</h2>
           ${invoice.companyInfo?.nameEn ? `<p>${invoice.companyInfo.nameEn}</p>` : ''}
           <p>${invoice.companyInfo?.address || settings.address || ''}</p>
           <p>هاتف: ${invoice.companyInfo?.phone || settings.phone || ''}</p>
@@ -451,7 +451,7 @@ export const formatReceiptForPrint = (receipt, settings = {}) => {
       <div class="company-brand">
         <img src="${typeof window !== 'undefined' ? window.location.origin : ''}/logo512.png" alt="Logo" class="company-logo" onerror="this.style.display='none'" />
         <div class="company-info">
-          <h2>${receipt.companyInfo?.name || settings.companyName || 'ألوان المسافر'}</h2>
+          <h2>${receipt.companyInfo?.name || settings.companyName || 'ألوان السفر'}</h2>
           ${receipt.companyInfo?.nameEn ? `<p>${receipt.companyInfo.nameEn}</p>` : ''}
           <p>${receipt.companyInfo?.address || settings.address || ''}</p>
           <p>هاتف: ${receipt.companyInfo?.phone || settings.phone || ''}</p>

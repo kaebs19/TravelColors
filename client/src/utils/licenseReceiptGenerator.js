@@ -69,7 +69,7 @@ const buildLicenseReceiptHTML = (appData) => {
 
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
           <div>
-            <div style="margin: 0; font-size: 17px; font-weight: 800; font-family: 'Tajawal', sans-serif;">ألوان المسافر</div>
+            <div style="margin: 0; font-size: 17px; font-weight: 800; font-family: 'Tajawal', sans-serif;">ألوان السفر</div>
             <div style="margin: 2px 0; font-size: 10px; opacity: 0.85; font-weight: 400;">Travel Colors</div>
             <div style="margin: 1px 0; font-size: 9px; opacity: 0.6;">للسفر والسياحة</div>
           </div>
@@ -210,7 +210,7 @@ const buildLicenseReceiptHTML = (appData) => {
         <div style="position: relative;">
           <div style="position: absolute; top: -10px; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #c8a44e, transparent);"></div>
         </div>
-        <div style="margin: 0 0 4px 0; font-size: 10px; font-weight: 600; font-family: 'Tajawal', sans-serif; line-height: 1.5;">شكراً لاختياركم ألوان المسافر</div>
+        <div style="margin: 0 0 4px 0; font-size: 10px; font-weight: 600; font-family: 'Tajawal', sans-serif; line-height: 1.5;">شكراً لاختياركم ألوان السفر</div>
         <div style="margin: 0; font-size: 8px; opacity: 0.5; font-family: 'Tajawal', sans-serif;">www.trcolors.com</div>
       </div>
     </div>

@@ -281,11 +281,15 @@ exports.searchCustomers = async (req, res, next) => {
       });
     }
 
+    // الحد الأقصى للنتائج — قابل للضبط من المستدعي ضمن سقف آمن
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 20));
+
     const customers = await Customer.find(
       buildSearchQuery(['name', 'phone', 'nationalId'], q)
     )
-      .select('name phone nationalId address')
-      .limit(10);
+      // isVIP و city يحتاجهما مُنشئ المواعيد لتعبئة النموذج بعد الاختيار
+      .select('name phone nationalId address city isVIP')
+      .limit(limit);
 
     res.json({
       success: true,

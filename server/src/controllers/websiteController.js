@@ -1,4 +1,4 @@
-const { WebsiteContent } = require('../models');
+const { WebsiteContent, Settings } = require('../models');
 const fs = require('fs');
 const path = require('path');
 const { normalizeMapEmbed } = require('../utils/mapEmbed');
@@ -7,9 +7,24 @@ const { normalizeMapEmbed } = require('../utils/mapEmbed');
 exports.getPublicContent = async (req, res) => {
   try {
     const content = await WebsiteContent.getContent();
+
+    // بيانات التسجيل الرسمية مصدرها الإعدادات (معلومات الشركة)،
+    // وتُدمج هنا حتى يجلبها الموقع العام بنفس الطلب بدل طلب إضافي.
+    let registration = { tourismLicense: '', unifiedNationalNumber: '' };
+    try {
+      const settings = await Settings.getSettings();
+      registration = {
+        tourismLicense: settings?.tourismLicense || '',
+        unifiedNationalNumber: settings?.unifiedNationalNumber || ''
+      };
+    } catch (settingsError) {
+      // الإعدادات غير متاحة — الموقع يعرض قيمه الافتراضية بدل أن يفشل
+      console.error('Error fetching settings for public content:', settingsError.message);
+    }
+
     res.json({
       success: true,
-      data: content
+      data: { ...content.toObject(), registration }
     });
   } catch (error) {
     console.error('Error fetching website content:', error);

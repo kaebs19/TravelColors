@@ -202,7 +202,7 @@ const ClientDashboard = () => {
         <div className="portal-nav-content">
           <div className="portal-nav-brand" onClick={() => navigate('/')}>
             <span className="portal-nav-name">
-              <span className="portal-nav-name-ar">ألوان المسافر</span>
+              <span className="portal-nav-name-ar">ألوان السفر</span>
               <span className="portal-nav-name-en">Travel Colors</span>
             </span>
           </div>
@@ -680,7 +680,7 @@ const ClientDashboard = () => {
 
       {/* Footer */}
       <footer className="portal-footer">
-        <p>&copy; {new Date().getFullYear()} Travel Colors - ألوان المسافر</p>
+        <p>&copy; {new Date().getFullYear()} Travel Colors - ألوان السفر</p>
       </footer>
     </div>
   );

@@ -103,7 +103,7 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
       <div className="sidebar-header">
         <img src={logoUrl} alt="Travel Colors Logo" className="sidebar-logo-img" onError={(e) => { e.target.src = '/favicon.svg'; }} />
         <div className="sidebar-brand">
-          <h1 className="sidebar-logo">ألوان المسافر</h1>
+          <h1 className="sidebar-logo">ألوان السفر</h1>
           <span className="sidebar-subtitle">لوحة التحكم</span>
         </div>
         <button

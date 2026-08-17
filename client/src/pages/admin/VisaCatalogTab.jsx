@@ -711,10 +711,10 @@ const VisaCatalogTab = () => {
     const cleanName = form.countryName || 'التأشيرة';
     setForm(prev => ({
       ...prev,
-      metaTitle: prev.metaTitle || `${cleanName} - ألوان المسافر`,
+      metaTitle: prev.metaTitle || `${cleanName} - ألوان السفر`,
       metaDescription: prev.metaDescription || (prev.description
         ? prev.description.substring(0, 160)
-        : `احصل على ${cleanName} بسهولة واحترافية مع ألوان المسافر. نوفر لك كل المتطلبات والإجراءات اللازمة.`)
+        : `احصل على ${cleanName} بسهولة واحترافية مع ألوان السفر. نوفر لك كل المتطلبات والإجراءات اللازمة.`)
     }));
     autoGenerateKeywords();
   };
@@ -1393,7 +1393,7 @@ const VisaCatalogTab = () => {
                   type="text"
                   value={form.metaTitle || ''}
                   onChange={e => setForm(prev => ({ ...prev, metaTitle: e.target.value }))}
-                  placeholder="سيظهر في نتائج البحث — مثال: التأشيرة الفرنسية - ألوان المسافر"
+                  placeholder="سيظهر في نتائج البحث — مثال: التأشيرة الفرنسية - ألوان السفر"
                   maxLength={70}
                 />
                 <small style={{ color: '#94a3b8' }}>{(form.metaTitle || '').length}/70 حرف</small>

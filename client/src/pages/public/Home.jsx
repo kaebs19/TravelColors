@@ -2,15 +2,18 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { websiteApi } from '../../api';
 import DeveloperCredit from '../../components/common/DeveloperCredit';
+import { getRegistration, SBC_URL } from '../../components/common/OfficialCredentials';
 import visaCatalogApi from '../../api/visaCatalogApi';
 import { useClientAuth } from '../../context/ClientAuthContext';
 import { getIconSvg } from '../../utils/icons';
+import { useLang } from '../../i18n/LanguageContext';
+import LanguageSwitcher from '../../i18n/LanguageSwitcher';
 import '../../styles/public-shared.css';
 import './Home.css';
 
 const DEFAULT_CONTENT = {
   hero: {
-    title: 'دعنا نسافر مع ألوان المسافر',
+    title: 'دعنا نسافر مع ألوان السفر',
     subtitle: 'شركة سياحية مرخصة',
     description: 'خدمات تأشيرات احترافية، رحلات مخصصة، وتجارب سفر لا تُنسى',
     backgroundImage: ''
@@ -25,7 +28,7 @@ const DEFAULT_CONTENT = {
   ],
   aboutUs: {
     title: 'من نحن',
-    description: 'شركة ألوان المسافر متخصصون في استخراج تأشيرة الشنقن في وقت قصير. حجز طيران - حجوزات فندقيه حول العالم - برامج شهر العسل للعرسان - رخص دولية / مرخص من هيئة السياحة رقم : 73104877',
+    description: 'شركة ألوان السفر متخصصون في استخراج تأشيرة الشنقن في وقت قصير. حجز طيران - حجوزات فندقيه حول العالم - برامج شهر العسل للعرسان - رخص دولية / مرخص من هيئة السياحة رقم : 73104877',
     features: [
       { title: 'خبرة واسعة', description: 'سنوات من الخبرة في مجال السياحة والسفر', icon: '⭐' },
       { title: 'أسعار تنافسية', description: 'نقدم أفضل الأسعار مع جودة عالية', icon: '💰' },
@@ -40,15 +43,30 @@ const DEFAULT_CONTENT = {
     { question: 'هل تقدمون خدمات لجميع مدن المملكة؟', answer: 'نعم، نخدم عملاءنا في جميع مدن المملكة مع توفير مواعيد في الرياض وجدة والدمام.' }
   ],
   contact: {
-    phone: '+966 55 922 9597',
+    phone: '+966 55 874 1741',
     email: 'info@trcolors.com',
-    whatsapp: '966559229597',
+    whatsapp: '966558741741',
     address: 'شارع الأمير ناصر بن سعود بن فرحان آل سعود، الصحافة، الرياض 13321'
   },
   socialMedia: { twitter: '', instagram: '', facebook: '', snapchat: '' },
-  footer: { copyrightText: '© {year} Travel Colors - ألوان المسافر. جميع الحقوق محفوظة' },
-  general: { siteName: 'ألوان المسافر', siteNameEn: 'Travel Colors', siteDescription: '', logo: '' }
+  footer: { copyrightText: '© {year} Travel Colors - ألوان السفر. جميع الحقوق محفوظة' },
+  general: { siteName: 'ألوان السفر', siteNameEn: 'Travel Colors', siteDescription: '', logo: '' }
 };
+
+// شعار العلامة — يُستخدم كبديل عند عدم رفع شعار من لوحة التحكم
+const BrandMark = ({ size = 40 }) => (
+  <svg className="brand-mark" width={size} height={size} viewBox="0 0 200 200" aria-hidden="true">
+    <g transform="translate(100 100) rotate(45)">
+      <rect x="-74" y="-74" width="66" height="66" rx="8" fill="#3BC177" />
+      <rect x="8" y="-74" width="66" height="66" rx="8" fill="#2E7EB3" />
+      <rect x="-74" y="8" width="66" height="66" rx="8" fill="#2EC4FF" />
+      <rect x="8" y="8" width="66" height="66" rx="8" fill="#1F5C85" />
+      <g transform="translate(41 41) scale(0.56) translate(-50 -50)">
+        <path d="M50 6 L56 30 L94 54 L94 62 L56 51 L54 76 L69 88 L69 94 L50 87 L31 94 L31 88 L46 76 L44 51 L6 62 L6 54 L44 30 Z" fill="#fff" />
+      </g>
+    </g>
+  </svg>
+);
 
 const Home = () => {
   const [content, setContent] = useState(DEFAULT_CONTENT);
@@ -63,6 +81,8 @@ const Home = () => {
   const userMenuRef = useRef(null);
   const navigate = useNavigate();
   const { client, isAuthenticated, logout } = useClientAuth();
+  const { t, pick, pickStrict, dir, localePath, isEn } = useLang();
+  const registration = getRegistration(content);
 
   useEffect(() => {
     const loadContent = async () => {
@@ -100,9 +120,16 @@ const Home = () => {
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // ضبط الحالة عند التحميل على موضع مُمرَّر مسبقاً
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // منع تمرير الخلفية أثناء فتح قائمة الجوال
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileMenuOpen]);
 
   // إغلاق القائمة المنسدلة عند الضغط خارجها
   useEffect(() => {
@@ -161,43 +188,102 @@ const Home = () => {
     return `${baseUrl}${path}`;
   };
 
+  // اسم الدولة باللغة الحالية (Visa يحمل countryNameEn)، بلا بادئة "التأشيرة"
+  const visaName = (visa) => (pick(visa, 'countryName') || '').replace(/^التأشيرة\s*/i, '');
+
   const whatsappLink = content.contact?.whatsapp
     ? `https://wa.me/${content.contact.whatsapp}`
     : '#';
 
-  const footerText = (content.footer?.copyrightText || DEFAULT_CONTENT.footer.copyrightText)
-    .replace('{year}', new Date().getFullYear());
+  // بالإنجليزية نتجاهل النص المخزّن (عربي) ونستخدم الترجمة
+  const footerText = (isEn
+    ? t('footer.copyright')
+    : (content.footer?.copyrightText || DEFAULT_CONTENT.footer.copyrightText)
+  ).replace('{year}', new Date().getFullYear());
 
   const navLinks = [
-    { id: 'home', label: 'الرئيسية' },
-    { id: 'visas', label: 'التأشيرات', href: '/visas' },
-    { id: 'us-visa', label: 'التأشيرة الأمريكية', href: '/us-visa' },
-    { id: 'services', label: 'خدماتنا' },
-    { id: 'contact', label: 'تواصل معنا', href: '/ContactUs' }
+    { id: 'home', label: t('nav.home') },
+    { id: 'visas', label: t('nav.visas'), href: '/visas' },
+    { id: 'us-visa', label: t('nav.usVisa'), href: '/us-visa' },
+    { id: 'services', label: t('nav.services') },
+    { id: 'contact', label: t('nav.contact'), href: '/ContactUs' }
   ];
 
   return (
-    <div className="website" dir="rtl">
-      {/* Navbar */}
-      <nav className={`site-nav ${scrolled ? 'scrolled' : ''}`}>
+    <div className="website" dir={dir}>
+      {/* Header */}
+      <header className={`site-header ${scrolled ? 'scrolled' : ''}`}>
+        {/* شريط علوي — بيانات التواصل والتوثيق */}
+        <div className="topbar">
+          <div className="topbar-inner">
+            <div className="topbar-group">
+              {content.contact?.phone && (
+                <a className="topbar-item" href={whatsappLink} target="_blank" rel="noopener noreferrer">
+                  {getIconSvg('📞', 14)}
+                  <span dir="ltr">{content.contact.phone}</span>
+                </a>
+              )}
+              {content.contact?.email && (
+                <a className="topbar-item" href={`mailto:${content.contact.email}`}>
+                  {getIconSvg('✉️', 14)}
+                  <span dir="ltr">{content.contact.email}</span>
+                </a>
+              )}
+            </div>
+            <div className="topbar-group">
+              <LanguageSwitcher variant="dark" />
+              <span className="topbar-badge">
+                {getIconSvg('✅', 13)}
+                {t('topbar.licensed')} · {registration.tourismLicense}
+              </span>
+              {(content.socialMedia?.twitter || content.socialMedia?.instagram || content.socialMedia?.facebook) && (
+                <div className="topbar-social">
+                  {content.socialMedia?.twitter && <a href={content.socialMedia.twitter} target="_blank" rel="noopener noreferrer" aria-label="X">𝕏</a>}
+                  {content.socialMedia?.instagram && <a href={content.socialMedia.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram">{getIconSvg('📷', 14)}</a>}
+                  {content.socialMedia?.facebook && <a href={content.socialMedia.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook">f</a>}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <nav className="site-nav">
         <div className="nav-container">
           <div className="nav-brand" onClick={() => scrollTo('home')}>
             {content.general?.logo ? (
               <img src={getImageUrl(content.general.logo)} alt={content.general?.siteName} className="nav-logo-img" width="140" height="44" />
             ) : (
-              <div className="nav-logo-text">
-                <span className="nav-logo-ar">{content.general?.siteName || 'ألوان المسافر'}</span>
-                <span className="nav-logo-en">{content.general?.siteNameEn || 'Travel Colors'}</span>
-              </div>
+              <>
+                <BrandMark size={42} />
+                <div className="nav-logo-text">
+                  <span className="nav-logo-ar" lang={isEn ? 'en' : 'ar'}>
+                    {isEn
+                      ? (content.general?.siteNameEn || 'Travel Colors')
+                      : (content.general?.siteName || 'ألوان السفر')}
+                  </span>
+                  <span className="nav-logo-en" lang={isEn ? 'ar' : 'en'}>
+                    {isEn
+                      ? (content.general?.siteName || 'ألوان السفر')
+                      : (content.general?.siteNameEn || 'Travel Colors')}
+                  </span>
+                </div>
+              </>
             )}
           </div>
+
+          {/* طبقة تعتيم خلف قائمة الجوال */}
+          <div
+            className={`nav-overlay ${mobileMenuOpen ? 'open' : ''}`}
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
 
           <div className={`nav-links ${mobileMenuOpen ? 'open' : ''}`}>
             {navLinks.map(link => (
               <button key={link.id} className="nav-link" onClick={() => {
                 if (link.href) {
                   setMobileMenuOpen(false);
-                  navigate(link.href);
+                  navigate(localePath(link.href));
                 } else {
                   scrollTo(link.id);
                 }
@@ -206,27 +292,28 @@ const Home = () => {
               </button>
             ))}
             <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="nav-whatsapp">
-              واتساب
+              {t('common.whatsapp')}
             </a>
+            <LanguageSwitcher variant="light" className="nav-lang" />
 
             {/* Auth — Mobile: يظهر داخل القائمة */}
             <div className="nav-auth-mobile">
               {isAuthenticated ? (
                 <>
                   <button className="nav-link" onClick={() => { setMobileMenuOpen(false); navigate('/portal/dashboard'); }}>
-                    لوحة التحكم
+                    {t('common.dashboard')}
                   </button>
                   <button className="nav-link nav-logout-mobile" onClick={() => { setMobileMenuOpen(false); logout(); }}>
-                    تسجيل خروج
+                    {t('common.logout')}
                   </button>
                 </>
               ) : (
                 <>
                   <button className="nav-link" onClick={() => { setMobileMenuOpen(false); navigate('/portal/login'); }}>
-                    تسجيل دخول
+                    {t('common.login')}
                   </button>
                   <button className="nav-auth-register-mobile" onClick={() => { setMobileMenuOpen(false); navigate('/portal/login?tab=register'); }}>
-                    إنشاء حساب
+                    {t('common.register')}
                   </button>
                 </>
               )}
@@ -248,11 +335,11 @@ const Home = () => {
                   <div className="nav-user-dropdown">
                     <button className="nav-user-dropdown-item" onClick={() => { setUserMenuOpen(false); navigate('/portal/dashboard'); }}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-                      لوحة التحكم
+                      {t('common.dashboard')}
                     </button>
                     <button className="nav-user-dropdown-item logout" onClick={() => { setUserMenuOpen(false); logout(); }}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                      تسجيل خروج
+                      {t('common.logout')}
                     </button>
                   </div>
                 )}
@@ -260,10 +347,10 @@ const Home = () => {
             ) : (
               <div className="nav-auth-buttons">
                 <button className="nav-login-btn" onClick={() => navigate('/portal/login')}>
-                  تسجيل دخول
+                  {t('common.login')}
                 </button>
                 <button className="nav-register-btn" onClick={() => navigate('/portal/login?tab=register')}>
-                  إنشاء حساب
+                  {t('common.register')}
                 </button>
               </div>
             )}
@@ -272,14 +359,15 @@ const Home = () => {
           <button
             className={`nav-toggle ${mobileMenuOpen ? 'open' : ''}`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="القائمة"
+            aria-label={t('common.menu')}
           >
             <span></span>
             <span></span>
             <span></span>
           </button>
         </div>
-      </nav>
+        </nav>
+      </header>
 
       <main>
       {/* Hero - Compact Cards */}
@@ -290,19 +378,19 @@ const Home = () => {
             <div className="hero-card hero-card-main">
               <span className="hero-card-badge">
                 <span className="hero-card-badge-icon">{getIconSvg('🏛️', 16)}</span>
-                {content.hero?.subtitle || 'شركة سياحية مرخصة'}
+                {pickStrict(content.hero, 'subtitle') || t('home.hero.badge')}
               </span>
-              <h1 className="hero-card-title">{content.hero?.title || 'دعنا نسافر مع ألوان المسافر'}</h1>
-              <p className="hero-card-desc">{content.hero?.description || ''}</p>
+              <h1 className="hero-card-title">{pickStrict(content.hero, 'title') || t('home.hero.title')}</h1>
+              <p className="hero-card-desc">{pickStrict(content.hero, 'description') || t('home.hero.description')}</p>
               <div className="hero-card-actions">
                 <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="pbtn pbtn-lg pbtn-whatsapp">
                   <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                   </svg>
-                  تواصل عبر واتساب
+                  {t('common.contactWhatsapp')}
                 </a>
                 <button className="pbtn pbtn-lg pbtn-secondary" onClick={() => scrollTo('services')}>
-                  تعرف على خدماتنا
+                  {t('home.hero.ctaServices')}
                 </button>
               </div>
             </div>
@@ -313,21 +401,21 @@ const Home = () => {
                 <span className="hero-stat-icon">{getIconSvg('👥')}</span>
                 <div className="hero-stat-info">
                   <strong>+5,000</strong>
-                  <span>عميل سعيد</span>
+                  <span>{t('home.stats.happyClients')}</span>
                 </div>
               </div>
               <div className="hero-stat-card">
                 <span className="hero-stat-icon">{getIconSvg('📅')}</span>
                 <div className="hero-stat-info">
                   <strong>+10</strong>
-                  <span>سنوات خبرة</span>
+                  <span>{t('home.stats.yearsExperience')}</span>
                 </div>
               </div>
               <div className="hero-stat-card">
                 <span className="hero-stat-icon">{getIconSvg('✈️')}</span>
                 <div className="hero-stat-info">
                   <strong>+3,000</strong>
-                  <span>رحلة منظمة</span>
+                  <span>{t('home.stats.organizedTrips')}</span>
                 </div>
               </div>
             </div>
@@ -338,10 +426,10 @@ const Home = () => {
       {/* Trust Bar */}
       <section className="trust-bar">
         <div className="trust-container">
-          <div className="trust-item"><span className="trust-icon">{getIconSvg('🏛️', 20)}</span><span>مرخص من هيئة السياحة</span></div>
-          <div className="trust-item"><span className="trust-icon">{getIconSvg('⭐', 20)}</span><span>+5000 عميل سعيد</span></div>
-          <div className="trust-item"><span className="trust-icon">{getIconSvg('📅', 20)}</span><span>+10 سنوات خبرة</span></div>
-          <div className="trust-item"><span className="trust-icon">{getIconSvg('✅', 20)}</span><span>ضمان أفضل الأسعار</span></div>
+          <div className="trust-item"><span className="trust-icon">{getIconSvg('🏛️', 20)}</span><span>{t('home.trust.licensed')}</span></div>
+          <div className="trust-item"><span className="trust-icon">{getIconSvg('⭐', 20)}</span><span>{t('home.trust.clients')}</span></div>
+          <div className="trust-item"><span className="trust-icon">{getIconSvg('📅', 20)}</span><span>{t('home.trust.years')}</span></div>
+          <div className="trust-item"><span className="trust-icon">{getIconSvg('✅', 20)}</span><span>{t('home.trust.bestPrice')}</span></div>
         </div>
       </section>
 
@@ -349,8 +437,8 @@ const Home = () => {
       <section className="services-section" ref={el => sectionsRef.current.services = el}>
         <div className="section-container">
           <div className="section-header animate-on-scroll">
-            <h2>خدماتنا</h2>
-            <p>نقدم لك مجموعة متكاملة من خدمات السفر والسياحة</p>
+            <h2>{t('home.services.title')}</h2>
+            <p>{t('home.services.subtitle')}</p>
           </div>
           <div className="services-grid">
             {(content.services || []).map((service, i) => {
@@ -375,12 +463,12 @@ const Home = () => {
               return (
                 <div className={`service-card animate-on-scroll delay-${(i % 3) + 1}`} key={i}>
                   <div className="service-icon">{getIconSvg(service.icon, 32)}</div>
-                  <h3>{service.title}</h3>
-                  <p>{service.description}</p>
+                  <h3>{pick(service, 'title')}</h3>
+                  <p>{pick(service, 'description')}</p>
                   {isLicense || isUsVisa || isVisaCatalog ? (
-                    <button className="pbtn pbtn-sm pbtn-primary service-btn" onClick={() => navigate(serviceLink)}>اطلب الآن</button>
+                    <button className="pbtn pbtn-sm pbtn-primary service-btn" onClick={() => navigate(localePath(serviceLink))}>{t('common.orderNow')}</button>
                   ) : (
-                    <a href={serviceLink} {...serviceLinkProps} className="pbtn pbtn-sm pbtn-whatsapp service-btn">اطلب الآن</a>
+                    <a href={serviceLink} {...serviceLinkProps} className="pbtn pbtn-sm pbtn-whatsapp service-btn">{t('common.orderNow')}</a>
                   )}
                 </div>
               );
@@ -399,7 +487,7 @@ const Home = () => {
             className="visa-catalog-card animate-on-scroll"
             key={visa._id}
             style={{ animationDelay: `${i * 0.1}s` }}
-            onClick={() => navigate(`/visas/${visa.slug}`)}
+            onClick={() => navigate(localePath(`/visas/${visa.slug}`))}
           >
             <div className="visa-catalog-cover">
               {visa.coverImage ? (
@@ -412,7 +500,7 @@ const Home = () => {
               <div className="visa-catalog-overlay"></div>
               <div className="visa-catalog-flag">
                 {visa.flagImage ? (
-                  <img src={getImageUrl(visa.flagImage)} alt="علم" loading="lazy" />
+                  <img src={getImageUrl(visa.flagImage)} alt="" loading="lazy" />
                 ) : (
                   <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" width="22" height="22"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" strokeLinecap="round" strokeLinejoin="round"/><line x1="4" y1="22" x2="4" y2="15" strokeLinecap="round"/></svg>
                 )}
@@ -420,28 +508,28 @@ const Home = () => {
               {visa.isFeatured && (
                 <span className="visa-catalog-popular">
                   <svg viewBox="0 0 24 24" fill="currentColor" width="11" height="11"><path d="M12 2L9 9H2l5.5 4.5L5 21l7-4.5L19 21l-2.5-7.5L22 9h-7L12 2z"/></svg>
-                  الأكثر طلباً
+                  {t('home.visas.mostRequested')}
                 </span>
               )}
             </div>
             <div className="visa-catalog-body">
-              <h3 className="visa-catalog-name">{visa.countryName?.replace(/^التأشيرة\s*/i, '')}</h3>
-              <p className="visa-catalog-desc">احصل على تأشيرتك {visa.countryName?.replace(/^التأشيرة\s*/i, '')} بسهولة وأمان</p>
+              <h3 className="visa-catalog-name">{visaName(visa)}</h3>
+              <p className="visa-catalog-desc">{t('home.visas.cardDesc', { country: visaName(visa) })}</p>
               <div className="visa-catalog-price-row">
                 <div className="visa-catalog-price">
                   {visa.offerEnabled && visa.offerPrice ? (
                     <>
-                      <span className="visa-catalog-price-old">{visa.price} {visa.currency || 'ريال'}</span>
-                      <span className="visa-catalog-price-new">{visa.offerPrice} {visa.currency || 'ريال'}</span>
+                      <span className="visa-catalog-price-old">{visa.price} {visa.currency || t('common.currency')}</span>
+                      <span className="visa-catalog-price-new">{visa.offerPrice} {visa.currency || t('common.currency')}</span>
                     </>
                   ) : (
-                    <span className="visa-catalog-price-current">{visa.price} <small>{visa.currency || 'ريال'}</small></span>
+                    <span className="visa-catalog-price-current">{visa.price} <small>{visa.currency || t('common.currency')}</small></span>
                   )}
                 </div>
-                <span className="visa-catalog-available">متاح</span>
+                <span className="visa-catalog-available">{t('home.visas.available')}</span>
               </div>
               <button className="pbtn pbtn-full pbtn-primary visa-catalog-btn">
-                {visa.visaType === 'إلكترونية' ? 'قدّم الآن' : 'احجز الآن'}
+                {visa.visaType === 'إلكترونية' ? t('common.applyNow') : t('common.bookNow')}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </button>
             </div>
@@ -454,12 +542,12 @@ const Home = () => {
               <div className="visa-catalog-header animate-on-scroll">
                 <div className="visa-catalog-header-top">
                   <div>
-                    <h2>تأشيراتنا</h2>
+                    <h2>{t('home.visas.title')}</h2>
                     <span className="visa-catalog-header-line"></span>
-                    <p>اختر وجهتك واحصل على تأشيرتك بأسرع وقت</p>
+                    <p>{t('home.visas.subtitle')}</p>
                   </div>
-                  <button className="pbtn pbtn-secondary visa-catalog-browse-btn" onClick={() => navigate('/visas')}>
-                    تصفح جميع التأشيرات
+                  <button className="pbtn pbtn-secondary visa-catalog-browse-btn" onClick={() => navigate(localePath('/visas'))}>
+                    {t('home.visas.browseAll')}
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </button>
                 </div>
@@ -472,8 +560,8 @@ const Home = () => {
                     <span className="visa-catalog-row-icon">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round"/><path d="M14 2v6h6" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </span>
-                    <h3>تأشيرات إلكترونية</h3>
-                    <span className="visa-catalog-row-badge elec">قدّم أونلاين</span>
+                    <h3>{t('home.visas.electronic')}</h3>
+                    <span className="visa-catalog-row-badge elec">{t('common.applyOnline')}</span>
                   </div>
                   <div className="visa-catalog-grid">
                     {electronicVisas.map((visa, i) => renderVisaCard(visa, i))}
@@ -488,8 +576,8 @@ const Home = () => {
                     <span className="visa-catalog-row-icon">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20"><path d="M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><circle cx="12" cy="10" r="3"/><path d="M8 17h8"/></svg>
                     </span>
-                    <h3>تأشيرات عادية</h3>
-                    <span className="visa-catalog-row-badge regular">نجهّزها لك</span>
+                    <h3>{t('home.visas.regular')}</h3>
+                    <span className="visa-catalog-row-badge regular">{t('home.visas.weArrange')}</span>
                   </div>
                   <div className="visa-catalog-grid">
                     {regularVisas.map((visa, i) => renderVisaCard(visa, i))}
@@ -506,16 +594,16 @@ const Home = () => {
       <section className="about-section" ref={el => sectionsRef.current.about = el}>
         <div className="section-container">
           <div className="section-header animate-on-scroll">
-            <h2>{content.aboutUs?.title || 'من نحن'}</h2>
+            <h2>{pickStrict(content.aboutUs, 'title') || t('home.about.title')}</h2>
           </div>
-          <p className="about-desc animate-on-scroll">{content.aboutUs?.description || ''}</p>
+          <p className="about-desc animate-on-scroll">{pick(content.aboutUs, 'description')}</p>
           <div className="about-features">
             {(content.aboutUs?.features || []).map((feature, i) => (
               <div className={`about-feature animate-on-scroll delay-${(i % 2) + 1}`} key={i}>
                 <div className="about-feature-icon">{getIconSvg(feature.icon, 28)}</div>
                 <div className="about-feature-text">
-                  <h3>{feature.title}</h3>
-                  <p>{feature.description}</p>
+                  <h3>{pick(feature, 'title')}</h3>
+                  <p>{pick(feature, 'description')}</p>
                 </div>
               </div>
             ))}
@@ -528,10 +616,10 @@ const Home = () => {
         <div className="section-container">
           <div className="stats-grid">
             {[
-              { number: 5000, suffix: '+', label: 'عميل سعيد' },
-              { number: 3000, suffix: '+', label: 'رحلة منظمة' },
-              { number: 2000, suffix: '+', label: 'تأشيرة معتمدة' },
-              { number: 10, suffix: '+', label: 'سنوات خبرة' }
+              { number: 5000, suffix: '+', label: t('home.stats.happyClients') },
+              { number: 3000, suffix: '+', label: t('home.stats.organizedTrips') },
+              { number: 2000, suffix: '+', label: t('home.stats.approvedVisas') },
+              { number: 10, suffix: '+', label: t('home.stats.yearsExperience') }
             ].map((stat, i) => (
               <div className="stat-card" key={i}>
                 <span className="stat-number">
@@ -548,19 +636,19 @@ const Home = () => {
       <section className="faq-section" ref={el => sectionsRef.current.faq = el}>
         <div className="section-container">
           <div className="section-header animate-on-scroll">
-            <h2>الأسئلة الشائعة</h2>
-            <p>إجابات على أكثر الأسئلة شيوعاً</p>
+            <h2>{t('home.faq.title')}</h2>
+            <p>{t('home.faq.subtitle')}</p>
           </div>
           <div className="faq-list">
             {(content.faq || []).map((item, i) => (
               <div className={`faq-item animate-on-scroll delay-${(i % 3) + 1} ${openFaq === i ? 'open' : ''}`} key={i}>
                 <button className="faq-question" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
-                  <span>{item.question}</span>
+                  <span>{pick(item, 'question')}</span>
                   <span className="faq-arrow">{openFaq === i ? '−' : '+'}</span>
                 </button>
                 {openFaq === i && (
                   <div className="faq-answer">
-                    <p>{item.answer}</p>
+                    <p>{pick(item, 'answer')}</p>
                   </div>
                 )}
               </div>
@@ -570,24 +658,24 @@ const Home = () => {
       </section>
 
       {/* Testimonials */}
-      {(content.testimonials || []).filter(t => t.isActive !== false).length > 0 && (
+      {(content.testimonials || []).filter(item => item.isActive !== false).length > 0 && (
         <section className="testimonials-section">
           <div className="section-container">
             <div className="section-header animate-on-scroll">
-              <h2>آراء عملائنا</h2>
-              <p>ثقة عملائنا هي أكبر إنجاز لنا</p>
+              <h2>{t('home.testimonials.title')}</h2>
+              <p>{t('home.testimonials.subtitle')}</p>
             </div>
             <div className="testimonials-grid">
-              {(content.testimonials || []).filter(t => t.isActive !== false).map((t, i) => (
+              {(content.testimonials || []).filter(item => item.isActive !== false).map((item, i) => (
                 <div className={`testimonial-card animate-on-scroll delay-${(i % 3) + 1}`} key={i}>
                   <div className="testimonial-quote">"</div>
-                  <div className="testimonial-stars">{'★'.repeat(t.stars || 5)}</div>
-                  <p className="testimonial-text">{t.text}</p>
+                  <div className="testimonial-stars">{'★'.repeat(item.stars || 5)}</div>
+                  <p className="testimonial-text">{pick(item, 'text')}</p>
                   <div className="testimonial-author">
-                    <span>{t.name}</span>
-                    {t.source && t.source !== 'direct' && (
+                    <span>{item.name}</span>
+                    {item.source && item.source !== 'direct' && (
                       <span className="testimonial-source">
-                        {t.source === 'google' ? '— Google' : t.source === 'twitter' ? '— Twitter' : t.source === 'instagram' ? '— Instagram' : ''}
+                        {item.source === 'google' ? '— Google' : item.source === 'twitter' ? '— Twitter' : item.source === 'instagram' ? '— Instagram' : ''}
                       </span>
                     )}
                   </div>
@@ -602,8 +690,8 @@ const Home = () => {
       <section className="contact-section" ref={el => sectionsRef.current.contact = el}>
         <div className="section-container">
           <div className="section-header animate-on-scroll">
-            <h2>تواصل معنا</h2>
-            <p>نسعد بتواصلكم معنا في أي وقت</p>
+            <h2>{t('home.contact.title')}</h2>
+            <p>{t('home.contact.subtitle')}</p>
           </div>
 
           {/* Contact + Map Layout */}
@@ -618,17 +706,17 @@ const Home = () => {
                   </svg>
                 </div>
                 <div className="contact-wa-text">
-                  <strong>تواصل عبر واتساب</strong>
-                  <span>احصل على استشارة مجانية فورية</span>
+                  <strong>{t('common.contactWhatsapp')}</strong>
+                  <span>{t('home.contact.freeConsult')}</span>
                 </div>
               </a>
 
               {/* Contact Items */}
               <div className="contact-info-list">
-                <a href={`tel:${content.contact?.phone}`} className="contact-info-item">
+                <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="contact-info-item">
                   <div className="contact-info-icon">{getIconSvg('📞', 22)}</div>
                   <div className="contact-info-text">
-                    <strong>اتصل بنا</strong>
+                    <strong>{t('home.contact.callUs')}</strong>
                     <span>{content.contact?.phone}</span>
                   </div>
                 </a>
@@ -636,7 +724,7 @@ const Home = () => {
                 <a href={`mailto:${content.contact?.email}`} className="contact-info-item">
                   <div className="contact-info-icon">{getIconSvg('✉️', 22)}</div>
                   <div className="contact-info-text">
-                    <strong>البريد الإلكتروني</strong>
+                    <strong>{t('home.contact.email')}</strong>
                     <span>{content.contact?.email}</span>
                   </div>
                 </a>
@@ -644,8 +732,8 @@ const Home = () => {
                 <a href="https://maps.google.com/?q=24.810952199999996,46.646181899999995" target="_blank" rel="noopener noreferrer" className="contact-info-item">
                   <div className="contact-info-icon">{getIconSvg('📍', 22)}</div>
                   <div className="contact-info-text">
-                    <strong>العنوان</strong>
-                    <span>{content.contact?.address}</span>
+                    <strong>{t('home.contact.address')}</strong>
+                    <span>{pick(content.contact, 'address')}</span>
                   </div>
                 </a>
               </div>
@@ -672,11 +760,11 @@ const Home = () => {
                   allowFullScreen=""
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title="موقع ألوان المسافر"
+                  title={t('home.contact.mapTitle')}
                 ></iframe>
               </div>
               <a href="https://maps.google.com/?q=24.810952199999996,46.646181899999995" target="_blank" rel="noopener noreferrer" className="contact-map-link">
-                فتح في خرائط جوجل ←
+                {t('home.contact.openInMaps')}
               </a>
             </div>
           </div>
@@ -695,10 +783,17 @@ const Home = () => {
                 {content.general?.logo ? (
                   <img src={getImageUrl(content.general.logo)} alt={content.general?.siteName} className="footer-logo-img" width="140" height="48" />
                 ) : (
-                  <span className="footer-logo-text">{content.general?.siteName || 'ألوان المسافر'}</span>
+                  <>
+                    <BrandMark size={44} />
+                    <span className="footer-logo-text">
+                      {isEn
+                        ? (content.general?.siteNameEn || 'Travel Colors')
+                        : (content.general?.siteName || 'ألوان السفر')}
+                    </span>
+                  </>
                 )}
               </div>
-              <p className="footer-about">{content.aboutUs?.description?.substring(0, 150) || 'شركة ألوان المسافر متخصصون في استخراج تأشيرة الشنقن في وقت قصير. حجز طيران - حجوزات فندقيه حول العالم - برامج شهر العسل للعرسان - رخص دولية'}...</p>
+              <p className="footer-about">{(pick(content.aboutUs, 'description') || '').substring(0, 150)}...</p>
               <div className="footer-social">
                 {content.socialMedia?.twitter && <a href={content.socialMedia.twitter} target="_blank" rel="noopener noreferrer" aria-label="X">𝕏</a>}
                 {content.socialMedia?.instagram && <a href={content.socialMedia.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram">{getIconSvg('📷', 16)}</a>}
@@ -708,46 +803,78 @@ const Home = () => {
 
             {/* Col 2: Services */}
             <div className="footer-col">
-              <h3 className="footer-col-title">خدماتنا</h3>
+              <h3 className="footer-col-title">{t('footer.servicesTitle')}</h3>
               <ul className="footer-links">
-                <li><button onClick={() => scrollTo('services')}>حجوزات الفنادق</button></li>
-                <li><button onClick={() => scrollTo('services')}>حجوزات الطيران</button></li>
-                <li><button onClick={() => navigate('/us-visa')}>التأشيرات</button></li>
-                <li><button onClick={() => scrollTo('services')}>برامج سياحية</button></li>
+                <li><button onClick={() => scrollTo('services')}>{t('footer.hotelBooking')}</button></li>
+                <li><button onClick={() => scrollTo('services')}>{t('footer.flightBooking')}</button></li>
+                <li><button onClick={() => navigate(localePath('/us-visa'))}>{t('footer.visas')}</button></li>
+                <li><button onClick={() => scrollTo('services')}>{t('footer.tourPackages')}</button></li>
               </ul>
             </div>
 
             {/* Col 3: Company */}
             <div className="footer-col">
-              <h3 className="footer-col-title">الشركة</h3>
+              <h3 className="footer-col-title">{t('footer.companyTitle')}</h3>
               <ul className="footer-links">
-                <li><button onClick={() => scrollTo('about')}>من نحن</button></li>
-                <li><button onClick={() => scrollTo('contact')}>تواصل معنا</button></li>
-                <li><button onClick={() => scrollTo('services')}>خدماتنا</button></li>
-                <li><button onClick={() => navigate('/us-visa')}>التأشيرات</button></li>
+                <li><button onClick={() => scrollTo('about')}>{t('footer.aboutUs')}</button></li>
+                <li><button onClick={() => scrollTo('contact')}>{t('footer.contactUs')}</button></li>
+                <li><button onClick={() => scrollTo('services')}>{t('footer.ourServices')}</button></li>
+                <li><button onClick={() => navigate(localePath('/us-visa'))}>{t('footer.visas')}</button></li>
               </ul>
             </div>
 
             {/* Col 4: Contact */}
             <div className="footer-col">
-              <h3 className="footer-col-title">تواصل معنا</h3>
+              <h3 className="footer-col-title">{t('footer.contactTitle')}</h3>
               <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="footer-whatsapp-card">
-                <span><span style={{ display: 'inline-flex', verticalAlign: 'middle', marginLeft: '6px' }}>{getIconSvg('💬', 16)}</span> تواصل عبر واتساب</span>
-                <span className="footer-whatsapp-sub">احصل على استشارة مجانية من خبرائنا</span>
+                <span><span style={{ display: 'inline-flex', verticalAlign: 'middle', marginLeft: '6px' }}>{getIconSvg('💬', 16)}</span> {t('common.contactWhatsapp')}</span>
+                <span className="footer-whatsapp-sub">{t('footer.whatsappSub')}</span>
               </a>
               <div className="footer-contact-list">
                 <div className="footer-contact-item">
                   <span>{getIconSvg('📞', 16)}</span>
-                  <a href={`tel:${content.contact?.phone}`}>{content.contact?.phone}</a>
+                  <a href={whatsappLink} target="_blank" rel="noopener noreferrer" dir="ltr">{content.contact?.phone}</a>
                 </div>
                 <div className="footer-contact-item">
                   <span>{getIconSvg('✉️', 16)}</span>
-                  <a href={`mailto:${content.contact?.email}`}>{content.contact?.email}</a>
+                  <a href={`mailto:${content.contact?.email}`} dir="ltr">{content.contact?.email}</a>
                 </div>
                 <div className="footer-contact-item">
                   <span>{getIconSvg('📍', 16)}</span>
-                  <span>{content.contact?.address}</span>
+                  <span>{pick(content.contact, 'address')}</span>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* شريط التوثيق الرسمي */}
+          <div className="footer-credentials">
+            <a
+              className="footer-sbc"
+              href={SBC_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="/Saudi_Business_Center.jpeg"
+                alt={t('credentials.sbcAlt')}
+                className="footer-sbc-logo"
+                width="325"
+                height="295"
+                loading="lazy"
+              />
+            </a>
+            <div className="footer-credentials-text">
+              <p className="footer-credentials-title">{t('credentials.title')}</p>
+              <div className="footer-credentials-items">
+                <span className="footer-credential">
+                  {t('credentials.unifiedNumber')}
+                  <b dir="ltr">{registration.unifiedNationalNumber}</b>
+                </span>
+                <span className="footer-credential">
+                  {t('credentials.tourismLicense')}
+                  <b dir="ltr">{registration.tourismLicense}</b>
+                </span>
               </div>
             </div>
           </div>
@@ -759,8 +886,8 @@ const Home = () => {
             <div className="footer-bottom-inner">
               <p>{footerText}</p>
               <div className="footer-legal-links">
-                <Link to="/privacy">سياسة الخصوصية</Link>
-                <Link to="/terms">الشروط والأحكام</Link>
+                <Link to={localePath('/privacy')}>{t('common.privacy')}</Link>
+                <Link to={localePath('/terms')}>{t('common.terms')}</Link>
               </div>
               <DeveloperCredit />
             </div>
@@ -769,7 +896,7 @@ const Home = () => {
       </footer>
 
       {/* WhatsApp Floating Button */}
-      <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="whatsapp-float" aria-label="تواصل واتساب">
+      <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="whatsapp-float" aria-label={t('common.contactWhatsapp')}>
         <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
         </svg>

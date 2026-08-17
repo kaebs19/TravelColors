@@ -25,41 +25,41 @@ const getBaseHtml = () => {
 
 // القيم الافتراضية
 const DEFAULTS = {
-  title: 'ألوان المسافر للسفر والسياحة',
-  description: 'ألوان المسافر - شركة سياحية مرخصة متخصصة في استخراج التأشيرات وحجوزات الطيران والفنادق والبرامج السياحية',
-  image: '/logo512.png',
-  siteName: 'ألوان المسافر'
+  title: 'ألوان السفر للسفر والسياحة',
+  description: 'ألوان السفر - شركة سياحية مرخصة متخصصة في استخراج التأشيرات وحجوزات الطيران والفنادق والبرامج السياحية',
+  image: '/og-1200x630.png',
+  siteName: 'ألوان السفر'
 };
 
 // خريطة الصفحات الثابتة
 const STATIC_PAGES = {
   '/': {
-    title: 'ألوان المسافر للسفر والسياحة',
+    title: 'ألوان السفر للسفر والسياحة',
     description: 'شركة سياحية مرخصة متخصصة في استخراج التأشيرات وحجوزات الطيران والفنادق والبرامج السياحية'
   },
   '/us-visa': {
-    title: 'التأشيرة الأمريكية - ألوان المسافر',
+    title: 'التأشيرة الأمريكية - ألوان السفر',
     description: 'خدمات استخراج التأشيرة الأمريكية - سياحية، علاج، دراسة. جميع المتطلبات والمستندات المطلوبة للحصول على تأشيرتك'
   },
   '/international-license': {
-    title: 'الرخصة الدولية - ألوان المسافر',
-    description: 'خدمة استخراج رخصة القيادة الدولية بسهولة وسرعة من خلال ألوان المسافر'
+    title: 'الرخصة الدولية - ألوان السفر',
+    description: 'خدمة استخراج رخصة القيادة الدولية بسهولة وسرعة من خلال ألوان السفر'
   },
   '/visas': {
-    title: 'التأشيرات المتاحة - ألوان المسافر',
-    description: 'تصفح جميع التأشيرات المتاحة واختر وجهتك القادمة مع ألوان المسافر'
+    title: 'التأشيرات المتاحة - ألوان السفر',
+    description: 'تصفح جميع التأشيرات المتاحة واختر وجهتك القادمة مع ألوان السفر'
   },
   '/ContactUs': {
-    title: 'تواصل معنا - ألوان المسافر',
-    description: 'تواصل مع فريق ألوان المسافر للسفر والسياحة للاستفسارات والحجوزات'
+    title: 'تواصل معنا - ألوان السفر',
+    description: 'تواصل مع فريق ألوان السفر للسفر والسياحة للاستفسارات والحجوزات'
   },
   '/privacy': {
-    title: 'سياسة الخصوصية - ألوان المسافر',
-    description: 'سياسة الخصوصية وحماية البيانات لشركة ألوان المسافر'
+    title: 'سياسة الخصوصية - ألوان السفر',
+    description: 'سياسة الخصوصية وحماية البيانات لشركة ألوان السفر'
   },
   '/terms': {
-    title: 'الشروط والأحكام - ألوان المسافر',
-    description: 'الشروط والأحكام الخاصة بخدمات شركة ألوان المسافر للسفر والسياحة'
+    title: 'الشروط والأحكام - ألوان السفر',
+    description: 'الشروط والأحكام الخاصة بخدمات شركة ألوان السفر للسفر والسياحة'
   }
 };
 
@@ -72,8 +72,8 @@ const getVisaMeta = async (slug) => {
 
     const API_URL = process.env.API_PUBLIC_URL || 'https://new.trcolors.com';
     return {
-      title: visa.metaTitle || `${visa.countryName} - ألوان المسافر`,
-      description: visa.metaDescription || `خدمات تأشيرة ${visa.countryName} من ألوان المسافر`,
+      title: visa.metaTitle || `${visa.countryName} - ألوان السفر`,
+      description: visa.metaDescription || `خدمات تأشيرة ${visa.countryName} من ألوان السفر`,
       image: visa.coverImage ? `${API_URL}${visa.coverImage}` : ''
     };
   } catch (err) {
@@ -93,9 +93,9 @@ const injectMeta = (html, meta, fullUrl) => {
 
   // استبدال القيم الافتراضية بالقيم الديناميكية
   return html
-    .replace(/ألوان المسافر للسفر والسياحة/g, title)
+    .replace(/ألوان السفر للسفر والسياحة/g, title)
     .replace(/شركة سياحية مرخصة متخصصة في استخراج التأشيرات وحجوزات الطيران والفنادق والبرامج السياحية/g, description)
-    .replace(/content="\/logo512\.png"/g, `content="${image}"`)
+    .replace(/content="\/og-1200x630\.png"/g, `content="${image}"`)
     .replace(/content=""/g, `content="${fullUrl}"`);
 };
 
@@ -106,7 +106,10 @@ const serveWithMeta = async (req, res) => {
     return res.status(500).send('Server Error');
   }
 
-  const urlPath = req.path;
+  // النسخة الإنجليزية تُقدَّم تحت /en — نزيل البادئة لمطابقة نفس الصفحة.
+  // ملاحظة: النصوص أدناه عربية حتى الآن؛ الترجمة الإنجليزية للـ meta
+  // ما زالت ضمن أعمال SEO غير المنجزة.
+  const urlPath = req.path.replace(/^\/en(?=\/|$)/, '') || '/';
   const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
 
   let meta = null;

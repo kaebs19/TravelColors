@@ -1,3 +1,4 @@
+import { assetUrl } from './assetUrl';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { code39Svg } from './barcode';
@@ -66,9 +67,9 @@ const buildInvoiceHTML = (invoice, settings = {}) => {
       <div style="padding:20px 22px 16px;border-bottom:1px solid ${C.border};">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div style="display:flex;align-items:center;gap:12px;">
-            <img src="${ci.logo || '/logo512.png'}" alt="Logo" style="width:52px;height:52px;border-radius:10px;object-fit:contain;" crossorigin="anonymous" onerror="this.style.display='none'" />
+            <img src="${assetUrl(ci.logo, '/logo512.png')}" alt="Logo" style="width:52px;height:52px;border-radius:10px;object-fit:contain;" crossorigin="anonymous" onerror="this.style.display='none'" />
             <div>
-              <div style="font-size:18px;font-weight:800;color:${C.primary};line-height:1.3;">${ci.name || settings.companyName || 'ألوان المسافر'}</div>
+              <div style="font-size:18px;font-weight:800;color:${C.primary};line-height:1.3;">${ci.name || settings.companyName || 'ألوان السفر'}</div>
               <div style="font-size:11px;color:${C.muted};font-weight:500;margin-top:2px;">${ci.nameEn || 'Travel Colors'} · للسفر والسياحة</div>
             </div>
           </div>
@@ -225,7 +226,7 @@ export const shareInvoiceToWhatsApp = async (invoice, settings = {}) => {
     const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
 
     const docLabel = typeLabels[invoice.type] || 'فاتورة';
-    const companyName = invoice.companyInfo?.name || settings.companyName || 'ألوان المسافر';
+    const companyName = invoice.companyInfo?.name || settings.companyName || 'ألوان السفر';
     const message =
       `مرحباً ${invoice.customerName || ''},\n\n` +
       `مرفق ${docLabel} رقم ${invoice.invoiceNumber} من ${companyName}.\n` +

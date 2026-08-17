@@ -1,0 +1,384 @@
+/* ===== تخطيط نافذة التفاصيل ذات العمودين =====
+   مشترك بين شاشات لوحة التحكم (المواعيد، المهام...).
+   العمود الرئيسي للمحتوى، والجانبي للمعلومات والإجراءات. */
+
+.detail-modal {
+  display: flex;
+  gap: 0;
+  min-height: 500px;
+  max-height: 80vh;
+}
+
+/* ── العمود الرئيسي ── */
+.detail-modal-main {
+  flex: 1;
+  min-width: 0;
+  padding: 24px;
+  overflow-y: auto;
+  border-left: 1px solid var(--border-color);
+}
+
+.detail-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.detail-modal-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.detail-modal-ref {
+  padding: 4px 10px;
+  background: var(--bg-secondary, #f3f4f6);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  border-radius: 6px;
+  margin-right: auto;
+}
+
+.detail-modal-section {
+  margin-bottom: 24px;
+}
+
+.detail-modal-section:last-child {
+  margin-bottom: 0;
+}
+
+.detail-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.detail-section-icon {
+  font-size: 1rem;
+}
+
+/* لوحة الحقول */
+.detail-fields {
+  background: var(--bg-secondary, #f9fafb);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.detail-field-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.detail-field-row:last-child {
+  margin-bottom: 0;
+}
+
+.detail-field-label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  min-width: 110px;
+  flex-shrink: 0;
+}
+
+.detail-field-value {
+  color: var(--text-color);
+  font-weight: 500;
+  font-size: 0.875rem;
+  word-break: break-word;
+}
+
+.detail-field-notes {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-color);
+  color: var(--text-color);
+  font-size: 0.875rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+/* قائمة تتبّع الحالة */
+.detail-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--bg-secondary, #f9fafb);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.detail-checklist-item.checked {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.detail-checklist-item.cancelled {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.detail-check-icon {
+  font-size: 0.9rem;
+}
+
+/* ── العمود الجانبي ── */
+.detail-modal-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  background: var(--bg-secondary, #f9fafb);
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.detail-sidebar-section {
+  margin-bottom: 20px;
+}
+
+.detail-sidebar-section:last-child {
+  margin-bottom: 0;
+}
+
+.detail-sidebar-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+}
+
+.detail-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.detail-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2e7eb3, #1f5c85);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.detail-user-name {
+  flex: 1;
+  font-weight: 500;
+  color: var(--text-color);
+  font-size: 0.875rem;
+}
+
+.detail-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--bg-white, #fff);
+  border-radius: 8px;
+}
+
+.detail-info-icon {
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.detail-info-label {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  min-width: 62px;
+  flex-shrink: 0;
+}
+
+.detail-info-value {
+  color: var(--text-color);
+  font-weight: 500;
+  font-size: 0.875rem;
+  word-break: break-word;
+}
+
+.detail-info-value.highlight {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.detail-info-value.clickable {
+  color: var(--primary-color, #2563eb);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* زر تغيير الموظف المسؤول بجانب الاسم */
+.detail-user-change {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px dashed var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.detail-user-change:hover {
+  border-color: var(--primary-color, #2563eb);
+  color: var(--primary-color, #2563eb);
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.detail-info-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--primary-color, #2563eb);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* أزرار الإجراءات في العمود الجانبي */
+.detail-action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  text-align: right;
+}
+
+.detail-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.detail-action-neutral {
+  background: rgba(100, 116, 139, 0.12);
+  color: #475569;
+}
+
+.detail-action-neutral:hover:not(:disabled) {
+  background: #475569;
+  color: #fff;
+}
+
+.detail-action-primary {
+  background: rgba(46, 126, 179, 0.12);
+  color: #2e7eb3;
+}
+
+.detail-action-primary:hover:not(:disabled) {
+  background: #2e7eb3;
+  color: #fff;
+}
+
+.detail-action-success {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+.detail-action-success:hover:not(:disabled) {
+  background: #10b981;
+  color: #fff;
+}
+
+.detail-action-warning {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+}
+
+.detail-action-warning:hover:not(:disabled) {
+  background: #f59e0b;
+  color: #fff;
+}
+
+.detail-action-cancel {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+}
+
+.detail-action-cancel:hover:not(:disabled) {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* شارة VIP في ترويسة النافذة */
+.vip-badge-lg {
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 6px;
+}
+
+/* ── استجابة الشاشات الصغيرة ── */
+@media (max-width: 860px) {
+  .detail-modal {
+    flex-direction: column;
+    max-height: 82vh;
+  }
+
+  .detail-modal-main {
+    border-left: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 18px;
+    overflow-y: visible;
+  }
+
+  .detail-modal-sidebar {
+    width: 100%;
+    padding: 18px;
+    overflow-y: visible;
+  }
+
+  .detail-modal-ref {
+    margin-right: 0;
+  }
+}

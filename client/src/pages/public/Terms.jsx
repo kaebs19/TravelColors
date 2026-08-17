@@ -6,6 +6,7 @@ import DeveloperCredit from '../../components/common/DeveloperCredit';
 import '../../styles/public-shared.css';
 import './LegalPage.css';
 
+import OfficialCredentials from '../../components/common/OfficialCredentials';
 const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5002/api';
 const baseUrl = apiUrl.replace('/api', '');
 const getImageUrl = (path) => {
@@ -16,20 +17,20 @@ const getImageUrl = (path) => {
 
 const DEFAULT_CONTENT = {
   contact: {
-    phone: '+966 55 922 9597',
+    phone: '+966 55 874 1741',
     email: 'info@trcolors.com',
-    whatsapp: '966559229597',
+    whatsapp: '966558741741',
     address: 'المملكة العربية السعودية'
   },
   socialMedia: { twitter: '', instagram: '', facebook: '', snapchat: '' },
-  general: { siteName: 'ألوان المسافر', siteNameEn: 'Travel Colors', logo: '' }
+  general: { siteName: 'ألوان السفر', siteNameEn: 'Travel Colors', logo: '' }
 };
 
 const sections = [
   {
     id: 1,
     title: 'قبول الشروط',
-    content: 'باستخدامك لموقع وخدمات شركة ألوان المسافر للسياحة والسفر، فإنك توافق على الالتزام بهذه الشروط والأحكام بالكامل. إذا كنت لا توافق على أي جزء من هذه الشروط، يُرجى عدم استخدام خدماتنا. تحتفظ الشركة بحقها في تعديل هذه الشروط في أي وقت، وسيتم إشعارك بأي تغييرات جوهرية عبر الموقع الإلكتروني أو البريد الإلكتروني المسجل لدينا.',
+    content: 'باستخدامك لموقع وخدمات شركة ألوان السفر للسياحة والسفر، فإنك توافق على الالتزام بهذه الشروط والأحكام بالكامل. إذا كنت لا توافق على أي جزء من هذه الشروط، يُرجى عدم استخدام خدماتنا. تحتفظ الشركة بحقها في تعديل هذه الشروط في أي وقت، وسيتم إشعارك بأي تغييرات جوهرية عبر الموقع الإلكتروني أو البريد الإلكتروني المسجل لدينا.',
     points: [
       'يُعد استخدام الموقع أو أي من خدماتنا موافقة ضمنية على هذه الشروط والأحكام',
       'تسري هذه الشروط من تاريخ أول استخدام لخدماتنا',
@@ -40,7 +41,7 @@ const sections = [
   {
     id: 2,
     title: 'الخدمات المقدمة',
-    content: 'تقدم شركة ألوان المسافر مجموعة شاملة من خدمات السفر والسياحة المرخصة من هيئة السياحة السعودية. نسعى لتقديم أفضل الخدمات بأعلى معايير الجودة والاحترافية.',
+    content: 'تقدم شركة ألوان السفر مجموعة شاملة من خدمات السفر والسياحة المرخصة من هيئة السياحة السعودية. نسعى لتقديم أفضل الخدمات بأعلى معايير الجودة والاحترافية.',
     points: [
       'استخراج التأشيرات السياحية لجميع الدول بما في ذلك تأشيرات الشنقن والتأشيرات الإلكترونية',
       'حجوزات الطيران على جميع خطوط الطيران المحلية والدولية بأفضل الأسعار',
@@ -91,7 +92,7 @@ const sections = [
   {
     id: 6,
     title: 'حدود المسؤولية',
-    content: 'تبذل شركة ألوان المسافر قصارى جهدها لتقديم أفضل الخدمات، إلا أنها لا تتحمل المسؤولية عن الأمور الخارجة عن إرادتها. يُقر العميل بعلمه واطلاعه على حدود المسؤولية التالية:',
+    content: 'تبذل شركة ألوان السفر قصارى جهدها لتقديم أفضل الخدمات، إلا أنها لا تتحمل المسؤولية عن الأمور الخارجة عن إرادتها. يُقر العميل بعلمه واطلاعه على حدود المسؤولية التالية:',
     points: [
       'لا تتحمل الشركة مسؤولية قرارات السفارات والقنصليات بشأن منح أو رفض التأشيرات',
       'لا تتحمل الشركة مسؤولية تأخير أو إلغاء الرحلات من قبل شركات الطيران لأي سبب كان',
@@ -104,18 +105,18 @@ const sections = [
   {
     id: 7,
     title: 'حقوق الملكية الفكرية',
-    content: 'جميع المحتويات المعروضة على موقع شركة ألوان المسافر محمية بموجب قوانين حماية الملكية الفكرية المعمول بها في المملكة العربية السعودية والاتفاقيات الدولية ذات الصلة.',
+    content: 'جميع المحتويات المعروضة على موقع شركة ألوان السفر محمية بموجب قوانين حماية الملكية الفكرية المعمول بها في المملكة العربية السعودية والاتفاقيات الدولية ذات الصلة.',
     points: [
-      'جميع النصوص والصور والشعارات والتصاميم والرسومات هي ملكية حصرية لشركة ألوان المسافر',
+      'جميع النصوص والصور والشعارات والتصاميم والرسومات هي ملكية حصرية لشركة ألوان السفر',
       'يُمنع نسخ أو إعادة إنتاج أو توزيع أو تعديل أي محتوى من الموقع دون إذن كتابي مسبق',
-      'علامة "ألوان المسافر" التجارية وشعارها مسجلة ومحمية قانونياً',
+      'علامة "ألوان السفر" التجارية وشعارها مسجلة ومحمية قانونياً',
       'أي استخدام غير مصرح به للمحتوى يعرّض المخالف للمساءلة القانونية والتعويض عن الأضرار'
     ]
   },
   {
     id: 8,
     title: 'إنهاء الخدمة',
-    content: 'تحتفظ شركة ألوان المسافر بحقها في تعليق أو إنهاء حساب أي مستخدم أو رفض تقديم الخدمة في الحالات التالية:',
+    content: 'تحتفظ شركة ألوان السفر بحقها في تعليق أو إنهاء حساب أي مستخدم أو رفض تقديم الخدمة في الحالات التالية:',
     points: [
       'مخالفة أي من هذه الشروط والأحكام',
       'تقديم معلومات كاذبة أو مضللة أو وثائق مزورة',
@@ -179,9 +180,9 @@ const Terms = () => {
       <nav className="public-nav">
         <div className="public-nav-content">
           <div className="public-nav-brand" onClick={() => navigate('/')}>
-            {logo && <img src={logo} alt="ألوان المسافر" className="public-nav-logo" />}
+            {logo && <img src={logo} alt="ألوان السفر" className="public-nav-logo" />}
             <span className="public-nav-name">
-              <span className="public-nav-name-ar">{content.general?.siteName || 'ألوان المسافر'}</span>
+              <span className="public-nav-name-ar">{content.general?.siteName || 'ألوان السفر'}</span>
               <span className="public-nav-name-en">{content.general?.siteNameEn || 'Travel Colors'}</span>
             </span>
           </div>
@@ -194,7 +195,7 @@ const Terms = () => {
       {/* Hero */}
       <div className="legal-hero">
         <h1>الشروط والأحكام</h1>
-        <p>يُرجى قراءة هذه الشروط والأحكام بعناية قبل استخدام خدمات شركة ألوان المسافر للسياحة والسفر</p>
+        <p>يُرجى قراءة هذه الشروط والأحكام بعناية قبل استخدام خدمات شركة ألوان السفر للسياحة والسفر</p>
         <div className="legal-updated">آخر تحديث: يناير 2025</div>
       </div>
 
@@ -263,7 +264,7 @@ const Terms = () => {
       {/* Footer */}
       <footer className="public-footer">
         <div className="public-footer-brand">
-          <span className="public-footer-brand-ar">ألوان المسافر</span>
+          <span className="public-footer-brand-ar">ألوان السفر</span>
           <span className="public-footer-brand-en">TRAVEL COLORS</span>
         </div>
         <nav className="public-footer-nav">
@@ -272,7 +273,8 @@ const Terms = () => {
           <span onClick={() => navigate('/international-license')}>الرخصة الدولية</span>
           <span onClick={() => navigate('/ContactUs')}>تواصل معنا</span>
         </nav>
-        <p>&copy; {new Date().getFullYear()} Travel Colors - ألوان المسافر. جميع الحقوق محفوظة</p>
+        <OfficialCredentials content={content} />
+        <p>&copy; {new Date().getFullYear()} Travel Colors - ألوان السفر. جميع الحقوق محفوظة</p>
         <DeveloperCredit />
         <div className="public-footer-links">
           <span onClick={() => navigate('/privacy')}>سياسة الخصوصية</span>

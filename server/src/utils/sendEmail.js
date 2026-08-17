@@ -25,7 +25,7 @@ const sendEmail = async (options) => {
     const transport = getTransporter();
 
     const mailOptions = {
-      from: `${process.env.FROM_NAME || 'ألوان المسافر'} <${process.env.FROM_EMAIL || 'info@trcolors.com'}>`,
+      from: `${process.env.FROM_NAME || 'ألوان السفر'} <${process.env.FROM_EMAIL || 'info@trcolors.com'}>`,
       to: options.email,
       subject: options.subject,
       html: options.html

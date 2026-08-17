@@ -2395,3 +2395,20 @@
   color: #4f46e5;
 }
 
+
+/* ===== صف الموعد قابل للنقر لفتح نافذة التفاصيل ===== */
+.appointments-table tbody tr.appointment-row {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.appointments-table tbody tr.appointment-row:hover {
+  background: var(--primary-bg, #eff6ff);
+}
+
+/* العناصر التفاعلية داخل الصف تحتفظ بمؤشرها الطبيعي */
+.appointments-table tbody tr.appointment-row button,
+.appointments-table tbody tr.appointment-row a,
+.appointments-table tbody tr.appointment-row select {
+  cursor: pointer;
+}

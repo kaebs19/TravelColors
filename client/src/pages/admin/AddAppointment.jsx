@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { appointmentsApi, departmentsApi, customersApi, settingsApi, employeesApi } from '../../api';
+import { appointmentsApi, departmentsApi, settingsApi, employeesApi } from '../../api';
 import { Loader, NumberInput, PhoneInput } from '../../components/common';
+import { CustomerSearch } from '../../components/admin';
 import { useAuth, useToast } from '../../context';
 import { generateAppointmentReceipt } from '../../utils/receiptGenerator';
 import { generateAppointmentMessage } from '../../utils/messageGenerator';
@@ -126,7 +127,7 @@ const AddAppointment = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [departments, setDepartments] = useState([]);
-  const [customers, setCustomers] = useState([]);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [allEmployees, setAllEmployees] = useState([]);
   const [settings, setSettings] = useState(null);
   const [editingAppointment, setEditingAppointment] = useState(null);
@@ -309,15 +310,13 @@ const AddAppointment = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [departmentsRes, customersRes, settingsRes, employeesRes] = await Promise.all([
+      const [departmentsRes, settingsRes, employeesRes] = await Promise.all([
         departmentsApi.getDepartments(),
-        customersApi.getCustomers(),
         settingsApi.getSettings(),
         employeesApi.getEmployees().catch(() => ({ data: { data: { employees: [] } } }))
       ]);
 
       const depts = departmentsRes.data?.data?.departments || departmentsRes.data?.departments || [];
-      const custs = customersRes.data?.data?.customers || customersRes.data?.customers || [];
       const emps = employeesRes.data?.data?.employees || employeesRes.data?.employees || [];
       setAllEmployees(emps);
 
@@ -351,7 +350,6 @@ const AddAppointment = () => {
       }
 
       setDepartments(depts);
-      setCustomers(custs);
 
       // إذا كان تعديل، جلب بيانات الموعد
       if (editId) {
@@ -359,6 +357,10 @@ const AddAppointment = () => {
         const appointment = appointmentRes.data?.data?.appointment || appointmentRes.data?.appointment;
         if (appointment) {
           setEditingAppointment(appointment);
+          // إظهار العميل المربوط داخل مُنتقي البحث عند التعديل
+          if (appointment.customer?._id) {
+            setSelectedCustomer(appointment.customer);
+          }
           const getDateStr = (date) => date ? new Date(date).toISOString().split('T')[0] : '';
 
           // فصل الوقت إلى ساعة ودقائق
@@ -449,22 +451,30 @@ const AddAppointment = () => {
       }
     }
 
-    if (name === 'customer' && value) {
-      const selectedCustomer = customers.find(c => c._id === value);
-      if (selectedCustomer) {
-        setFormData(prev => ({
-          ...prev,
-          customerName: selectedCustomer.name,
-          phone: convertArabicToEnglish(selectedCustomer.phone || ''),
-          isVIP: selectedCustomer.isVIP || false
-        }));
-      }
-    }
+  };
+
+  // اختيار عميل من نتائج البحث — يعبّئ الاسم والجوال وحالة VIP
+  const handleSelectCustomer = (customerId, customer) => {
+    setSelectedCustomer(customer);
+    setFormData(prev => ({
+      ...prev,
+      customer: customerId,
+      customerName: customer.name || '',
+      phone: convertArabicToEnglish(customer.phone || ''),
+      isVIP: customer.isVIP || false
+    }));
+  };
+
+  // إلغاء ربط العميل مع إبقاء ما أُدخل في الحقول قابلاً للتعديل
+  const handleClearCustomer = () => {
+    setSelectedCustomer(null);
+    setFormData(prev => ({ ...prev, customer: '' }));
   };
 
   const handleCustomerModeChange = (mode) => {
     setCustomerInputMode(mode);
     if (mode === 'manual') {
+      setSelectedCustomer(null);
       setFormData(prev => ({ ...prev, customer: '' }));
     }
   };
@@ -797,20 +807,12 @@ const AddAppointment = () => {
 
                 {customerInputMode === 'select' && (
                   <div className="form-group full-width">
-                    <label>اختر العميل</label>
-                    <select
-                      name="customer"
-                      value={formData.customer}
-                      onChange={handleChange}
-                      className="form-select"
-                    >
-                      <option value="">-- اختر عميل --</option>
-                      {customers.map(customer => (
-                        <option key={customer._id} value={customer._id}>
-                          {customer.isVIP && '⭐ '}{customer.name} {customer.phone ? `(${customer.phone})` : ''}
-                        </option>
-                      ))}
-                    </select>
+                    <label>ابحث عن العميل</label>
+                    <CustomerSearch
+                      onSelect={handleSelectCustomer}
+                      currentCustomer={selectedCustomer}
+                      onUnlink={handleClearCustomer}
+                    />
                   </div>
                 )}
 
@@ -1149,20 +1151,12 @@ const AddAppointment = () => {
 
                 {customerInputMode === 'select' && (
                   <div className="form-group full-width">
-                    <label>اختر العميل</label>
-                    <select
-                      name="customer"
-                      value={formData.customer}
-                      onChange={handleChange}
-                      className="form-select"
-                    >
-                      <option value="">-- اختر عميل --</option>
-                      {customers.map(customer => (
-                        <option key={customer._id} value={customer._id}>
-                          {customer.isVIP && '⭐ '}{customer.name} {customer.phone ? `(${customer.phone})` : ''}
-                        </option>
-                      ))}
-                    </select>
+                    <label>ابحث عن العميل</label>
+                    <CustomerSearch
+                      onSelect={handleSelectCustomer}
+                      currentCustomer={selectedCustomer}
+                      onUnlink={handleClearCustomer}
+                    />
                   </div>
                 )}
 

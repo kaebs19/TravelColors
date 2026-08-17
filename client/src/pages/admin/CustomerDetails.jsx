@@ -118,7 +118,7 @@ const CustomerDetails = () => {
   const handleSendWhatsApp = () => {
     const phone = customer.phone?.replace(/[^0-9]/g, '');
     const phoneNumber = phone?.startsWith('0') ? '966' + phone.slice(1) : phone;
-    const message = `مرحباً ${customer.name}،\n\nنشكرك على تواصلك مع ألوان المسافر للسفر والسياحة.\n\nكيف يمكننا مساعدتك؟`;
+    const message = `مرحباً ${customer.name}،\n\nنشكرك على تواصلك مع ألوان السفر للسفر والسياحة.\n\nكيف يمكننا مساعدتك؟`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = phoneNumber
       ? `https://wa.me/${phoneNumber}?text=${encodedMessage}`
@@ -787,7 +787,7 @@ const CustomerDetails = () => {
           <div className="receipt-modal">
             <div id="receipt-content" className="receipt-content">
               <div className="receipt-header">
-                <h2>ألوان المسافر للسفر والسياحة</h2>
+                <h2>ألوان السفر للسفر والسياحة</h2>
                 <p>Travel Colors Tourism</p>
                 <p>إيصال دفع</p>
               </div>
@@ -863,7 +863,7 @@ const CustomerDetails = () => {
 
               <div className="receipt-footer">
                 <p>شكراً لتعاملكم معنا</p>
-                <p>ألوان المسافر للسفر والسياحة</p>
+                <p>ألوان السفر للسفر والسياحة</p>
               </div>
             </div>
 

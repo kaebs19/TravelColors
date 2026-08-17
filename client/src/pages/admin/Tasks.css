@@ -1160,135 +1160,8 @@
   background: var(--primary-dark);
 }
 
-/* ===================================
-   Task Detail Modal - New Design
-   =================================== */
-
-.task-detail-modal {
-  display: flex;
-  gap: 0;
-  min-height: 500px;
-  max-height: 80vh;
-}
-
-/* القسم الرئيسي (يسار) */
-.task-detail-main {
-  flex: 1;
-  padding: 24px;
-  overflow-y: auto;
-  border-left: 1px solid var(--border-color);
-}
-
-.task-detail-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-
-.task-detail-header h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.vip-badge-lg {
-  padding: 4px 10px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 700;
-  border-radius: 6px;
-}
-
-.task-number-badge {
-  padding: 4px 10px;
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
-  font-size: 0.75rem;
-  font-family: monospace;
-  border-radius: 6px;
-  margin-right: auto;
-}
-
-/* الأقسام */
-.task-detail-section {
-  margin-bottom: 24px;
-}
-
-.section-title-new {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border-color);
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
 .section-icon {
   font-size: 1rem;
-}
-
-/* وصف المهمة */
-.task-description {
-  background: var(--bg-secondary);
-  border-radius: 8px;
-  padding: 16px;
-}
-
-.desc-row {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-.desc-row:last-child {
-  margin-bottom: 0;
-}
-
-.desc-label {
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  min-width: 100px;
-}
-
-.desc-value {
-  color: var(--text-primary);
-  font-weight: 500;
-}
-
-.desc-notes {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px dashed var(--border-color);
-}
-
-.desc-notes p {
-  margin: 0;
-  color: var(--text-primary);
-  line-height: 1.6;
-}
-
-/* Checklist */
-.task-checklist {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.checklist-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  background: var(--bg-secondary);
-  border-radius: 8px;
-  color: var(--text-secondary);
-  transition: all 0.2s;
 }
 
 .checklist-item.checked {
@@ -1299,16 +1172,6 @@
 .checklist-item.checked .check-icon {
   color: #10b981;
   font-weight: bold;
-}
-
-.check-icon {
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  font-size: 0.875rem;
 }
 
 /* المرفقات */
@@ -1586,38 +1449,6 @@
   cursor: not-allowed;
 }
 
-/* ===================================
-   Sidebar (يمين)
-   =================================== */
-
-.task-detail-sidebar {
-  width: 300px;
-  background: var(--bg-secondary);
-  padding: 24px;
-  overflow-y: auto;
-  flex-shrink: 0;
-}
-
-.sidebar-section {
-  margin-bottom: 20px;
-}
-
-.sidebar-section h4 {
-  margin: 0 0 12px 0;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* الموظف المسؤول */
-.assigned-user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
 .user-avatar {
   width: 36px;
   height: 36px;
@@ -1632,40 +1463,6 @@
   border: 2px dashed transparent;
 }
 
-.user-name {
-  flex: 1;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.btn-change-user {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2px dashed var(--border-color);
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-
-.btn-change-user:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: rgba(99, 102, 241, 0.1);
-}
-
-/* قائمة المعلومات */
-.info-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 .info-row {
   display: flex;
   align-items: center;
@@ -1675,27 +1472,7 @@
   border-radius: 8px;
 }
 
-.info-icon {
-  font-size: 0.875rem;
-}
 
-.info-label {
-  color: var(--text-secondary);
-  font-size: 0.8rem;
-  min-width: 60px;
-}
-
-.info-value {
-  color: var(--text-primary);
-  font-weight: 500;
-  font-size: 0.875rem;
-}
-
-.info-value.clickable {
-  color: var(--primary);
-  text-decoration: underline;
-  cursor: pointer;
-}
 
 /* سجل التحويلات */
 .transfer-history-list {
@@ -1718,13 +1495,6 @@
   color: var(--primary);
 }
 
-/* الإجراءات */
-.action-buttons-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 .action-btn {
   display: flex;
   align-items: center;
@@ -1741,36 +1511,6 @@
 
 .action-btn .action-icon {
   font-size: 1rem;
-}
-
-.action-start {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
-}
-
-.action-start:hover {
-  background: #3b82f6;
-  color: white;
-}
-
-.action-complete {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
-}
-
-.action-complete:hover {
-  background: #10b981;
-  color: white;
-}
-
-.action-cancel {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-}
-
-.action-cancel:hover {
-  background: #ef4444;
-  color: white;
 }
 
 /* جدول المعلومات */
@@ -3261,21 +3001,6 @@
   }
 
   .task-actions button {
-    width: 100%;
-  }
-
-  /* Task Detail Modal Responsive */
-  .task-detail-modal {
-    flex-direction: column;
-    max-height: none;
-  }
-
-  .task-detail-main {
-    border-left: none;
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  .task-detail-sidebar {
     width: 100%;
   }
 

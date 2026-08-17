@@ -154,7 +154,7 @@ ${mapLink ? `- الموقع: ${mapLink}` : ''}- المدينة ${data.city || ''
 ⏰ الرجاء الحضور قبل الموعد بـ 15 دقيقة.
 
 مع أطيب التحيات،
-ألوان المسافر للسفر والسياحة 🌍`;
+ألوان السفر للسفر والسياحة 🌍`;
 };
 
 const generateUnconfirmedFallback = (data, deptTitle) => {
@@ -172,7 +172,7 @@ const generateUnconfirmedFallback = (data, deptTitle) => {
 هذا الموعد قيد التأكيد، وسنوافيك بالتاريخ والوقت المحدد فور تأكيده.
 
 مع أطيب التحيات،
-ألوان المسافر للسفر والسياحة 🌍`;
+ألوان السفر للسفر والسياحة 🌍`;
 };
 
 const generateElectronicSubmissionFallback = (data, deptTitle, processingDays) => {
@@ -191,5 +191,5 @@ const generateElectronicSubmissionFallback = (data, deptTitle, processingDays) =
 فور صدور قرار التأشيرة أو استلام الصور المطلوبة.
 
 مع أطيب التحيات،
-ألوان المسافر للسفر والسياحة 🌍`;
+ألوان السفر للسفر والسياحة 🌍`;
 };

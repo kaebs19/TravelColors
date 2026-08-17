@@ -122,10 +122,10 @@ const ClientLogin = () => {
         <div className="auth-nav-content">
           <Link to="/" className="auth-nav-brand">
             {logo ? (
-              <img src={getImageUrl(logo)} alt="ألوان المسافر" className="auth-nav-logo" />
+              <img src={getImageUrl(logo)} alt="ألوان السفر" className="auth-nav-logo" />
             ) : (
               <div className="auth-nav-text">
-                <span className="auth-nav-ar">ألوان المسافر</span>
+                <span className="auth-nav-ar">ألوان السفر</span>
                 <span className="auth-nav-en">Travel Colors</span>
               </div>
             )}
@@ -140,9 +140,9 @@ const ClientLogin = () => {
           {/* Logo & Title */}
           <div className="auth-header">
             {logo && (
-              <img src={getImageUrl(logo)} alt="ألوان المسافر" className="auth-logo" />
+              <img src={getImageUrl(logo)} alt="ألوان السفر" className="auth-logo" />
             )}
-            <h1>ألوان المسافر</h1>
+            <h1>ألوان السفر</h1>
             <p className="auth-tagline">للسفر والسياحة</p>
           </div>
 

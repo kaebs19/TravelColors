@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { tasksApi, departmentsApi, employeesApi, visaApi } from '../../api';
 import { Card, Loader, Modal } from '../../components/common';
 import { useAuth, useToast } from '../../context';
+import '../../styles/DetailModal.css';
 import './Tasks.css';
 
 const UPLOADS_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:5002/api').replace(/\/api\/?$/, '');
@@ -1936,37 +1937,37 @@ const Tasks = () => {
         size="xlarge"
       >
         {selectedTask && (
-          <div className="task-detail-modal">
+          <div className="detail-modal">
             {/* القسم الأيسر - المحتوى الرئيسي */}
-            <div className="task-detail-main">
+            <div className="detail-modal-main">
               {/* العنوان */}
-              <div className="task-detail-header">
+              <div className="detail-modal-header">
                 <h2>{selectedTask.appointment?.customerName}</h2>
                 {selectedTask.appointment?.isVIP && <span className="vip-badge-lg">VIP</span>}
-                <span className="task-number-badge">{selectedTask.taskNumber}</span>
+                <span className="detail-modal-ref">{selectedTask.taskNumber}</span>
               </div>
 
               {/* الوصف / ملاحظات الموعد */}
-              <div className="task-detail-section">
-                <div className="section-title-new">
-                  <span className="section-icon">📋</span>
+              <div className="detail-modal-section">
+                <div className="detail-section-title">
+                  <span className="detail-section-icon">📋</span>
                   <span>تفاصيل الموعد</span>
                 </div>
-                <div className="task-description">
-                  <div className="desc-row">
-                    <span className="desc-label">القسم:</span>
-                    <span className="desc-value">{selectedTask.appointment?.department?.title || '-'}</span>
+                <div className="detail-fields">
+                  <div className="detail-field-row">
+                    <span className="detail-field-label">القسم:</span>
+                    <span className="detail-field-value">{selectedTask.appointment?.department?.title || '-'}</span>
                   </div>
-                  <div className="desc-row">
-                    <span className="desc-label">المدينة:</span>
-                    <span className="desc-value">{selectedTask.appointment?.city || '-'}</span>
+                  <div className="detail-field-row">
+                    <span className="detail-field-label">المدينة:</span>
+                    <span className="detail-field-value">{selectedTask.appointment?.city || '-'}</span>
                   </div>
-                  <div className="desc-row">
-                    <span className="desc-label">عدد الأشخاص:</span>
-                    <span className="desc-value">{selectedTask.appointment?.personsCount || 1} شخص</span>
+                  <div className="detail-field-row">
+                    <span className="detail-field-label">عدد الأشخاص:</span>
+                    <span className="detail-field-value">{selectedTask.appointment?.personsCount || 1} شخص</span>
                   </div>
                   {selectedTask.appointment?.notes && (
-                    <div className="desc-notes">
+                    <div className="detail-field-notes">
                       <p>{selectedTask.appointment.notes}</p>
                     </div>
                   )}
@@ -1974,31 +1975,31 @@ const Tasks = () => {
               </div>
 
               {/* قائمة المهام / Checklist */}
-              <div className="task-detail-section">
-                <div className="section-title-new">
-                  <span className="section-icon">✅</span>
+              <div className="detail-modal-section">
+                <div className="detail-section-title">
+                  <span className="detail-section-icon">✅</span>
                   <span>حالة المهمة</span>
                 </div>
-                <div className="task-checklist">
-                  <div className={`checklist-item ${selectedTask.createdAt ? 'checked' : ''}`}>
-                    <span className="check-icon">{selectedTask.createdAt ? '✓' : '○'}</span>
+                <div className="detail-checklist">
+                  <div className={`detail-checklist-item ${selectedTask.createdAt ? 'checked' : ''}`}>
+                    <span className="detail-check-icon">{selectedTask.createdAt ? '✓' : '○'}</span>
                     <span>تم إنشاء المهمة</span>
                   </div>
-                  <div className={`checklist-item ${selectedTask.startedAt ? 'checked' : ''}`}>
-                    <span className="check-icon">{selectedTask.startedAt ? '✓' : '○'}</span>
+                  <div className={`detail-checklist-item ${selectedTask.startedAt ? 'checked' : ''}`}>
+                    <span className="detail-check-icon">{selectedTask.startedAt ? '✓' : '○'}</span>
                     <span>بدأ العمل على المهمة</span>
                   </div>
-                  <div className={`checklist-item ${selectedTask.completedAt ? 'checked' : ''}`}>
-                    <span className="check-icon">{selectedTask.completedAt ? '✓' : '○'}</span>
+                  <div className={`detail-checklist-item ${selectedTask.completedAt ? 'checked' : ''}`}>
+                    <span className="detail-check-icon">{selectedTask.completedAt ? '✓' : '○'}</span>
                     <span>تم إكمال المهمة</span>
                   </div>
                 </div>
               </div>
 
               {/* المرفقات */}
-              <div className="task-detail-section">
-                <div className="section-title-new">
-                  <span className="section-icon">📎</span>
+              <div className="detail-modal-section">
+                <div className="detail-section-title">
+                  <span className="detail-section-icon">📎</span>
                   <span>المرفقات</span>
                 </div>
                 <div className="task-attachments-grid">
@@ -2075,9 +2076,9 @@ const Tasks = () => {
               </div>
 
               {/* الملاحظات */}
-              <div className="task-detail-section">
-                <div className="section-title-new">
-                  <span className="section-icon">💬</span>
+              <div className="detail-modal-section">
+                <div className="detail-section-title">
+                  <span className="detail-section-icon">💬</span>
                   <span>الملاحظات</span>
                 </div>
                 <div className="task-comments">
@@ -2120,35 +2121,35 @@ const Tasks = () => {
             </div>
 
             {/* القسم الأيمن - المعلومات والإجراءات */}
-            <div className="task-detail-sidebar">
+            <div className="detail-modal-sidebar">
               {/* الموظف المسؤول */}
-              <div className="sidebar-section">
+              <div className="detail-sidebar-section">
                 <h4>الموظف المسؤول</h4>
-                <div className="assigned-user">
-                  <div className="user-avatar">
+                <div className="detail-user">
+                  <div className="detail-user-avatar">
                     {selectedTask.assignedTo?.name ? selectedTask.assignedTo.name[0] : '؟'}
                   </div>
-                  <span className="user-name">{selectedTask.assignedTo?.name || 'غير مسند'}</span>
+                  <span className="detail-user-name">{selectedTask.assignedTo?.name || 'غير مسند'}</span>
                   {(selectedTask.status !== 'cancelled') && (
-                    <button className="btn-change-user" onClick={handleOpenTransferModal}>+</button>
+                    <button className="detail-user-change" onClick={handleOpenTransferModal}>+</button>
                   )}
                 </div>
               </div>
 
               {/* معلومات العميل */}
-              <div className="sidebar-section">
+              <div className="detail-sidebar-section">
                 <h4>معلومات العميل</h4>
-                <div className="info-list">
-                  <div className="info-row">
-                    <span className="info-icon">📞</span>
-                    <span className="info-label">الهاتف:</span>
-                    <span className="info-value">{selectedTask.appointment?.phone || '-'}</span>
+                <div className="detail-info-list">
+                  <div className="detail-info-row">
+                    <span className="detail-info-icon">📞</span>
+                    <span className="detail-info-label">الهاتف:</span>
+                    <span className="detail-info-value">{selectedTask.appointment?.phone || '-'}</span>
                   </div>
                 </div>
               </div>
 
               {/* الطلب المربوط */}
-              <div className="sidebar-section">
+              <div className="detail-sidebar-section">
                 <h4>📄 الطلب المربوط</h4>
                 {selectedTask.linkedApplication ? (
                   <div style={{ padding: '8px 0' }}>
@@ -2279,48 +2280,48 @@ const Tasks = () => {
               </div>
 
               {/* التواريخ */}
-              <div className="sidebar-section">
+              <div className="detail-sidebar-section">
                 <h4>التواريخ</h4>
-                <div className="info-list">
-                  <div className="info-row">
-                    <span className="info-icon">📅</span>
-                    <span className="info-label">الموعد:</span>
-                    <span className="info-value clickable">{formatDate(selectedTask.appointment?.appointmentDate)}</span>
+                <div className="detail-info-list">
+                  <div className="detail-info-row">
+                    <span className="detail-info-icon">📅</span>
+                    <span className="detail-info-label">الموعد:</span>
+                    <span className="detail-info-value clickable">{formatDate(selectedTask.appointment?.appointmentDate)}</span>
                   </div>
-                  <div className="info-row">
-                    <span className="info-icon">⏰</span>
-                    <span className="info-label">الوقت:</span>
-                    <span className="info-value">{selectedTask.appointment?.appointmentTime || '-'}</span>
+                  <div className="detail-info-row">
+                    <span className="detail-info-icon">⏰</span>
+                    <span className="detail-info-label">الوقت:</span>
+                    <span className="detail-info-value">{selectedTask.appointment?.appointmentTime || '-'}</span>
                   </div>
-                  <div className="info-row">
-                    <span className="info-icon">📝</span>
-                    <span className="info-label">الإنشاء:</span>
-                    <span className="info-value">{formatDate(selectedTask.createdAt)}</span>
+                  <div className="detail-info-row">
+                    <span className="detail-info-icon">📝</span>
+                    <span className="detail-info-label">الإنشاء:</span>
+                    <span className="detail-info-value">{formatDate(selectedTask.createdAt)}</span>
                   </div>
                   {selectedTask.startedAt && (
-                    <div className="info-row">
-                      <span className="info-icon">▶️</span>
-                      <span className="info-label">البدء:</span>
-                      <span className="info-value">{formatDate(selectedTask.startedAt)}</span>
+                    <div className="detail-info-row">
+                      <span className="detail-info-icon">▶️</span>
+                      <span className="detail-info-label">البدء:</span>
+                      <span className="detail-info-value">{formatDate(selectedTask.startedAt)}</span>
                     </div>
                   )}
                   {selectedTask.completedAt && (
-                    <div className="info-row">
-                      <span className="info-icon">✅</span>
-                      <span className="info-label">الإكمال:</span>
-                      <span className="info-value">{formatDate(selectedTask.completedAt)}</span>
+                    <div className="detail-info-row">
+                      <span className="detail-info-icon">✅</span>
+                      <span className="detail-info-label">الإكمال:</span>
+                      <span className="detail-info-value">{formatDate(selectedTask.completedAt)}</span>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* الحالة */}
-              <div className="sidebar-section">
+              <div className="detail-sidebar-section">
                 <h4>الحالة</h4>
-                <div className="info-list">
-                  <div className="info-row">
-                    <span className="info-icon">🚦</span>
-                    <span className="info-label">الحالة:</span>
+                <div className="detail-info-list">
+                  <div className="detail-info-row">
+                    <span className="detail-info-icon">🚦</span>
+                    <span className="detail-info-label">الحالة:</span>
                     {getStatusBadge(selectedTask.status)}
                   </div>
                 </div>
@@ -2328,7 +2329,7 @@ const Tasks = () => {
 
               {/* سجل التحويلات */}
               {selectedTask.transferHistory?.length > 0 && (
-                <div className="sidebar-section">
+                <div className="detail-sidebar-section">
                   <h4>سجل التحويلات</h4>
                   <div className="transfer-history-list">
                     {selectedTask.transferHistory.map((transfer, index) => (
@@ -2343,29 +2344,29 @@ const Tasks = () => {
               )}
 
               {/* الإجراءات */}
-              <div className="sidebar-section sidebar-actions">
+              <div className="detail-sidebar-section sidebar-actions">
                 <h4>الإجراءات</h4>
-                <div className="action-buttons-list">
+                <div className="detail-action-list">
                   {selectedTask.status === 'new' && !isElectronicTask(selectedTask) && (
-                    <button className="action-btn action-start" onClick={() => handleStartTask(selectedTask._id)}>
+                    <button className="detail-action-btn detail-action-primary" onClick={() => handleStartTask(selectedTask._id)}>
                       <span className="action-icon">▶️</span>
                       <span>بدء العمل</span>
                     </button>
                   )}
                   {selectedTask.status === 'in_progress' && (
-                    <button className="action-btn action-complete" onClick={() => handleCompleteTask(selectedTask._id)}>
+                    <button className="detail-action-btn detail-action-success" onClick={() => handleCompleteTask(selectedTask._id)}>
                       <span className="action-icon">✅</span>
                       <span>إكمال المهمة</span>
                     </button>
                   )}
                   {(selectedTask.status === 'new' || selectedTask.status === 'in_progress') && (
-                    <button className="action-btn action-cancel" onClick={() => handleCancelTask(selectedTask._id)}>
+                    <button className="detail-action-btn detail-action-cancel" onClick={() => handleCancelTask(selectedTask._id)}>
                       <span className="action-icon">🗑️</span>
                       <span>إلغاء</span>
                     </button>
                   )}
                   {(selectedTask.status === 'completed' || selectedTask.status === 'cancelled') && (
-                    <button className="action-btn action-start" onClick={() => handleReopenTask(selectedTask._id)}>
+                    <button className="detail-action-btn detail-action-primary" onClick={() => handleReopenTask(selectedTask._id)}>
                       <span className="action-icon">🔄</span>
                       <span>إعادة فتح</span>
                     </button>
@@ -2375,7 +2376,7 @@ const Tasks = () => {
 
               {/* سجل النشاط */}
               {(user?.role === 'admin' || selectedTask.assignedTo?._id === user?._id) && (
-                <div className="sidebar-section sidebar-activity-log">
+                <div className="detail-sidebar-section sidebar-activity-log">
                   <h4>📋 سجل النشاط</h4>
                   {loadingActivityLogs ? (
                     <div className="activity-loading">جاري التحميل...</div>
@@ -2413,7 +2414,7 @@ const Tasks = () => {
               )}
 
               {/* معلومات إضافية */}
-              <div className="sidebar-section sidebar-info-table">
+              <div className="detail-sidebar-section sidebar-info-table">
                 <h4>معلومات</h4>
                 <div className="info-table">
                   <div className="info-table-row">

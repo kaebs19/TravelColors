@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+<g transform="translate(100 100) rotate(45)">
+<rect x="-74" y="-74" width="66" height="66" rx="8" fill="#ffffff"></rect>
+<rect x="8" y="-74" width="66" height="66" rx="8" fill="#ffffff"></rect>
+<rect x="-74" y="8" width="66" height="66" rx="8" fill="#ffffff"></rect>
+<rect x="8" y="8" width="66" height="66" rx="8" fill="#ffffff"></rect>
+<g transform="translate(41 41) scale(0.56) translate(-50 -50)"><path d="M50 6 L56 30 L94 54 L94 62 L56 51 L54 76 L69 88 L69 94 L50 87 L31 94 L31 88 L46 76 L44 51 L6 62 L6 54 L44 30 Z" fill="#1F5C85"></path></g>
+</g></svg>

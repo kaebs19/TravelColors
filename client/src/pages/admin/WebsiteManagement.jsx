@@ -631,7 +631,7 @@ const WebsiteManagement = ({ initialTab = 'hero' }) => {
           </div>
           <div className="wm-form-group">
             <label>رقم واتساب (بدون + أو 00)</label>
-            <input type="text" value={content.contact?.whatsapp || ''} onChange={e => updateField('contact.whatsapp', e.target.value)} dir="ltr" placeholder="966559229597" />
+            <input type="text" value={content.contact?.whatsapp || ''} onChange={e => updateField('contact.whatsapp', e.target.value)} dir="ltr" placeholder="966558741741" />
           </div>
         </div>
         <div className="wm-form-row">
@@ -1697,9 +1697,9 @@ const WebsiteManagement = ({ initialTab = 'hero' }) => {
       title: '👋 رسالة الترحيب',
       desc: 'تُرسل عند تسجيل عميل جديد',
       fields: [
-        { name: 'subject', label: 'عنوان البريد', placeholder: 'أهلاً بك في شركة ألوان المسافر!' },
+        { name: 'subject', label: 'عنوان البريد', placeholder: 'أهلاً بك في شركة ألوان السفر!' },
         { name: 'greeting', label: 'نص الترحيب', placeholder: 'مرحباً بك' },
-        { name: 'bodyText', label: 'نص الرسالة', placeholder: 'يسعدنا انضمامك إلى ألوان المسافر...', multiline: true },
+        { name: 'bodyText', label: 'نص الرسالة', placeholder: 'يسعدنا انضمامك إلى ألوان السفر...', multiline: true },
         { name: 'ctaText', label: 'نص الزر', placeholder: 'الذهاب للوحة التحكم' }
       ]
     },
@@ -1708,7 +1708,7 @@ const WebsiteManagement = ({ initialTab = 'hero' }) => {
       title: '🔐 استعادة كلمة المرور',
       desc: 'تُرسل عند طلب استعادة كلمة المرور',
       fields: [
-        { name: 'subject', label: 'عنوان البريد', placeholder: 'استعادة كلمة المرور — ألوان المسافر' },
+        { name: 'subject', label: 'عنوان البريد', placeholder: 'استعادة كلمة المرور — ألوان السفر' },
         { name: 'bodyText', label: 'نص الرسالة', placeholder: 'تلقّينا طلباً لإعادة تعيين كلمة المرور...', multiline: true },
         { name: 'warningText', label: 'نص التحذير', placeholder: 'هذا الرابط صالح لمدة 30 دقيقة فقط...' },
         { name: 'ctaText', label: 'نص الزر', placeholder: 'إعادة تعيين كلمة المرور' }
@@ -1719,7 +1719,7 @@ const WebsiteManagement = ({ initialTab = 'hero' }) => {
       title: '✅ تأكيد تغيير كلمة المرور',
       desc: 'تُرسل بعد تغيير كلمة المرور بنجاح',
       fields: [
-        { name: 'subject', label: 'عنوان البريد', placeholder: 'تم تغيير كلمة المرور — ألوان المسافر' },
+        { name: 'subject', label: 'عنوان البريد', placeholder: 'تم تغيير كلمة المرور — ألوان السفر' },
         { name: 'bodyText', label: 'نص الرسالة', placeholder: 'نودّ إعلامك بأن كلمة مرور حسابك قد تم تغييرها...', multiline: true },
         { name: 'warningText', label: 'نص التحذير', placeholder: 'إذا لم تقم بهذا التغيير، يرجى التواصل معنا فوراً...' }
       ]
@@ -1730,7 +1730,7 @@ const WebsiteManagement = ({ initialTab = 'hero' }) => {
       desc: 'تُرسل عند تقديم طلب رخصة أو تأشيرة',
       fields: [
         { name: 'subject', label: 'عنوان البريد', placeholder: 'تم استلام طلبك — الرخصة الدولية' },
-        { name: 'bodyText', label: 'نص الرسالة', placeholder: 'شكراً لاختيارك ألوان المسافر. تم استلام طلبك...', multiline: true },
+        { name: 'bodyText', label: 'نص الرسالة', placeholder: 'شكراً لاختيارك ألوان السفر. تم استلام طلبك...', multiline: true },
         { name: 'ctaText', label: 'نص الزر', placeholder: 'متابعة الطلب' }
       ]
     },
@@ -1740,7 +1740,7 @@ const WebsiteManagement = ({ initialTab = 'hero' }) => {
       desc: 'تُرسل عند تغيير حالة الطلب من لوحة التحكم',
       fields: [
         { name: 'subject', label: 'عنوان البريد', placeholder: 'تحديث على طلبك — قيد المراجعة' },
-        { name: 'bodyText', label: 'نص الرسالة', placeholder: 'تم تحديث حالة طلبك لدى ألوان المسافر...', multiline: true },
+        { name: 'bodyText', label: 'نص الرسالة', placeholder: 'تم تحديث حالة طلبك لدى ألوان السفر...', multiline: true },
         { name: 'ctaText', label: 'نص الزر', placeholder: 'عرض تفاصيل الطلب' }
       ]
     }

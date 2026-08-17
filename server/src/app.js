@@ -81,14 +81,24 @@ app.use('/api', routes);
 
 // Meta tags — خدمة صفحات SPA مع meta tags ديناميكية
 const { serveWithMeta } = require('./middlewares/metaTags');
-app.get('/', serveWithMeta);
-app.get('/us-visa', serveWithMeta);
-app.get('/visas', serveWithMeta);
-app.get('/visas/:slug', serveWithMeta);
-app.get('/international-license', serveWithMeta);
-app.get('/ContactUs', serveWithMeta);
-app.get('/privacy', serveWithMeta);
-app.get('/terms', serveWithMeta);
+
+// صفحات الموقع العام — تُسجَّل بالعربية على الجذر وبالإنجليزية تحت /en
+// حتى لا تسقط مسارات /en على معالج 404 الذي يرجع JSON.
+const PUBLIC_PAGE_PATHS = [
+  '/',
+  '/us-visa',
+  '/visas',
+  '/visas/:slug',
+  '/international-license',
+  '/ContactUs',
+  '/privacy',
+  '/terms'
+];
+
+PUBLIC_PAGE_PATHS.forEach((pagePath) => {
+  app.get(pagePath, serveWithMeta);
+  app.get(pagePath === '/' ? '/en' : `/en${pagePath}`, serveWithMeta);
+});
 
 // 404 handler
 app.use((req, res) => {

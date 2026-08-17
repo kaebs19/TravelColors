@@ -1,3 +1,4 @@
+import { assetUrl } from './assetUrl';
 /**
  * توليد تقارير قابلة للطباعة لكل تبويب
  * جميع الأرقام بالإنجليزية (0123456789)
@@ -18,13 +19,13 @@ const formatDateAr = (date) => {
 
 // Header مشترك لجميع التقارير
 const generateHeader = (settings, reportTitle, dateRange) => {
-  const logoUrl = settings?.logo ? `${window.location.origin}/api/${settings.logo}` : '';
+  const logoUrl = assetUrl(settings?.logo);
   return `
     <div class="report-print-header">
       <div class="company-info">
         ${logoUrl ? `<img src="${logoUrl}" class="company-logo" alt="logo" />` : ''}
         <div class="company-text">
-          <h2>${settings?.companyName || 'ألوان المسافر للسفر والسياحة'}</h2>
+          <h2>${settings?.companyName || 'ألوان السفر للسفر والسياحة'}</h2>
           ${settings?.companyNameEn ? `<p class="en-name">${settings.companyNameEn}</p>` : ''}
           <p>${settings?.address || ''}</p>
           <p>هاتف: ${settings?.phone || ''} ${settings?.email ? `| بريد: ${settings.email}` : ''}</p>
@@ -42,7 +43,7 @@ const generateHeader = (settings, reportTitle, dateRange) => {
 
 const generateFooter = (settings) => `
   <div class="report-print-footer">
-    <p>${settings?.companyName || 'ألوان المسافر للسفر والسياحة'}</p>
+    <p>${settings?.companyName || 'ألوان السفر للسفر والسياحة'}</p>
     <p>تم إنشاء هذا التقرير تلقائياً من نظام إدارة المواعيد</p>
   </div>
 `;

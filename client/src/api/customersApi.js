@@ -14,8 +14,8 @@ export const customersApi = {
   },
 
   // البحث السريع
-  searchCustomers: async (query) => {
-    const response = await api.get('/customers/search', { params: { q: query } });
+  searchCustomers: async (query, limit) => {
+    const response = await api.get('/customers/search', { params: { q: query, limit } });
     return response.data;
   },
 

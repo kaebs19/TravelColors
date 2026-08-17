@@ -7,11 +7,12 @@ import { useClientAuth } from '../../context/ClientAuthContext';
 import '../../styles/public-shared.css';
 import './VisaCatalog.css';
 
+import OfficialCredentials from '../../components/common/OfficialCredentials';
 const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost:5002').replace(/\/api\/?$/, '');
 
 const VisaCatalog = () => {
   const [visas, setVisas] = useState([]);
-  const [contact, setContact] = useState({ whatsapp: '966559229597' });
+  const [contact, setContact] = useState({ whatsapp: '966558741741' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [scrolled, setScrolled] = useState(false);
@@ -83,7 +84,7 @@ const VisaCatalog = () => {
             </a>
           )}
           {contact.phone && (
-            <a href={`tel:${contact.phone}`} className="vcat-topbar-link">
+            <a href={`https://wa.me/${contact.whatsapp}`} target="_blank" rel="noopener noreferrer" className="vcat-topbar-link">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" strokeLinecap="round" strokeLinejoin="round"/></svg>
               {contact.phone}
             </a>
@@ -96,7 +97,7 @@ const VisaCatalog = () => {
       <nav className={`vcat-nav ${scrolled ? 'vcat-nav-scrolled' : ''}`}>
         <div className="vcat-nav-inner">
           <Link to="/" className="vcat-brand">
-            <span className="vcat-brand-ar">ألوان المسافر</span>
+            <span className="vcat-brand-ar">ألوان السفر</span>
             <span className="vcat-brand-en">TRAVEL COLORS</span>
           </Link>
           <div className={`vcat-nav-links ${mobileMenuOpen ? 'open' : ''}`}>
@@ -271,7 +272,7 @@ const VisaCatalog = () => {
       <footer className="vcat-footer">
         <div className="vcat-footer-inner">
           <div className="vcat-footer-brand">
-            <span className="vcat-footer-brand-ar">ألوان المسافر</span>
+            <span className="vcat-footer-brand-ar">ألوان السفر</span>
             <span className="vcat-footer-brand-en">TRAVEL COLORS</span>
           </div>
           <div className="vcat-footer-links">
@@ -288,7 +289,8 @@ const VisaCatalog = () => {
               </a>
             </div>
           )}
-          <p className="vcat-footer-copy">© {new Date().getFullYear()} Travel Colors - ألوان المسافر. جميع الحقوق محفوظة</p>
+          <OfficialCredentials />
+          <p className="vcat-footer-copy">© {new Date().getFullYear()} Travel Colors - ألوان السفر. جميع الحقوق محفوظة</p>
           <DeveloperCredit style={{ textAlign: 'center' }} />
         </div>
       </footer>

@@ -5,15 +5,16 @@ import DeveloperCredit from '../../components/common/DeveloperCredit';
 import '../../styles/public-shared.css';
 import './LegalPage.css';
 
+import OfficialCredentials from '../../components/common/OfficialCredentials';
 const DEFAULT_CONTENT = {
   contact: {
-    phone: '+966 55 922 9597',
+    phone: '+966 55 874 1741',
     email: 'info@trcolors.com',
-    whatsapp: '966559229597',
+    whatsapp: '966558741741',
     address: 'المملكة العربية السعودية'
   },
   socialMedia: { twitter: '', instagram: '', facebook: '', snapchat: '' },
-  general: { siteName: 'ألوان المسافر', siteNameEn: 'Travel Colors', siteDescription: '', logo: '' }
+  general: { siteName: 'ألوان السفر', siteNameEn: 'Travel Colors', siteDescription: '', logo: '' }
 };
 
 const PrivacyPolicy = () => {
@@ -63,7 +64,7 @@ const PrivacyPolicy = () => {
       content: (
         <>
           <p>
-            تقوم شركة ألوان المسافر بجمع المعلومات الشخصية اللازمة لتقديم خدمات السفر والسياحة بأعلى مستوى من الجودة والكفاءة. نحرص على جمع البيانات الضرورية فقط لإتمام المعاملات وتوفير الخدمات المطلوبة.
+            تقوم شركة ألوان السفر بجمع المعلومات الشخصية اللازمة لتقديم خدمات السفر والسياحة بأعلى مستوى من الجودة والكفاءة. نحرص على جمع البيانات الضرورية فقط لإتمام المعاملات وتوفير الخدمات المطلوبة.
           </p>
           <p>تشمل المعلومات التي قد نقوم بجمعها ما يلي:</p>
           <ul>
@@ -107,7 +108,7 @@ const PrivacyPolicy = () => {
       content: (
         <>
           <p>
-            تلتزم شركة ألوان المسافر بتطبيق أعلى معايير الأمان لحماية بياناتكم الشخصية من أي وصول غير مصرح به أو استخدام غير قانوني أو إفصاح أو تعديل أو إتلاف. نتبع أفضل الممارسات العالمية في مجال أمن المعلومات.
+            تلتزم شركة ألوان السفر بتطبيق أعلى معايير الأمان لحماية بياناتكم الشخصية من أي وصول غير مصرح به أو استخدام غير قانوني أو إفصاح أو تعديل أو إتلاف. نتبع أفضل الممارسات العالمية في مجال أمن المعلومات.
           </p>
           <p>تشمل إجراءات الحماية المتبعة:</p>
           <ul>
@@ -148,7 +149,7 @@ const PrivacyPolicy = () => {
       content: (
         <>
           <p>
-            لا تقوم شركة ألوان المسافر ببيع أو تأجير بياناتكم الشخصية لأي أطراف خارجية. قد نشارك معلوماتكم فقط في الحالات الضرورية لإتمام الخدمات المطلوبة وفقاً للشروط التالية:
+            لا تقوم شركة ألوان السفر ببيع أو تأجير بياناتكم الشخصية لأي أطراف خارجية. قد نشارك معلوماتكم فقط في الحالات الضرورية لإتمام الخدمات المطلوبة وفقاً للشروط التالية:
           </p>
           <ul>
             <li>السفارات والقنصليات: مشاركة البيانات المطلوبة لمعالجة طلبات التأشيرات والموافقة عليها</li>
@@ -193,7 +194,7 @@ const PrivacyPolicy = () => {
       content: (
         <>
           <p>
-            تحتفظ شركة ألوان المسافر بحق تعديل أو تحديث سياسة الخصوصية هذه في أي وقت لتعكس التغييرات في ممارساتنا أو المتطلبات القانونية والتنظيمية. نلتزم بإخطاركم بأي تغييرات جوهرية.
+            تحتفظ شركة ألوان السفر بحق تعديل أو تحديث سياسة الخصوصية هذه في أي وقت لتعكس التغييرات في ممارساتنا أو المتطلبات القانونية والتنظيمية. نلتزم بإخطاركم بأي تغييرات جوهرية.
           </p>
           <ul>
             <li>سيتم نشر أي تعديلات على هذه الصفحة مع تحديث تاريخ "آخر تحديث"</li>
@@ -221,8 +222,13 @@ const PrivacyPolicy = () => {
             </div>
             <div className="legal-contact-item">
               <span className="legal-contact-label">الهاتف:</span>
-              <a href={`tel:${content.contact?.phone || '+966 55 922 9597'}`} dir="ltr">
-                {content.contact?.phone || '+966 55 922 9597'}
+              <a
+                href={`https://wa.me/${content.contact?.whatsapp || DEFAULT_CONTENT.contact.whatsapp}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                dir="ltr"
+              >
+                {content.contact?.phone || '+966 55 874 1741'}
               </a>
             </div>
             <div className="legal-contact-item">
@@ -231,7 +237,7 @@ const PrivacyPolicy = () => {
             </div>
           </div>
           <p>
-            فريق حماية البيانات في شركة ألوان المسافر مستعد للرد على جميع استفساراتكم وملاحظاتكم خلال أوقات العمل الرسمية.
+            فريق حماية البيانات في شركة ألوان السفر مستعد للرد على جميع استفساراتكم وملاحظاتكم خلال أوقات العمل الرسمية.
           </p>
         </>
       )
@@ -247,12 +253,12 @@ const PrivacyPolicy = () => {
             {content.general?.logo && (
               <img
                 src={getImageUrl(content.general.logo)}
-                alt={content.general?.siteName || 'ألوان المسافر'}
+                alt={content.general?.siteName || 'ألوان السفر'}
                 className="public-nav-logo"
               />
             )}
             <span className="public-nav-name">
-              <span className="public-nav-name-ar">{content.general?.siteName || 'ألوان المسافر'}</span>
+              <span className="public-nav-name-ar">{content.general?.siteName || 'ألوان السفر'}</span>
               <span className="public-nav-name-en">{content.general?.siteNameEn || 'Travel Colors'}</span>
             </span>
           </div>
@@ -267,7 +273,7 @@ const PrivacyPolicy = () => {
         <div className="legal-hero-content">
           <h1>سياسة الخصوصية</h1>
           <p>
-            نلتزم في شركة ألوان المسافر بحماية خصوصيتكم وبياناتكم الشخصية. توضح هذه السياسة كيفية جمعنا واستخدامنا وحمايتنا لمعلوماتكم عند استخدام خدماتنا.
+            نلتزم في شركة ألوان السفر بحماية خصوصيتكم وبياناتكم الشخصية. توضح هذه السياسة كيفية جمعنا واستخدامنا وحمايتنا لمعلوماتكم عند استخدام خدماتنا.
           </p>
           <div className="legal-hero-badge">
             آخر تحديث: مارس 2026
@@ -315,7 +321,7 @@ const PrivacyPolicy = () => {
       {/* Footer */}
       <footer className="public-footer">
         <div className="public-footer-brand">
-          <span className="public-footer-brand-ar">ألوان المسافر</span>
+          <span className="public-footer-brand-ar">ألوان السفر</span>
           <span className="public-footer-brand-en">TRAVEL COLORS</span>
         </div>
         <nav className="public-footer-nav">
@@ -324,7 +330,8 @@ const PrivacyPolicy = () => {
           <span onClick={() => navigate('/international-license')}>الرخصة الدولية</span>
           <span onClick={() => navigate('/ContactUs')}>تواصل معنا</span>
         </nav>
-        <p>&copy; {new Date().getFullYear()} Travel Colors - ألوان المسافر. جميع الحقوق محفوظة</p>
+        <OfficialCredentials content={content} />
+        <p>&copy; {new Date().getFullYear()} Travel Colors - ألوان السفر. جميع الحقوق محفوظة</p>
         <DeveloperCredit />
         <div className="public-footer-links">
           <span onClick={() => navigate('/privacy')}>سياسة الخصوصية</span>

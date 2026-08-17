@@ -541,6 +541,32 @@ const Settings = () => {
                     disabled={!isAdmin}
                   />
                 </div>
+                <div className="form-group">
+                  <label>رقم رخصة وزارة السياحة</label>
+                  <input
+                    type="text"
+                    value={settings.tourismLicense || ''}
+                    onChange={(e) => handleChange('tourismLicense', e.target.value)}
+                    className="form-input"
+                    dir="ltr"
+                    placeholder="73104877"
+                    disabled={!isAdmin}
+                  />
+                  <small className="form-hint">يظهر في تذييل الموقع العام والشريط العلوي</small>
+                </div>
+                <div className="form-group">
+                  <label>الرقم الوطني الموحد</label>
+                  <input
+                    type="text"
+                    value={settings.unifiedNationalNumber || ''}
+                    onChange={(e) => handleChange('unifiedNationalNumber', e.target.value)}
+                    className="form-input"
+                    dir="ltr"
+                    placeholder="7049580140"
+                    disabled={!isAdmin}
+                  />
+                  <small className="form-hint">يظهر مع بيانات المركز السعودي للأعمال في تذييل الموقع</small>
+                </div>
 
                 {/* قسم الشعار */}
                 {isAdmin && (
@@ -829,7 +855,7 @@ const Settings = () => {
                 <h4>شروط الإيصال</h4>
                 <div className="form-group">
                   <textarea
-                    value={settings.receiptTerms || 'شكراً لاختياركم ألوان المسافر\nنتمنى لكم رحلة سعيدة'}
+                    value={settings.receiptTerms || 'شكراً لاختياركم ألوان السفر\nنتمنى لكم رحلة سعيدة'}
                     onChange={(e) => handleChange('receiptTerms', e.target.value)}
                     className="form-textarea"
                     rows="3"
@@ -1863,7 +1889,7 @@ const Settings = () => {
                     className="form-input"
                     value={settings.usVisa?.whatsappNumber || ''}
                     onChange={(e) => handleChange('usVisa', { ...settings.usVisa, whatsappNumber: e.target.value })}
-                    placeholder="966559229597"
+                    placeholder="966558741741"
                     disabled={!isAdmin}
                     dir="ltr"
                   />

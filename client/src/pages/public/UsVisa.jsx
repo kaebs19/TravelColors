@@ -5,10 +5,11 @@ import DeveloperCredit from '../../components/common/DeveloperCredit';
 import '../../styles/public-shared.css';
 import './UsVisa.css';
 
+import OfficialCredentials from '../../components/common/OfficialCredentials';
 const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost:5002/api');
 
 const UsVisa = () => {
-  const [contact, setContact] = useState({ whatsapp: '966559229597' });
+  const [contact, setContact] = useState({ whatsapp: '966558741741' });
   const [visaSettings, setVisaSettings] = useState(null);
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
@@ -53,7 +54,7 @@ const UsVisa = () => {
   }, [visaSettings]);
 
   // استخدام رقم واتساب خاص بالتأشيرة الأمريكية أو الافتراضي
-  const whatsappNum = visaSettings?.whatsappNumber || contact?.whatsapp || '966559229597';
+  const whatsappNum = visaSettings?.whatsappNumber || contact?.whatsapp || '966558741741';
   const whatsappLink = `https://wa.me/${whatsappNum}`;
 
   // بيانات الأسعار والنصوص من الإعدادات
@@ -95,7 +96,7 @@ const UsVisa = () => {
             </a>
           )}
           {whatsappNum && (
-            <a href={`tel:${whatsappNum}`} className="usvisa-topbar-link">
+            <a href={`https://wa.me/${whatsappNum}`} target="_blank" rel="noopener noreferrer" className="usvisa-topbar-link">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" strokeLinecap="round" strokeLinejoin="round"/></svg>
               {whatsappNum}
             </a>
@@ -108,7 +109,7 @@ const UsVisa = () => {
       <nav className={`usvisa-nav ${scrolled ? 'scrolled' : ''}`}>
         <div className="usvisa-nav-container">
           <div className="usvisa-nav-brand" onClick={() => navigate('/')}>
-            <span className="usvisa-nav-ar">ألوان المسافر</span>
+            <span className="usvisa-nav-ar">ألوان السفر</span>
             <span className="usvisa-nav-en">TRAVEL COLORS</span>
           </div>
           <div className="usvisa-nav-links">
@@ -324,7 +325,7 @@ const UsVisa = () => {
       <footer className="usvisa-footer">
         <div className="usvisa-footer-inner">
           <div className="usvisa-footer-brand">
-            <span className="usvisa-footer-brand-ar">ألوان المسافر</span>
+            <span className="usvisa-footer-brand-ar">ألوان السفر</span>
             <span className="usvisa-footer-brand-en">TRAVEL COLORS</span>
           </div>
           <div className="usvisa-footer-links">
@@ -333,7 +334,8 @@ const UsVisa = () => {
             <Link to="/international-license">الرخصة الدولية</Link>
             <Link to="/ContactUs">تواصل معنا</Link>
           </div>
-          <p className="usvisa-footer-copy">© {new Date().getFullYear()} Travel Colors - ألوان المسافر. جميع الحقوق محفوظة</p>
+          <OfficialCredentials />
+          <p className="usvisa-footer-copy">© {new Date().getFullYear()} Travel Colors - ألوان السفر. جميع الحقوق محفوظة</p>
           <DeveloperCredit style={{ textAlign: 'center' }} />
         </div>
       </footer>

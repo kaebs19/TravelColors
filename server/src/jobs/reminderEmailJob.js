@@ -53,7 +53,7 @@ const buildEmailHtml = (appointment, recipientName) => {
         </div>
         ${notesHtml}
         ${subTasksHtml}
-        <p style="margin-top:20px;color:#6b7280;font-size:13px">— ألوان المسافر</p>
+        <p style="margin-top:20px;color:#6b7280;font-size:13px">— ألوان السفر</p>
       </div>
     </div>
   `;

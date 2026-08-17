@@ -6,6 +6,7 @@ import { getIconSvg } from '../../utils/icons';
 import '../../styles/public-shared.css';
 import './ContactUs.css';
 
+import OfficialCredentials from '../../components/common/OfficialCredentials';
 const ContactUs = () => {
   const navigate = useNavigate();
 
@@ -96,7 +97,7 @@ const ContactUs = () => {
           <div className="public-nav-content">
             <div className="public-nav-brand" onClick={() => navigate('/')}>
               <span className="public-nav-name">
-                <span className="public-nav-name-ar">ألوان المسافر</span>
+                <span className="public-nav-name-ar">ألوان السفر</span>
                 <span className="public-nav-name-en">Travel Colors</span>
               </span>
             </div>
@@ -121,7 +122,7 @@ const ContactUs = () => {
         <div className="public-nav-content">
           <div className="public-nav-brand" onClick={() => navigate('/')}>
             <span className="public-nav-name">
-              <span className="public-nav-name-ar">ألوان المسافر</span>
+              <span className="public-nav-name-ar">ألوان السفر</span>
               <span className="public-nav-name-en">Travel Colors</span>
             </span>
           </div>
@@ -238,7 +239,7 @@ const ContactUs = () => {
                   allowFullScreen=""
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title="موقع ألوان المسافر على الخريطة"
+                  title="موقع ألوان السفر على الخريطة"
                 />
               </div>
             </div>
@@ -249,7 +250,7 @@ const ContactUs = () => {
       {/* Footer */}
       <footer className="public-footer">
         <div className="public-footer-brand">
-          <span className="public-footer-brand-ar">ألوان المسافر</span>
+          <span className="public-footer-brand-ar">ألوان السفر</span>
           <span className="public-footer-brand-en">TRAVEL COLORS</span>
         </div>
         <nav className="public-footer-nav">
@@ -258,7 +259,8 @@ const ContactUs = () => {
           <span onClick={() => navigate('/international-license')}>الرخصة الدولية</span>
           <span onClick={() => navigate('/ContactUs')}>تواصل معنا</span>
         </nav>
-        <p>&copy; {new Date().getFullYear()} Travel Colors - ألوان المسافر. جميع الحقوق محفوظة</p>
+        <OfficialCredentials />
+        <p>&copy; {new Date().getFullYear()} Travel Colors - ألوان السفر. جميع الحقوق محفوظة</p>
         <DeveloperCredit />
         <div className="public-footer-links">
           <span onClick={() => navigate('/privacy')}>سياسة الخصوصية</span>

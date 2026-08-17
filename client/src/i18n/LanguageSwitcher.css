@@ -1,0 +1,62 @@
+/* مبدّل اللغة — أصناف متداخلة لرفع الأولوية فوق إعادة الضبط العامة
+   في صفحات الموقع (.public-page * و .website *) التي تصفّر الهوامش والحشو. */
+.lang-switcher.lang-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.lang-switcher .lang-switcher-btn {
+  padding: 4px 11px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1.6;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 200ms ease, color 200ms ease;
+}
+
+/* فوق خلفية داكنة — الشريط العلوي والتذييل */
+.lang-switcher-dark.lang-switcher-dark {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.lang-switcher-dark .lang-switcher-btn {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.lang-switcher-dark .lang-switcher-btn:hover {
+  color: #fff;
+}
+
+.lang-switcher-dark .lang-switcher-btn.active {
+  background: rgba(255, 255, 255, 0.92);
+  color: #12385a;
+}
+
+/* فوق خلفية فاتحة — شريط التنقل */
+.lang-switcher-light.lang-switcher-light {
+  background: rgba(31, 92, 133, 0.08);
+  border: 1px solid rgba(31, 92, 133, 0.14);
+}
+
+.lang-switcher-light .lang-switcher-btn {
+  color: #5a7186;
+}
+
+.lang-switcher-light .lang-switcher-btn:hover {
+  color: #1f5c85;
+}
+
+.lang-switcher-light .lang-switcher-btn.active {
+  background: #1f5c85;
+  color: #fff;
+}

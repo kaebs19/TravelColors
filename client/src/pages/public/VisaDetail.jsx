@@ -6,6 +6,7 @@ import DeveloperCredit from '../../components/common/DeveloperCredit';
 import '../../styles/public-shared.css';
 import './VisaDetail.css';
 
+import OfficialCredentials from '../../components/common/OfficialCredentials';
 const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost:5002').replace(/\/api\/?$/, '');
 
 // أيقونات SVG للمتطلبات
@@ -40,7 +41,7 @@ const VisaDetail = () => {
   const navigate = useNavigate();
 
   const [visa, setVisa] = useState(null);
-  const [contact, setContact] = useState({ whatsapp: '966559229597' });
+  const [contact, setContact] = useState({ whatsapp: '966558741741' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [scrolled, setScrolled] = useState(false);
@@ -90,7 +91,7 @@ const VisaDetail = () => {
     }
   };
 
-  const whatsappNum = visa?.contactNumber || contact.whatsapp || '966559229597';
+  const whatsappNum = visa?.contactNumber || contact.whatsapp || '966558741741';
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -151,7 +152,7 @@ const VisaDetail = () => {
             </a>
           )}
           {whatsappNum && (
-            <a href={`tel:${whatsappNum}`} className="vd-topbar-link">
+            <a href={`https://wa.me/${whatsappNum}`} target="_blank" rel="noopener noreferrer" className="vd-topbar-link">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" strokeLinecap="round" strokeLinejoin="round"/></svg>
               {whatsappNum}
             </a>
@@ -164,7 +165,7 @@ const VisaDetail = () => {
       <nav className={`vd-nav ${scrolled ? 'vd-nav-scrolled' : ''}`}>
         <div className="vd-nav-inner">
           <Link to="/" className="vd-brand">
-            <span className="vd-brand-ar">ألوان المسافر</span>
+            <span className="vd-brand-ar">ألوان السفر</span>
             <span className="vd-brand-en">TRAVEL COLORS</span>
           </Link>
           <div className="vd-nav-links">
@@ -395,7 +396,7 @@ const VisaDetail = () => {
       <footer className="vd-footer">
         <div className="vd-footer-inner">
           <div className="vd-footer-brand">
-            <span className="vd-footer-brand-ar">ألوان المسافر</span>
+            <span className="vd-footer-brand-ar">ألوان السفر</span>
             <span className="vd-footer-brand-en">TRAVEL COLORS</span>
           </div>
           <div className="vd-footer-links">
@@ -404,7 +405,8 @@ const VisaDetail = () => {
             <Link to="/international-license">الرخصة الدولية</Link>
             <Link to="/ContactUs">تواصل معنا</Link>
           </div>
-          <p className="vd-footer-copy">© {new Date().getFullYear()} Travel Colors - ألوان المسافر. جميع الحقوق محفوظة</p>
+          <OfficialCredentials />
+          <p className="vd-footer-copy">© {new Date().getFullYear()} Travel Colors - ألوان السفر. جميع الحقوق محفوظة</p>
           <DeveloperCredit style={{ textAlign: 'center' }} />
         </div>
       </footer>

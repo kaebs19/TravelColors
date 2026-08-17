@@ -1,10 +1,10 @@
 /**
- * قوالب البريد الإلكتروني — شركة ألوان المسافر | Travel Colors
+ * قوالب البريد الإلكتروني — شركة ألوان السفر | Travel Colors
  * تصميم RTL عربي احترافي مع شعار + معلومات الشركة
  */
 
 const BRAND = {
-  name: 'شركة ألوان المسافر',
+  name: 'شركة ألوان السفر',
   nameEn: 'Travel Colors',
   tagline: 'متخصصون في استخراج تأشيرة الشنقن في وقت قصير',
   color: '#1e3a5f',
@@ -15,7 +15,7 @@ const BRAND = {
   logoUrl: 'https://www.trcolors.com/uploads/logo-1771113367995-505445895.jpg',
   email: 'info@trcolors.com',
   visaEmail: 'visa@trcolors.com',
-  phone: '+966 55 922 9597',
+  phone: '+966 55 874 1741',
   licenseNo: '73104877',
   address: 'المملكة العربية السعودية - الرياض، حي الصحافة',
   services: [
@@ -106,7 +106,7 @@ const baseLayout = (title, content) => `
                 <tr>
                   <td style="text-align:center;">
                     <p style="margin:0 0 6px;color:#374151;font-size:12px;">
-                      📞 <a href="tel:+966559229597" style="color:#374151;text-decoration:none;direction:ltr;unicode-bidi:embed;">${BRAND.phone}</a>
+                      📞 <a href="tel:+966558741741" style="color:#374151;text-decoration:none;direction:ltr;unicode-bidi:embed;">${BRAND.phone}</a>
                     </p>
                     <p style="margin:0 0 6px;color:#374151;font-size:12px;">
                       ✉️ <a href="mailto:${BRAND.email}" style="color:${BRAND.accent};text-decoration:none;">${BRAND.email}</a>
@@ -191,7 +191,7 @@ const welcomeEmail = (name, overrides = {}) => {
     </div>
 
     <p style="margin:20px 0 0;color:#9ca3af;font-size:12px;text-align:center;line-height:1.6;">
-      للاستفسار تواصل معنا عبر الواتساب: <a href="https://wa.me/966559229597" style="color:${BRAND.accent};text-decoration:none;direction:ltr;unicode-bidi:embed;">${BRAND.phone}</a>
+      للاستفسار تواصل معنا عبر الواتساب: <a href="https://wa.me/966558741741" style="color:${BRAND.accent};text-decoration:none;direction:ltr;unicode-bidi:embed;">${BRAND.phone}</a>
     </p>
   `);
 
@@ -260,7 +260,7 @@ const passwordChangedEmail = (name, overrides = {}) => {
       <p style="margin:0;color:#991b1b;font-size:13px;line-height:1.7;">
         🔒 إذا لم تقم بهذا التغيير، يرجى التواصل معنا فوراً:<br>
         البريد: <a href="mailto:${BRAND.email}" style="color:${BRAND.accent};">${BRAND.email}</a><br>
-        الهاتف: <a href="tel:+966559229597" style="color:${BRAND.accent};direction:ltr;unicode-bidi:embed;">${BRAND.phone}</a>
+        الهاتف: <a href="tel:+966558741741" style="color:${BRAND.accent};direction:ltr;unicode-bidi:embed;">${BRAND.phone}</a>
       </p>
     </div>
 
@@ -387,7 +387,7 @@ const statusUpdateEmail = (name, appNumber, newStatus, serviceType, overrides = 
     </div>
 
     <p style="margin:0;color:#9ca3af;font-size:12px;text-align:center;line-height:1.6;">
-      للاستفسار تواصل معنا عبر الواتساب: <a href="https://wa.me/966559229597" style="color:${BRAND.accent};text-decoration:none;direction:ltr;unicode-bidi:embed;">${BRAND.phone}</a>
+      للاستفسار تواصل معنا عبر الواتساب: <a href="https://wa.me/966558741741" style="color:${BRAND.accent};text-decoration:none;direction:ltr;unicode-bidi:embed;">${BRAND.phone}</a>
     </p>
   `);
 

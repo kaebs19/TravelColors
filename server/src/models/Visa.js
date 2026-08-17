@@ -151,7 +151,7 @@ visaSchema.pre('save', function() {
 visaSchema.pre('save', function() {
   // metaTitle
   if (!this.metaTitle) {
-    this.metaTitle = `${this.countryName} - ألوان المسافر`;
+    this.metaTitle = `${this.countryName} - ألوان السفر`;
   }
 
   // metaDescription
@@ -161,7 +161,7 @@ visaSchema.pre('save', function() {
         ? this.description.substring(0, 160).trim()
         : this.description;
     } else {
-      this.metaDescription = `تأشيرة ${this.countryName} - احصل على فيزا ${this.countryName} بسهولة مع ألوان المسافر`;
+      this.metaDescription = `تأشيرة ${this.countryName} - احصل على فيزا ${this.countryName} بسهولة مع ألوان السفر`;
     }
   }
 
