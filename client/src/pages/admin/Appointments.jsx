@@ -5,6 +5,7 @@ import { Card, Loader, Modal } from '../../components/common';
 import { useAuth, useToast } from '../../context';
 import { generateAppointmentReceipt, shareReceiptToWhatsApp } from '../../utils/receiptGenerator';
 import { generateAppointmentMessage, generateQuickUpdateMessage } from '../../utils/messageGenerator';
+import { assetUrl } from '../../utils/assetUrl';
 import '../../styles/DetailModal.css';
 import './Appointments.css';
 
@@ -705,9 +706,7 @@ const Appointments = () => {
   const handlePrintReceipt = async (appointment) => {
     try {
       const dept = departments.find(d => d._id === appointment.department?._id);
-      const logoUrl = companySettings.logo
-        ? `${process.env.REACT_APP_API_URL || 'http://localhost:5002'}${companySettings.logo}`
-        : '/logo512.png';
+      const logoUrl = assetUrl(companySettings.logo, '/logo512.png');
       await generateAppointmentReceipt(appointment, {
         departmentTitle: dept?.title || appointment.department?.title || 'غير محدد',
         employeeName: appointment.createdBy?.name || 'موظف النظام',
@@ -731,9 +730,7 @@ const Appointments = () => {
   const handleShareReceiptWhatsApp = async (appointment) => {
     try {
       const dept = departments.find(d => d._id === appointment.department?._id);
-      const logoUrl = companySettings.logo
-        ? `${process.env.REACT_APP_API_URL || 'http://localhost:5002'}${companySettings.logo}`
-        : '/logo512.png';
+      const logoUrl = assetUrl(companySettings.logo, '/logo512.png');
       const result = await shareReceiptToWhatsApp(appointment, {
         departmentTitle: dept?.title || appointment.department?.title || 'غير محدد',
         employeeName: appointment.createdBy?.name || 'موظف النظام',

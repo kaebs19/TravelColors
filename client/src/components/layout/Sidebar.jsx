@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context';
 import { settingsApi } from '../../api';
+import { assetUrl } from '../../utils/assetUrl';
 import './Sidebar.css';
 
 const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
@@ -21,7 +22,7 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
       try {
         const res = await settingsApi.getSettings();
         if (res.data?.data?.logo) {
-          setLogoUrl(`${process.env.REACT_APP_API_URL || 'http://localhost:5002'}${res.data.data.logo}`);
+          setLogoUrl(assetUrl(res.data.data.logo, '/favicon.svg'));
         }
       } catch (err) {
         // استخدام الشعار الافتراضي

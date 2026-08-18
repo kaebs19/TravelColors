@@ -3,6 +3,7 @@ import { useAuth, useToast } from '../../context';
 import settingsApi from '../../api/settingsApi';
 import { Card, Loader } from '../../components/common';
 import './Settings.css';
+import { assetUrl } from '../../utils/assetUrl';
 
 const Settings = () => {
   const { user, hasPermission } = useAuth();
@@ -576,7 +577,7 @@ const Settings = () => {
                     <div className="logo-preview-wrapper">
                       <div className="logo-preview-box">
                         <img
-                          src={settings.logo ? `${process.env.REACT_APP_API_URL || 'http://localhost:5002'}${settings.logo}` : '/favicon.svg'}
+                          src={assetUrl(settings.logo, '/favicon.svg')}
                           alt="شعار الشركة"
                           className="logo-preview-img"
                           onError={(e) => { e.target.src = '/favicon.svg'; }}

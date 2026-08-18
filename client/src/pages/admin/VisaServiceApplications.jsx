@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { visaApi } from '../../api';
 import { BASE_STATUS_MAP, toEnDigits, formatDate } from '../../utils/adminHelpers';
 import './VisaServiceApplications.css';
+import { serverOrigin } from '../../utils/assetUrl';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5002';
+const API_URL = serverOrigin();
 
 const STATUS_MAP = {
   ...BASE_STATUS_MAP,

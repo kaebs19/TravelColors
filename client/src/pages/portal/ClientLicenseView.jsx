@@ -5,6 +5,7 @@ import { useToast } from '../../context';
 import licenseApi from '../../api/licenseApi';
 import { generateLicenseReceipt } from '../../utils/licenseReceiptGenerator';
 import './Portal.css';
+import { serverOrigin } from '../../utils/assetUrl';
 
 const STATUS_CONFIG = {
   draft: { label: 'مسودة', color: '#f59e0b', bg: '#fef3c7', icon: '📝' },
@@ -22,7 +23,7 @@ const DELIVERY_LABELS = {
   shipping: { label: 'شحن', icon: '📦' }
 };
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5002';
+const API_URL = serverOrigin();
 
 const ClientLicenseView = () => {
   const { id } = useParams();

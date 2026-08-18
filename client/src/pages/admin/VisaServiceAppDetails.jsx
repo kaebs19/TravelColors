@@ -6,6 +6,7 @@ import { DataRow, ImageLightbox, StatusUpdatePanel, CustomerSearch } from '../..
 import { useToast } from '../../context';
 import { BASE_STATUS_MAP, toEnDigits, formatDate, getImageUrl, copyToClipboard } from '../../utils/adminHelpers';
 import './VisaServiceAppDetails.css';
+import { serverOrigin } from '../../utils/assetUrl';
 
 /* ─── Status map override ─── */
 const STATUS_MAP = {
@@ -160,7 +161,7 @@ const VisaServiceAppDetails = () => {
   const requiredDocs = app.visaId?.requiredDocuments || [];
   const uploadedDocs = app.documents || [];
   const hasNewDocs = uploadedDocs.length > 0 || requiredDocs.length > 0;
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5002';
+  const API_URL = serverOrigin();
 
   return (
     <div className="vsad-page">
