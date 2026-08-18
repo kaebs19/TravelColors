@@ -3,15 +3,16 @@ import { websiteApi } from '../../api';
 import { useLang } from '../../i18n/LanguageContext';
 import './OfficialCredentials.css';
 
-// قيم احتياطية فقط — المصدر الفعلي هو الإعدادات (لوحة التحكم ← الإعدادات
-// ← الإعدادات العامة)، وتصل للموقع ضمن استجابة محتوى الموقع العام.
-export const DEFAULT_TOURISM_LICENSE = '73104877';
+// الرقم الوطني الموحد صادر فعلاً، فله قيمة احتياطية.
+// رخصة وزارة السياحة بلا قيمة احتياطية عمداً: مصدرها الإعدادات وحدها،
+// فتفريغ الحقل من لوحة التحكم يخفي كل ادعاءات الترخيص في الموقع
+// دون الحاجة إلى نشر جديد.
 export const DEFAULT_UNIFIED_NUMBER = '7049580140';
 export const SBC_URL = 'https://businesscenter.gov.sa';
 
-/** يقرأ أرقام التسجيل من محتوى الموقع مع السقوط للقيم الافتراضية */
+/** يقرأ أرقام التسجيل من محتوى الموقع */
 export const getRegistration = (content) => ({
-  tourismLicense: content?.registration?.tourismLicense || DEFAULT_TOURISM_LICENSE,
+  tourismLicense: content?.registration?.tourismLicense || '',
   unifiedNationalNumber: content?.registration?.unifiedNationalNumber || DEFAULT_UNIFIED_NUMBER
 });
 

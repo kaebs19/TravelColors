@@ -553,7 +553,7 @@ const Settings = () => {
                     placeholder="73104877"
                     disabled={!isAdmin}
                   />
-                  <small className="form-hint">يظهر في تذييل الموقع العام والشريط العلوي</small>
+                  <small className="form-hint">يظهر في الشريط العلوي وشريط الثقة وتذييل الموقع. اتركه فارغاً لإخفاء كل ما يشير إلى الترخيص من الموقع.</small>
                 </div>
                 <div className="form-group">
                   <label>الرقم الوطني الموحد</label>

@@ -1688,7 +1688,9 @@
 .footer-logo-img {
   height: 48px;
   width: auto;
-  filter: brightness(0) invert(1);
+  /* بلا filter — الشعار الجديد ملوّن، وbrightness(0) invert(1)
+     كان يحوّله إلى مربع أبيض صلب على خلفية التذييل الداكنة */
+  object-fit: contain;
 }
 
 .footer-logo-text {

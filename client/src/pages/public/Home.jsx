@@ -232,10 +232,12 @@ const Home = () => {
             </div>
             <div className="topbar-group">
               <LanguageSwitcher variant="dark" />
-              <span className="topbar-badge">
-                {getIconSvg('✅', 13)}
-                {t('topbar.licensed')} · {registration.tourismLicense}
-              </span>
+              {registration.tourismLicense && (
+                <span className="topbar-badge">
+                  {getIconSvg('✅', 13)}
+                  {t('topbar.licensed')} · {registration.tourismLicense}
+                </span>
+              )}
               {(content.socialMedia?.twitter || content.socialMedia?.instagram || content.socialMedia?.facebook) && (
                 <div className="topbar-social">
                   {content.socialMedia?.twitter && <a href={content.socialMedia.twitter} target="_blank" rel="noopener noreferrer" aria-label="X">𝕏</a>}
@@ -426,7 +428,9 @@ const Home = () => {
       {/* Trust Bar */}
       <section className="trust-bar">
         <div className="trust-container">
-          <div className="trust-item"><span className="trust-icon">{getIconSvg('🏛️', 20)}</span><span>{t('home.trust.licensed')}</span></div>
+          {registration.tourismLicense && (
+            <div className="trust-item"><span className="trust-icon">{getIconSvg('🏛️', 20)}</span><span>{t('home.trust.licensed')}</span></div>
+          )}
           <div className="trust-item"><span className="trust-icon">{getIconSvg('⭐', 20)}</span><span>{t('home.trust.clients')}</span></div>
           <div className="trust-item"><span className="trust-icon">{getIconSvg('📅', 20)}</span><span>{t('home.trust.years')}</span></div>
           <div className="trust-item"><span className="trust-icon">{getIconSvg('✅', 20)}</span><span>{t('home.trust.bestPrice')}</span></div>
@@ -867,14 +871,18 @@ const Home = () => {
             <div className="footer-credentials-text">
               <p className="footer-credentials-title">{t('credentials.title')}</p>
               <div className="footer-credentials-items">
-                <span className="footer-credential">
-                  {t('credentials.unifiedNumber')}
-                  <b dir="ltr">{registration.unifiedNationalNumber}</b>
-                </span>
-                <span className="footer-credential">
-                  {t('credentials.tourismLicense')}
-                  <b dir="ltr">{registration.tourismLicense}</b>
-                </span>
+                {registration.unifiedNationalNumber && (
+                  <span className="footer-credential">
+                    {t('credentials.unifiedNumber')}
+                    <b dir="ltr">{registration.unifiedNationalNumber}</b>
+                  </span>
+                )}
+                {registration.tourismLicense && (
+                  <span className="footer-credential">
+                    {t('credentials.tourismLicense')}
+                    <b dir="ltr">{registration.tourismLicense}</b>
+                  </span>
+                )}
               </div>
             </div>
           </div>
